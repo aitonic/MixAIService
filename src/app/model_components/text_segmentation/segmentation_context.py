@@ -14,7 +14,12 @@ class SegmentationContext:
             strategy: The segmentation strategy to use.
         """
         self._strategy = strategy
-
+        
+        
+    """
+    The context class holds a segmentation strategy and uses it to segment text.
+    The strategy can be changed at runtime.
+    """
     def set_strategy(self, strategy: SegmentationStrategy):
         """
         Sets the segmentation strategy.

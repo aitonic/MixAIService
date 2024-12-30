@@ -114,9 +114,9 @@ def resolve_class(class_name:str, components:list[str], components_data:dict, re
         init_signature = inspect.signature(class_.__init__)
         init_params = init_signature.parameters
         # print(init_params)  # 打印 __init__ 方法的参数
-        for name, parameter in init_params.items():
-            print(parameter.annotation)
-            print(parameter.annotation == str)
+        # for name, parameter in init_params.items():
+        #     print(parameter.annotation)
+        #     print(parameter.annotation == str)
         params = {name: parameter.annotation(**param[name]) if parameter.annotation != str else param[name] for name, parameter in init_params.items() if name != 'self'}
         instance = class_(**params)
         # print(instance.__dict__)

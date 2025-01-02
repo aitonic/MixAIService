@@ -73,7 +73,7 @@ class App:
         if App.app:
             return App.app
         logger.info(f"开始创建服务=======")
-        app = FastAPI(app_dir='. main.py', title ='ai组件', description = 'ai组件服务')
+        app = FastAPI(app_dir='main.py', title ='ai组件', description = 'ai组件服务')
 
         try:
             # 数据库

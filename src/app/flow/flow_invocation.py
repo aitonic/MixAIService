@@ -26,7 +26,7 @@ class RunParameter(BaseModel):
 
 @run_crtl.post('/simple-ai/run')
 def run_app_with_config(req:RunParameter) -> str:
-    from main import app
+    from src.main import app
     config = app.app_config.get(req.app_no)
     if not config:
         return {"error": "Invalid app_no"}

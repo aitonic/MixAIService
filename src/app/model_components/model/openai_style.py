@@ -78,18 +78,14 @@ class OpenAiStyleModel(AbsLLMModel):
 
     def completion(self, parameter:BaseCompletionParameter) -> Iterator[ModelResponse]:
         # 创建请求模型
-        requestModel = self.__build_request_model(parameter.messages, parameter.temperature, parameter.max_new_tokens, parameter.model, parameter.stream)
+        requestModel = self.__build_request_model(parameter.messages, parameter.temperature, parameter.max_new_tokens, parameter.stream)
 
-        print(parameter.model)
-        
-        print(requestModel)
         # 发送 POST 请求，获取响应
         count = 0
         while count < self.max_retry:
             # print(f"count:{str(count)}")
             try:
                 response = requests.post(self.completion_url, json=requestModel.model_dump(), headers={"Authorization":f"Bearer {self.api_key}"})
-                print(requestModel.model_dump())
                 response.raise_for_status()
                 break
             except requests.RequestException as e:
@@ -97,7 +93,6 @@ class OpenAiStyleModel(AbsLLMModel):
                 print(f"请求失败: {e}")
                 count = count+1
 
-                
         if not parameter.stream:
              # 如果不使用流式返回
             data = response.json()  # 获取响应的 JSON 数据
@@ -116,9 +111,9 @@ class OpenAiStyleModel(AbsLLMModel):
                 yield result.choices[0].delta.content
 
 
-    async def async_completion(self, messages: list[BaseMessage], temperature: float = None, max_new_tokens: int = None, model: str = None, stream: bool = False) -> AsyncGenerator[ModelResponse, None]: 
+    async def async_completion(self, messages: list[BaseMessage], temperature: float = None, max_new_tokens: int = None, stream: bool = False) -> AsyncGenerator[ModelResponse, None]: 
         # 创建请求模型
-        requestModel = self.__build_request_model(messages, temperature, max_new_tokens, model, stream)
+        requestModel = self.__build_request_model(messages, temperature, max_new_tokens, stream)
 
         async with httpx.AsyncClient() as client:
             response = await client.post(self.completion_url, json=requestModel.model_dump(), headers={"Authorization": f"Bearer {self.api_key}"})
@@ -141,17 +136,15 @@ class OpenAiStyleModel(AbsLLMModel):
                         yield result.choices[0].delta.content
     
 
-    def __build_request_model(self, messages: list[BaseMessage], temperature: float = None, max_new_tokens: int = None, model: str = None, stream: bool = False) -> ModelResponse: # type: ignore
+    def __build_request_model(self, messages: list[BaseMessage], temperature: float = None, max_new_tokens: int = None, stream: bool = False) -> ModelResponse: # type: ignore
         # 创建请求模型
         return RequestModel.from_messages(
-            model=model if model else self.model,
+            model=self.model,
             messages=messages,
             max_new_tokens=max_new_tokens if max_new_tokens else self.max_new_tokens,
             temperature=temperature if temperature else self.temperature,
             stream=stream
         )
-        
-        
     
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         param = args[0]

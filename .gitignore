@@ -1,0 +1,79 @@
+# 忽略所有以 . 开头的隐藏文件，不包括example的文件
+.*
+
+# 排除包含 example 的文件或文件夹
+!*.example
+!.*/example
+
+!.gitignore
+
+# 忽略 PDF 文件
+*.pdf
+
+# 忽略 Word 文件
+*.doc
+*.docx
+
+# 忽略 JSON 文件
+*.json
+
+# 忽略 Excel 文件
+*.xls
+*.xlsx
+
+# 忽略 CSV 文件
+*.csv
+
+# 忽略视频和音频文件
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mkv
+
+# 忽略图片文件
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+
+# 忽略数据安全风险的文件
+*.csv
+*.xlsx
+*.xls
+*.doc
+*.docx
+*.pdf
+*.ppt
+
+# 忽略log文件
+
+
+# 忽略数据库数据文件
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+*.db2
+*.db3
+*.db4
+
+# 忽略日志文件
+*.log
+
+# 忽略临时文件
+*.tmp
+
+# 忽略编译文件
+*.pyc
+
+# 忽略 .DS_Store 文件
+.DS_Store
+
+# 忽略 .env 文件
+.env
+
+# 忽略配置文件 ini 
+config.yaml
+config.ini

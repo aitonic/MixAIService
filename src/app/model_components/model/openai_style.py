@@ -86,6 +86,7 @@ class OpenAiStyleModel(AbsLLMModel):
             # print(f"count:{str(count)}")
             try:
                 response = requests.post(self.completion_url, json=requestModel.model_dump(), headers={"Authorization":f"Bearer {self.api_key}"})
+                print(self.completion_url)
                 response.raise_for_status()
                 break
             except requests.RequestException as e:
@@ -93,6 +94,7 @@ class OpenAiStyleModel(AbsLLMModel):
                 print(f"请求失败: {e}")
                 count = count+1
 
+                
         if not parameter.stream:
              # 如果不使用流式返回
             data = response.json()  # 获取响应的 JSON 数据

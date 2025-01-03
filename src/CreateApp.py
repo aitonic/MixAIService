@@ -114,5 +114,5 @@ def __register_routers__(app: FastAPI):
     # 引用Controlls里面的蓝图并注册
 
     # 应用模板
-    from app.flow.flow_invocation import run_crtl
+    from src.app.flow.flow_invocation import run_crtl
     app.include_router(run_crtl)

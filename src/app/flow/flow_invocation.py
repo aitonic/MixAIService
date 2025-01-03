@@ -5,7 +5,7 @@ from typing import Iterator
 from ..model_components.model.base import AbsLLMModel
 # from model_components.model.base import AbsLLMModel
 from fastapi import APIRouter
-from utils.Response import ResponseUtil
+from src.utils.Response import ResponseUtil
 run_crtl = APIRouter()
 
 # class VariableModel(BaseModel):

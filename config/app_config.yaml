@@ -5,10 +5,10 @@ test01:
       - name: OpenAiStyleModel
         param:
           parameter:
-              model: "qwen-coder"
+              model: "llama3pro"
               api_key: '123'
               base_url: http://127.0.0.1:1234
-              full_url: http://192.168.201.4/v1/chat/completions
+              full_url: http://192.168.11.11:8070/v1/chat/completions
               max_retry: 2
       - name: HumanPrompt
         param:

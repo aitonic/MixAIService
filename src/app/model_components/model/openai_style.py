@@ -80,13 +80,16 @@ class OpenAiStyleModel(AbsLLMModel):
         # 创建请求模型
         requestModel = self.__build_request_model(parameter.messages, parameter.temperature, parameter.max_new_tokens, parameter.model, parameter.stream)
 
+        print(parameter.model)
+        
+        print(requestModel)
         # 发送 POST 请求，获取响应
         count = 0
         while count < self.max_retry:
             # print(f"count:{str(count)}")
             try:
                 response = requests.post(self.completion_url, json=requestModel.model_dump(), headers={"Authorization":f"Bearer {self.api_key}"})
-                print(self.completion_url)
+                print(requestModel.model_dump())
                 response.raise_for_status()
                 break
             except requests.RequestException as e:
@@ -147,6 +150,8 @@ class OpenAiStyleModel(AbsLLMModel):
             temperature=temperature if temperature else self.temperature,
             stream=stream
         )
+        
+        
     
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         param = args[0]

@@ -1,6 +1,7 @@
 import importlib
 import inspect
 from collections.abc import Iterator
+from pydantic import BaseModel, Field
 
 # from model_components.model.base import AbsLLMModel
 from fastapi import APIRouter
@@ -133,7 +134,7 @@ def resolve_class(
     # params = {name: parameter.annotation(**param[name]) if parameter.annotation != str else param[name] for name, parameter in init_params.items() if name != 'self'}
     params = {
         name: parameter.annotation(**param[name])
-        if parameter.annotation != str  # 直接比较类型
+        if parameter.annotation is not str  # 直接比较类型
         else param[name]
         for name, parameter in init_params.items()
         if name != "self"
@@ -141,24 +142,18 @@ def resolve_class(
     instance = class_(**params)
     # print(instance.__dict__)
 
-        # if isinstance(instance, AbsLLMModel):
-        if "model_components.model" in component_path:
-            # 模型的调用就是执行结果了
-            return instance
-        else:
-            return instance(req.data)
+    # if isinstance(instance, AbsLLMModel):
+    if "model_components.model" in component_path:
+        # 模型的调用就是执行结果了
+        return instance
+    else:
+        return instance(req.data)
         
 
-@run_crtl.post('/simple-ai/v2/run')
+@run_crtl.post('/simple-ai/run')
 def run_app_with_config(req:RunParameter) -> str:
     result = resolve_app_config(req)
     return ResponseUtil.success(result)
-    
-    # if isinstance(result, Iterator):
-    #     for r in result:
-    #         return ResponseUtil.success(r)
-
-    # return ResponseUtil.success(result)
 
 def resolve_app_config(req:RunParameter):
     # 根据app_no获取app配置

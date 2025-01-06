@@ -4,7 +4,7 @@ import threading
 
 import uvicorn
 
-import src.CreateApp as CreateApp
+import CreateApp as CreateApp
 
 # app = FastAPI(title='simple-ai', description='简易ai的组件服务')
 app = CreateApp.App.createApp()

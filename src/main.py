@@ -1,10 +1,15 @@
 # main.py
 import logging as logger
+import os
+import sys
 import threading
 
 import uvicorn
 
-import CreateApp as CreateApp
+import src.CreateApp as CreateApp
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
 
 # app = FastAPI(title='simple-ai', description='简易ai的组件服务')
 app = CreateApp.App.createApp()
@@ -12,7 +17,12 @@ app = CreateApp.App.createApp()
 
 def on_start_up():
     # 加载组件
-    from app.core.business_logic import load_classes_from_components, load_app_config, load_agent_config
+    from src.app.core.business_logic import (
+        load_agent_config,
+        load_app_config,
+        load_classes_from_components,
+    )
+
     app.components_data = load_classes_from_components()
 
     # 加载app配置

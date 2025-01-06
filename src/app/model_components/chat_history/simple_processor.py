@@ -1,8 +1,4 @@
-from typing import List
-from utils import (
-    identifier_util, 
-    datetime_util
-)
+from src.utils import datetime_util, identifier_util
 
 from .base import AbsMemory
 from .dto import MessageInfo, MessageListParameter

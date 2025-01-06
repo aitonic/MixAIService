@@ -53,9 +53,10 @@ def load_classes_from_components():
 
 # 加载app配置文件
 def load_app_config():
-    with open("config/app_config.yaml", 'r', encoding='utf-8') as file:
+    with open("config/app_config.yaml", encoding="utf-8") as file:
         return yaml.safe_load(file)
-    
+
+
 def load_agent_config():
-    with open("config/agent_config.yaml", 'r', encoding='utf-8') as file:
+    with open("config/agent_config.yaml", encoding="utf-8") as file:
         return yaml.safe_load(file)

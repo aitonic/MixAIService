@@ -11,7 +11,7 @@ test01:
               full_url: http://192.168.11.11:8070/v1/chat/completions
               max_retry: 2
       - name: HumanPrompt
-        param:offi
+        param:
           human_message: "{{query}}"
       - name: SystemPrompt
         param:

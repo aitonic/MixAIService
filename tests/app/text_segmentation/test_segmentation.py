@@ -1,12 +1,16 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
-from src.app.model_components.text_segmentation.segmentation_context import SegmentationContext
-from src.app.model_components.text_segmentation.chinese_segmentation import ChineseSegmentation
+from src.app.model_components.text_segmentation.chinese_segmentation import (
+    ChineseSegmentation,
+)
+from src.app.model_components.text_segmentation.segmentation_context import (
+    SegmentationContext,
+)
+
 
 class TestTextSegmentation(unittest.TestCase):
-
     def test_chinese_segmentation(self):
         strategy = ChineseSegmentation()
         context = SegmentationContext(strategy)
@@ -56,5 +60,6 @@ class TestTextSegmentation(unittest.TestCase):
         # expected2 = ["你好。这是一个测试句子！"]
         # self.assertEqual(context.segment_text(text), expected2)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

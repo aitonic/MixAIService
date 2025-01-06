@@ -1,6 +1,6 @@
 # agent/agent.py
 import asyncio
-from typing import List
+
 
 class Agent:
     def __init__(self, name: str):
@@ -19,7 +19,7 @@ class Agent:
 
     async def execute_task(self, task: str):
         print(f"Agent {self.name}: Executing task - {task}")
-        await asyncio.sleep(1) # Simulate task execution
+        await asyncio.sleep(1)  # Simulate task execution
 
-    def get_tasks(self) -> List[str]:
+    def get_tasks(self) -> list[str]:
         return self.tasks

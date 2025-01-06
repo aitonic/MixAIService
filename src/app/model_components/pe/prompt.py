@@ -1,22 +1,20 @@
 from typing import Any
-from .base import(
-    AbsPrompt
-)
 
+from jinja2 import Environment, Template, meta
 
-from jinja2 import Template, Undefined, Environment, meta
+from .base import AbsPrompt
+
 
 class BasePrompt(AbsPrompt):
-    '''
-    基础的prompt类
+    """基础的prompt类
     使用jinjia2作为模板处理
-    '''
+    """
 
-    def __init__(self, role:str,prompt_str: str) -> None:
-        super().__init__(role,prompt_str)
+    def __init__(self, role: str, prompt_str: str) -> None:
+        super().__init__(role, prompt_str)
 
     def generate_prompt(self, params: dict) -> str:
-        '''根据参数处理prompt'''
+        """根据参数处理prompt"""
         # 创建 Jinja2 环境
         env = Environment()
 
@@ -36,22 +34,22 @@ class BasePrompt(AbsPrompt):
                 raise ValueError(f"Missing parameter: {var}")
         self.content = Template(self.content).render(params)
         return self
-    
+
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.generate_prompt(args[0])
-    
-class SystemPrompt(BasePrompt):
 
+
+class SystemPrompt(BasePrompt):
     def __init__(self, system_prompt: str) -> None:
-        super().__init__("system",system_prompt)
+        super().__init__("system", system_prompt)
 
     def generate_prompt(self, params: dict) -> BasePrompt:
         return super().generate_prompt(params)
-    
-class HumanPrompt(BasePrompt):
 
+
+class HumanPrompt(BasePrompt):
     def __init__(self, human_message: str) -> None:
-        super().__init__("user",human_message)
+        super().__init__("user", human_message)
 
     def generate_prompt(self, params: dict) -> BasePrompt:
         return super().generate_prompt(params)

@@ -12,12 +12,14 @@ app = CreateApp.App.createApp()
 
 def on_start_up():
     # 加载组件
-    from src.app.core.business_logic import load_classes_from_components, load_config
-
+    from app.core.business_logic import load_classes_from_components, load_app_config, load_agent_config
     app.components_data = load_classes_from_components()
 
     # 加载app配置
-    app.app_config = load_config()
+    app.app_config = load_app_config()
+
+    # 加载agent配置
+    app.agent_config = load_agent_config()
 
 
 if __name__ == "__main__":

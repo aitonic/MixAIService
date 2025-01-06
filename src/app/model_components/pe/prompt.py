@@ -37,8 +37,10 @@ class BasePrompt(AbsPrompt):
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.generate_prompt(args[0])
-
-
+    
+    def as_param(self):
+        return self.__dict__
+    
 class SystemPrompt(BasePrompt):
     def __init__(self, system_prompt: str) -> None:
         super().__init__("system", system_prompt)

@@ -77,3 +77,5 @@
 # 忽略配置文件 ini 
 config.yaml
 config.ini
+
+__pycache__

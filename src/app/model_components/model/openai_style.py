@@ -7,6 +7,9 @@ import requests
 from pydantic import BaseModel, Field
 
 from .base import AbsLLMModel
+
+import logging as logger
+
 from .constants import (
     DEFAULT_MAX_NEW_TOKENS,
     DEFAULT_MODEL,
@@ -167,14 +170,17 @@ class OpenAiStyleModel(AbsLLMModel):
         stream: bool = False,
     ) -> ModelResponse:  # type: ignore
         # 创建请求模型
-        return RequestModel.from_messages(
+        request_model =  RequestModel.from_messages(
             model=self.model,
             messages=messages,
             max_new_tokens=max_new_tokens if max_new_tokens else self.max_new_tokens,
             temperature=temperature if temperature else self.temperature,
-            stream=stream,
+            stream=stream
         )
 
+        logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
+        return request_model
+    
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         param = args[0]
         return self.completion(BaseCompletionParameter(**param))

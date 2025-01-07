@@ -1,21 +1,21 @@
-import os
-from abc import ABC, abstractmethod
-import httpx
-import traceback
 import json
-from typing import Iterator
+import os
+import traceback
+from abc import ABC, abstractmethod
+from collections.abc import Iterator
+from typing import Never
+
+import httpx
+
 from src.utils.logger import logger
+
 from .constants import (
     DEFAULT_COMPLETION_PATH,
+    DEFAULT_EMBED_MODEL,
     DEFAULT_EMBEDDING_PATH,
-    DEFAULT_EMBED_MODEL
 )
-from .dto import (
-    BaseLLMParameter, 
-    ModelResponse, 
-    BaseCompletionParameter,
-    BaseMessage
-)
+from .dto import BaseCompletionParameter, BaseLLMParameter, ModelResponse
+
 
 class Completions:
     suffix = DEFAULT_COMPLETION_PATH
@@ -30,7 +30,13 @@ class Completions:
         self.max_retry = max_retry
 
     @property
-    def completion_url(self):
+    def completion_url(self) -> str:
+        """获取完成请求的 URL。
+
+        Returns:
+            str: 完整的 URL。
+
+        """
         if self.full_url:
             return self.full_url
         return self.base_url + DEFAULT_COMPLETION_PATH
@@ -73,7 +79,7 @@ class Completions:
                             data = json.loads(line.decode("utf-8").replace("data:", ""))
                             result = ModelResponse(**data)
                             yield result.choices[0].delta.content
-                except Exception as e:
+                except Exception:
                     logger.error(f"completions接口出错：{traceback.format_exc()}")
                     count = count+1
             # 如果不使用流式返回
@@ -99,16 +105,17 @@ class Embeddings:
             return self.full_url
         return self.base_url + DEFAULT_EMBEDDING_PATH
     
-    def create(self, text: str, model: str = DEFAULT_EMBED_MODEL, encoding_format:str = "float"):
-        """调用embedding接口的方法，出入参和openai一致。
+    def create(self, text: str, model: str = DEFAULT_EMBED_MODEL, encoding_format: str = "float") -> dict:
+        """调用 embedding 接口的方法，输入和输出参数与 OpenAI 接口一致。
 
-        参数:
-            input_data (str): 输入数据，待嵌入的文本。
-            model (str): 使用的模型名称，默认为"text-embedding-ada-002"。
-            user (str): 用户标识，可选参数。
+        Args:
+            text (str): 输入文本。
+            model (str): 使用的嵌入模型，默认为 DEFAULT_EMBED_MODEL。
+            encoding_format (str): 编码格式，默认为 "float"。
 
-        返回:
-            dict: 包含嵌入结果的字典。
+        Returns:
+            dict: 调用 embedding 接口的返回值，包含嵌入结果。
+
         """
         url = self.embed_url
         headers = {
@@ -171,7 +178,7 @@ class AbsLLMModel(ABC):
         return Embeddings(api_key=self.api_key, base_url=self.base_url, full_url=self.full_url, max_retry=self.max_retry)
 
     @abstractmethod
-    def generate(self, parameter: BaseCompletionParameter):
+    def generate(self, parameter: BaseCompletionParameter) -> Never:
         """抽象方法，用于定义具体的生成逻辑。
 
         参数:

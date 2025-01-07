@@ -3,7 +3,7 @@ import os
 import sys
 
 import yaml
-from src.utils.logger import logger
+
 exclude_name = ["datetime", "Undefined", "Path"]
 
 

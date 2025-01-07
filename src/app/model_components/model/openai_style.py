@@ -1,30 +1,22 @@
-import json
 from collections.abc import AsyncGenerator, Iterator
 from typing import Any
 
 import httpx
-import requests
 from pydantic import BaseModel, Field
-import traceback
 
 from src.utils.logger import logger
 
 from .base import AbsLLMModel
 from .constants import (
+    DEFAULT_EMBED_MODEL,
     DEFAULT_MAX_NEW_TOKENS,
     DEFAULT_MODEL,
     DEFAULT_REPETITION_PENALTY,
     DEFAULT_TEMPERATURE,
     DEFAULT_TOP_N,
     DEFAULT_TOP_P,
-    DEFAULT_EMBED_MODEL
 )
-from .dto import (
-    BaseCompletionParameter, 
-    BaseLLMParameter, 
-    BaseMessage, 
-    ModelResponse
-)
+from .dto import BaseCompletionParameter, BaseLLMParameter, BaseMessage, ModelResponse
 
 
 class RequestModel(BaseModel):
@@ -108,9 +100,8 @@ class OpenAiStyleModel(AbsLLMModel):
     def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
         # 发送 POST 请求，获取响应，支持流式输出
         count = 0
-        for response in self.completions.create(parameter):
+        for count, response in enumerate(self.completions.create(parameter), start=1):
             yield response
-            count += 1
             if count >= parameter.max_new_tokens:  # 根据需要限制输出数量
                 break
 
@@ -124,12 +115,11 @@ class OpenAiStyleModel(AbsLLMModel):
             parameter.messages, parameter.temperature, parameter.max_new_tokens, parameter.stream
         )
 
-        async with httpx.AsyncClient() as client:
-            async with client.post(
-                self.completion_url,
-                json=request_model.model_dump(),
-                headers={"Authorization": f"Bearer {self.api_key}"},
-            ) as response:
+        async with httpx.AsyncClient() as client, client.post(
+            self.completion_url,
+            json=request_model.model_dump(),
+            headers={"Authorization": f"Bearer {self.api_key}"},
+        ) as response:
                 async for line in response.aiter_lines():
                     if line:
                         yield line  # 逐行输出结果

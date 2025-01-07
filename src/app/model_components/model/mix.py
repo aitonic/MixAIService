@@ -4,6 +4,7 @@ from typing import Any
 import httpx
 import requests
 from pydantic import BaseModel, Field
+
 from src.utils.logger import logger
 
 from .base import AbsLLMModel

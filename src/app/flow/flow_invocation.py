@@ -7,7 +7,6 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from src.utils.logger import logger
-
 from src.utils.response import ResponseUtil
 
 run_crtl = APIRouter()
@@ -259,7 +258,10 @@ def test() -> None:
     该接口创建一个 OpenAiStyleModel 实例，并调用其 embeddings.create 方法进行测试。
     返回的结果将根据其类型进行处理，如果是迭代器，则逐个返回结果；否则直接返回结果。
     """
-    from src.app.model_components.model.openai_style import OpenAiStyleModel, OpenAiStyleLLMParameter,BaseCompletionParameter
+    from src.app.model_components.model.openai_style import (
+        OpenAiStyleLLMParameter,
+        OpenAiStyleModel,
+    )
 
     # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
     result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).embeddings.create(text="这是一个测试")

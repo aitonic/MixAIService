@@ -2,12 +2,14 @@
 import os
 import sys
 import threading
+
 import uvicorn
+
+import src.create_app as create_app
+from src.utils.logger import logger
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
-import src.create_app as create_app
-from src.utils.logger import logger
 
 
 # app = FastAPI(title='simple-ai', description='简易ai的组件服务')

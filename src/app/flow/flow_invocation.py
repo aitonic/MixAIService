@@ -2,18 +2,13 @@ import importlib
 import inspect
 from collections.abc import Iterator
 from typing import TypeVar
-from fastapi.responses import StreamingResponse
 
-# from model_components.model.base import AbsLLMModel
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from src.utils.logger import logger
 
-# from src.utils.Response import ResponseUtil
 from src.utils.response import ResponseUtil
-
-from utils.logger import logger
 
 run_crtl = APIRouter()
 
@@ -44,146 +39,11 @@ class RunParameter(BaseModel):
     app_no: str = Field(alias="appNo")
     data: dict
 
-
-@run_crtl.post("/simple-ai/v1/run")
-def run_app_with_config_v1(req: RunParameter) -> str:
-    from src.main import app
-
-    config = app.app_config.get(req.app_no)
-    if not config:
-        return {"error": "Invalid app_no"}
-
-    logger.info(config)
-
-    # 获取app的组合
-    compose = config["compose"]
-    # 根据短线切割，得到所有的类
-    class_names: list[str] = compose["path"].split("-")
-    components: list[str] = compose["components"]
-
-    class_2_instance = {}
-    run_instance = None
-    run_param_index = len(class_names) - 2
-    index_2_param_name = {}
-    index_2_instance = {}
-    # 逐个类的解析
-    for index, class_name in enumerate(class_names):
-        # 此处的class_name可能是多个类名的拼接，统一入参
-        param_definition = []
-        param_name = None
-        if "=" in class_name:
-            param_definition = class_name.split("=")
-            param_name = param_definition[0]
-            names = param_definition[1].split("+")
-        else:
-            names = class_name.split("+")
-        if len(names) > 1:
-            # 此处的实例就是列表
-            instances = []
-            for name in names:
-                class_2_instance[name] = resolve_class(
-                    name, components, app.components_data, req
-                )
-                instances.append(class_2_instance[name].__dict__)
-            index_2_instance[index] = instances
-            index_2_param_name[index] = param_name
-        else:
-            class_2_instance[class_name] = resolve_class(
-                class_name, components, app.components_data, req
-            )
-            index_2_instance[index] = class_2_instance[class_name]
-
-        if index == len(class_names) - 1:
-            run_instance = class_2_instance[class_name]
-
-    # 调用需要执行的实例，得到结果
-    # 取实例执行的参数
-    run_params = index_2_instance[run_param_index]
-    run_param_name = index_2_param_name[run_param_index]
-    if run_param_name:
-        result = run_instance({run_param_name: run_params})
-    else:
-        result = run_instance(run_params)
-
-    if isinstance(result, Iterator):
-        for r in result:
-            return ResponseUtil.success(r)
-
-    return ResponseUtil.success(result)
-
-
-
-def resolve_class(
-    class_name: str, components: list[dict], components_data: dict[str, str], req: RunParameter
-) -> T:
-    """解析类名并实例化类对象。
-
-    Args:
-        class_name (str): 要解析的类名。
-        components (list[dict]): 组件列表。
-        components_data (dict[str, str]): 组件路径数据。
-        req (RunParameter): 运行参数对象。
-
-    Returns:
-        T: 实例化的类对象或类对象的执行结果。
-
-    """
-    # 从 components_data 中获取类
-    component_path = components_data.get(class_name.lower())
-    if not component_path:
-        raise Exception(f"Class not found in components_data:{class_name}")
-
-    # 找到组件
-    component = [
-        component
-        for component in components
-        if component["name"].lower() == class_name.lower()
-    ]
-    if not component:
-        raise Exception(f"不存在组件类：{class_name}的相关配置")
-
-    # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
-    param: dict = component[0]["param"]
-    if not param:
-        param = {}
-    # 接口入参替换
-    param.update(req.data)
-    # 前一个直接关联的组件执行结果的替换
-    # TODO
-    # 通过指定的类名字符串，获取类对象
-    # class_path = app.components_data[component_class]
-    module_name, class_name = component_path.rsplit(".", 1)
-    module = importlib.import_module(module_name)
-    class_ = getattr(module, class_name)
-    # 获取类的 __init__ 方法的参数
-    init_signature = inspect.signature(class_.__init__)
-    init_params = init_signature.parameters
-    # params = {name: parameter.annotation(**param[name]) if parameter.annotation != str else param[name] for name, parameter in init_params.items() if name != 'self'}
-    params = {
-        name: parameter.annotation(**param[name])
-        if parameter.annotation is not str  # 直接比较类型
-        else param[name]
-        for name, parameter in init_params.items()
-        if name != "self"
-    }
-    instance = class_(**params)
-    # print(instance.__dict__)
-
-    # if isinstance(instance, AbsLLMModel):
-    if "model_components.model" in component_path:
-        # 模型的调用就是执行结果了
-        return instance
-    else:
-        return instance(req.data)
-
-
 @run_crtl.post("/simple-ai/run")
 def run_app_with_config(req: RunParameter) -> str:
     
     result = _resolve_app_config(req)
     return ResponseUtil.success(result)
-
-
 
 
 def _resolve_app_config(req: RunParameter) -> str | dict | list | None:
@@ -228,16 +88,16 @@ def _get_agent_config(req: RunParameter) -> AgentConfig:
 
 
 def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConfig], agent_config: AgentConfig, req: RunParameter) -> dict:
-    """解析路径并生成对应的值。
+    """Parse the path and generate corresponding values.
 
     Args:
-        path (list[str]): 路径列表。
-        converter (dict[str, PathConverterConfig]): 路径转换器配置。
-        agent_config (AgentConfig): Agent 配置。
-        req (RunParameter): 运行参数对象。
+        path (list[str]): List of paths.
+        converter (dict[str, PathConverterConfig]): Path converter configuration.
+        agent_config (AgentConfig): Agent configuration.
+        req (RunParameter): Run parameter object.
 
     Returns:
-        dict: 路径到值的映射。
+        dict: Mapping from path to value.
 
     """
     from src.main import app
@@ -344,7 +204,7 @@ def get_converter_config(
 
 def resolve_component(
     component_config: ComponentConfig, components_data: dict, req: RunParameter
-) -> object | dict | list | str | int | float | None:
+) -> object | None:
     """根据组件配置、组件数据和请求参数解析组件。
 
     Args:
@@ -393,7 +253,12 @@ def resolve_component(
         return instance(req.data)
 
 @run_crtl.post("/simple-ai/test")
-def test():
+def test() -> None:
+    """测试接口，用于验证模型的功能。
+
+    该接口创建一个 OpenAiStyleModel 实例，并调用其 embeddings.create 方法进行测试。
+    返回的结果将根据其类型进行处理，如果是迭代器，则逐个返回结果；否则直接返回结果。
+    """
     from src.app.model_components.model.openai_style import OpenAiStyleModel, OpenAiStyleLLMParameter,BaseCompletionParameter
 
     # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))

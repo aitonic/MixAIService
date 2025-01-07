@@ -1,5 +1,5 @@
 # main.py
-import logging as logger
+from utils.logger import logger
 import os
 import sys
 import threading

@@ -1,4 +1,4 @@
-import logging as logger
+from utils.logger import logger
 from datetime import datetime
 from decimal import Decimal
 

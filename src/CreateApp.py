@@ -1,5 +1,5 @@
 # from log_common import logger
-import logging as logger
+from utils.logger import logger
 
 # from config import initialConfig, get_config_value, DbEngineFactory as dbEngineFactory
 import time

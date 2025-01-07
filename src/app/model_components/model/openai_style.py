@@ -1,5 +1,5 @@
 import json
-import logging as logger
+from utils.logger import logger
 from collections.abc import AsyncGenerator, Iterator
 from typing import Any
 

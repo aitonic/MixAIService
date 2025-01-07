@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 # from src.utils.Response import ResponseUtil
 from src.utils.Response import ResponseUtil
 
+from utils.logger import logger
+
 run_crtl = APIRouter()
 
 
@@ -46,7 +48,7 @@ def run_app_with_config(req: RunParameter) -> str:
     if not config:
         return {"error": "Invalid app_no"}
 
-    print(config)
+    logger.info(config)
 
     # 获取app的组合
     compose = config["compose"]
@@ -178,7 +180,7 @@ def resolve_app_config(req: RunParameter):
     if not agent_config:
         raise Exception(f"不存在app配置：{req.app_no}")
     
-    print(f"{req.app_no}的配置信息：{agent_config}")
+    logger.info(f"{req.app_no}的配置信息：{agent_config}")
 
     agent_config = AgentConfig(**agent_config)
 

@@ -4,6 +4,7 @@ from typing import Any
 import httpx
 import requests
 from pydantic import BaseModel, Field
+from utils.logger import logger
 
 from .base import AbsLLMModel
 from .constants import (
@@ -119,7 +120,7 @@ class Mix(AbsLLMModel):
                 break
             except requests.RequestException as e:
                 # 处理请求异常
-                print(f"请求失败: {e}")
+                logger.info(f"请求失败: {e}")
                 count = count + 1
 
         if parameter.stream:
@@ -200,9 +201,3 @@ class Mix(AbsLLMModel):
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         param = args[0]
         return self.completion(BaseCompletionParameter(**param))
-
-
-# client = MIX(base_url="192.168.6.16:8070", api_key="1234", full_url="http://192.168.6.16:8070/generate/")
-# # 非流式
-# result = client.completion(messages=[SystemMessage(content="你是一个小助手，你的名字是小马。"),UserMessage(content="介绍一下你自己")], stream=False)
-# print(result.model_dump())

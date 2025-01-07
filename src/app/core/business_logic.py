@@ -3,13 +3,13 @@ import os
 import sys
 
 import yaml
-
+from utils.logger import logger
 exclude_name = ["datetime", "Undefined", "Path"]
 
 
 def load_classes_from_components():
     components_path = os.path.join(os.path.dirname(__file__), "../model_components")
-    print(f"components_path: {components_path}")
+    logger.info(f"components_path: {components_path}")
 
     # 将 components 目录添加到模块搜索路径
     sys.path.append(os.path.dirname(components_path))
@@ -30,13 +30,13 @@ def load_classes_from_components():
                     else f"model_components.{module_name}"
                 )
 
-                # print(f"Importing module: {full_module_name}")  # 调试信息
+                # logger.info(f"Importing module: {full_module_name}")  # 调试信息
                 module = importlib.import_module(full_module_name)
 
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if isinstance(attr, type):
-                        # print(f"Found class: {attr_name}")  # 调试信息
+                        # logger.info(f"Found class: {attr_name}")  # 调试信息
                         if (
                             attr_name != "ABC"
                             and not attr_name.startswith("Abs")

@@ -6,6 +6,7 @@ from typing import Any
 import httpx
 import requests
 from pydantic import BaseModel, Field
+import traceback
 
 from .base import AbsLLMModel
 from .constants import (
@@ -89,7 +90,6 @@ class OpenAiStyleModel(AbsLLMModel):
         # 发送 POST 请求，获取响应
         count = 0
         while count < self.max_retry:
-            # print(f"count:{str(count)}")
             try:
                 response = requests.post(
                     self.completion_url,
@@ -100,7 +100,7 @@ class OpenAiStyleModel(AbsLLMModel):
                 break
             except requests.RequestException as e:
                 # 处理请求异常
-                print(f"请求失败: {e}")
+                logger.error(f"请求失败: {traceback.format_exc()}")
                 count = count + 1
 
         if not parameter.stream:
@@ -116,7 +116,6 @@ class OpenAiStyleModel(AbsLLMModel):
         # 使用流式返回
         for line in response.iter_lines():
             if line:
-                # print(line.decode('utf-8'))
                 if "DONE" in line.decode("utf-8"):
                     return
                 # 去掉 'data:' 前缀并解析 JSON 数据

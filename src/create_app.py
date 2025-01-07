@@ -1,31 +1,35 @@
 # from log_common import logger
-from utils.logger import logger
-
 # from config import initialConfig, get_config_value, DbEngineFactory as dbEngineFactory
 import time
 import traceback
+from collections.abc import Awaitable, Callable
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import StreamingResponse
 
+from src.utils.logger import logger
 
-def is_json_type(request: Request):
-    if "content-type" in request.headers and "json" in request.headers.get(
-        "content-type"
-    ):
-        return True
 
-    if "Content-Type" in request.headers and "json" in request.headers.get(
-        "Content-Type"
-    ):
-        return True
+def is_json_type(request: Request) -> bool:
+    """检查请求头是否包含 JSON 类型的 Content-Type。
 
-    return False
+    Args:
+        request (Request): HTTP 请求对象。
 
+    Returns:
+        bool: 如果 Content-Type 包含 'json' 则返回 True，否则返回 False。
+
+    """
+    return (
+        "content-type" in request.headers and "json" in request.headers.get("content-type")
+    ) or (
+        "Content-Type" in request.headers and "json" in request.headers.get("Content-Type")
+    )
 
 class HttpMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         start_time = time.time()
 
         logger.info(f"请求头信息:{request.headers}")
@@ -77,7 +81,13 @@ class HttpMiddleware(BaseHTTPMiddleware):
 class App:
     app: FastAPI = None
 
-    def createApp():
+    def create_app()-> FastAPI:
+        """获取 App 的应用实例。
+
+        Returns:
+            Any: App 的应用实例。
+
+        """
         if App.app:
             return App.app
         logger.info("开始创建服务=======")
@@ -99,7 +109,7 @@ class App:
             # app.add_event_handler('startup', on_start_up(app))
 
             # 注册蓝图
-            __register_routers__(app)  # 应用模板
+            _register_routers(app)  # 应用模板
 
             app.add_middleware(HttpMiddleware)
 
@@ -114,11 +124,17 @@ class App:
         App.app = app
         return app
 
-    def get_app():
+    def get_app() -> FastAPI:
+        """获取 App 的应用实例。
+
+        Returns:
+            FastAPI: App 的应用实例。
+
+        """
         return App.app
 
 
-def __register_routers__(app: FastAPI):
+def _register_routers(app: FastAPI) -> None:
     # 引用Controlls里面的蓝图并注册
 
     # 应用模板

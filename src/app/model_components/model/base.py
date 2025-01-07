@@ -1,5 +1,8 @@
 import os
 from abc import ABC, abstractmethod
+from typing import Any, Never
+
+from src.utils.logger import logger
 
 from .constants import DEFAULT_COMPLETION_PATH
 from .dto import BaseLLMParameter, ModelResponse
@@ -23,15 +26,31 @@ class AbsLLMModel(ABC):
         self.max_retry = parameter.max_retry
 
     @property
-    def completion_url(self):
+    def completion_url(self) -> str:
         if self.full_url:
             return self.full_url
         return self.base_url + DEFAULT_COMPLETION_PATH
 
     @abstractmethod
-    def completion(self, **args):
+    def completion(self, **args: dict[str, Any]) -> Never:
+        """抽象方法，负责实现具体的完成逻辑。
+
+        Args:
+            **args (dict[str, Any]): 参数字典，键为字符串，值为任意类型。
+
+        Raises:
+            Exception: 如果子类未实现该方法。
+
+        """
         raise Exception("Not implemented completion method")
 
-    def after_response(self, response: ModelResponse):
-        # 保存日志
-        pass
+    # @abstractmethod
+    def after_response(self, response: ModelResponse) -> None:
+        """在模型响应后执行的操作。
+
+        Args:
+            response (ModelResponse): 模型的响应对象。
+
+        """
+        logger.info(f"Processing response: {response}")
+        

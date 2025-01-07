@@ -7,7 +7,7 @@ class SegmentationContext:
     """Context class that uses a segmentation strategy to segment text."""
 
     def __init__(self, strategy: SegmentationStrategy):
-        """Initializes the context with a segmentation strategy.
+        """Initialize the context with a segmentation strategy.
 
         Args:
             strategy: The segmentation strategy to use.
@@ -21,7 +21,7 @@ class SegmentationContext:
     """
 
     def set_strategy(self, strategy: SegmentationStrategy):
-        """Sets the segmentation strategy.
+        """Set the segmentation strategy.
 
         Args:
             strategy: The new segmentation strategy to use.

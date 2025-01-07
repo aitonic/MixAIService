@@ -11,7 +11,7 @@ from src.app.model_components.text_segmentation.segmentation_context import (
 
 
 class TestTextSegmentation(unittest.TestCase):
-    def test_chinese_segmentation(self):
+    def test_chinese_segmentation(self) -> None:
         strategy = ChineseSegmentation()
         context = SegmentationContext(strategy)
 
@@ -43,7 +43,7 @@ class TestTextSegmentation(unittest.TestCase):
         expected7 = ["你好。", "这是一个测试句子！", "这是另一个句子？"]
         self.assertEqual(context.segment_text(text7), expected7)
 
-    def test_strategy_switching(self):
+    def test_strategy_switching(self) -> None:
         strategy1 = ChineseSegmentation()
         context = SegmentationContext(strategy1)
         text = "你好。这是一个测试句子！"

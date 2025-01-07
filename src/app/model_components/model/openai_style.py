@@ -1,11 +1,12 @@
 import json
-from utils.logger import logger
 from collections.abc import AsyncGenerator, Iterator
 from typing import Any
 
 import httpx
 import requests
 from pydantic import BaseModel, Field
+
+from src.utils.logger import logger
 
 from .base import AbsLLMModel
 from .constants import (
@@ -29,14 +30,28 @@ class RequestModel(BaseModel):
 
     @classmethod
     def from_messages(
-        cls,
+        cls: type["RequestModel"],  # 指定 cls 的类型为当前类
         model: str,
         messages: list[BaseMessage],
         max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
         temperature: float = DEFAULT_TEMPERATURE,
         stop: list[str] | None = None,
         stream: bool = False,
-    ):
+    ) -> "RequestModel":  # 返回值类型为当前类
+        """根据消息创建 RequestModel 的实例。
+
+        Args:
+            model (str): 模型名称。
+            messages (List[BaseMessage]): 消息列表。
+            max_new_tokens (int): 最大生成的 token 数量。
+            temperature (float): 生成温度。
+            stop (Optional[List[str]]): 停止词。
+            stream (bool): 是否启用流式生成。
+
+        Returns:
+            RequestModel: 当前类的实例。
+
+        """
         messages_dict = [message.model_dump() for message in messages]
         return cls(
             model=model,
@@ -72,14 +87,18 @@ class OpenAiStyleModel(AbsLLMModel):
 
         self.validate_custom_rules()
 
-    def validate_custom_rules(self):
+    def validate_custom_rules(self) -> None:
+        """实现自定义校验逻辑。
+
+        当前方法会校验自定义规则，其中 api_key 允许为空。
+        """
         # 实现自定义校验逻辑
         # api_key允许为空
         pass
 
     def completion(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
         # 创建请求模型
-        requestModel = self.__build_request_model(
+        request_model = self.__build_request_model(
             parameter.messages,
             parameter.temperature,
             parameter.max_new_tokens,
@@ -90,14 +109,27 @@ class OpenAiStyleModel(AbsLLMModel):
         count = 0
         while count < self.max_retry:
             # print(f"count:{str(count)}")
+            """
+            发送请求到 completion URL。
+
+            Args:
+                request_model: 包含请求数据的模型。
+
+            Returns:
+                Response: 请求的响应。
+            """
             try:
                 response = requests.post(
                     self.completion_url,
-                    json=requestModel.model_dump(),
+                    json=request_model.model_dump(),
                     headers={"Authorization": f"Bearer {self.api_key}"},
+                    timeout=30  # 设置超时时间为 30 秒
                 )
                 response.raise_for_status()
                 break
+            except requests.Timeout:
+                print("请求超时，请检查网络或服务状态")
+                count = count + 1
             except requests.RequestException as e:
                 # 处理请求异常
                 print(f"请求失败: {e}")
@@ -132,14 +164,14 @@ class OpenAiStyleModel(AbsLLMModel):
         stream: bool = False,
     ) -> AsyncGenerator[ModelResponse, None]:
         # 创建请求模型
-        requestModel = self.__build_request_model(
+        request_model = self.__build_request_model(
             messages, temperature, max_new_tokens, stream
         )
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 self.completion_url,
-                json=requestModel.model_dump(),
+                json=request_model.model_dump(),
                 headers={"Authorization": f"Bearer {self.api_key}"},
             )
             response.raise_for_status()
@@ -179,6 +211,7 @@ class OpenAiStyleModel(AbsLLMModel):
         logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
         return request_model
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> ModelResponse:
+
         param = args[0]
         return self.completion(BaseCompletionParameter(**param))

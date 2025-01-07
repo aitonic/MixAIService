@@ -1,18 +1,20 @@
 import importlib
 import inspect
 from collections.abc import Iterator
+from typing import TypeVar
 
 # from model_components.model.base import AbsLLMModel
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-# from src.utils.Response import ResponseUtil
-from src.utils.Response import ResponseUtil
+from src.utils.logger import logger
 
-from utils.logger import logger
+# from src.utils.Response import ResponseUtil
+from src.utils.response import ResponseUtil
 
 run_crtl = APIRouter()
 
+T = TypeVar("T")
 
 class ComponentConfig(BaseModel):
     name: str = Field(description="组件名，不区分大小写")
@@ -41,7 +43,7 @@ class RunParameter(BaseModel):
 
 
 @run_crtl.post("/simple-ai/v1/run")
-def run_app_with_config(req: RunParameter) -> str:
+def run_app_with_config_v1(req: RunParameter) -> str:
     from src.main import app
 
     config = app.app_config.get(req.app_no)
@@ -107,9 +109,22 @@ def run_app_with_config(req: RunParameter) -> str:
     return ResponseUtil.success(result)
 
 
+
 def resolve_class(
-    class_name: str, components: list[str], components_data: dict, req: RunParameter
-):
+    class_name: str, components: list[dict], components_data: dict[str, str], req: RunParameter
+) -> T:
+    """解析类名并实例化类对象。
+
+    Args:
+        class_name (str): 要解析的类名。
+        components (list[dict]): 组件列表。
+        components_data (dict[str, str]): 组件路径数据。
+        req (RunParameter): 运行参数对象。
+
+    Returns:
+        T: 实例化的类对象或类对象的执行结果。
+
+    """
     # 从 components_data 中获取类
     component_path = components_data.get(class_name.lower())
     if not component_path:
@@ -165,83 +180,128 @@ def resolve_class(
 
 @run_crtl.post("/simple-ai/run")
 def run_app_with_config(req: RunParameter) -> str:
-    result = resolve_app_config(req)
+    
+    result = _resolve_app_config(req)
     return ResponseUtil.success(result)
 
 
-def resolve_app_config(req: RunParameter):
-    # 根据app_no获取app配置
-    from src.main import app
-    # config = app.app_config.get(req.app_no)
 
-    # 根据app配置，取出所有的agent配置
-    # TODO 先认为是一对一的关系
+def _resolve_app_config(req: RunParameter) -> str | dict | list | None:
+    """根据 app_no 获取 app 配置并解析执行结果。
+
+    Args:
+        req (RunParameter): 运行参数对象。
+
+    Returns:
+        Union[str, dict, list, None]: 执行结果，可能是字符串、字典、列表或 None。
+
+    """
+    agent_config = _get_agent_config(req)
+    path = resolve_path(agent_config)
+    converter = resolve_converter(agent_config)
+
+    path_2_value = _resolve_path_values(path, converter, agent_config, req)
+    llm = path_2_value[path[-1]]
+
+    run_params = _build_run_params(path, path_2_value, req)
+    result = llm(run_params)
+
+    return _process_result(result)
+
+
+def _get_agent_config(req: RunParameter) -> AgentConfig:
+    """获取并验证 agent 配置。
+
+    Args:
+        req (RunParameter): 运行参数对象。
+
+    Returns:
+        AgentConfig: 验证后的 agent 配置。
+
+    """
+    from src.main import app
     agent_config = app.agent_config.get(req.app_no)
     if not agent_config:
-        raise Exception(f"不存在app配置：{req.app_no}")
-    
-    logger.info(f"{req.app_no}的配置信息：{agent_config}")
+        raise Exception(f"不存在 app 配置：{req.app_no}")
+    logger.error(f"{req.app_no} 的配置信息：{agent_config}")
+    return AgentConfig(**agent_config)
 
-    agent_config = AgentConfig(**agent_config)
 
-    path: list[str] = resolve_path(agent_config)
-    converter: dict[str, PathConverterConfig] = resolve_converter(agent_config)
-    # 由于参数是进行传递的，应该根据顺序进行解析
+def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConfig], agent_config: AgentConfig, req: RunParameter) -> dict:
+    """解析路径并生成对应的值。
+
+    Args:
+        path (list[str]): 路径列表。
+        converter (dict[str, PathConverterConfig]): 路径转换器配置。
+        agent_config (AgentConfig): Agent 配置。
+        req (RunParameter): 运行参数对象。
+
+    Returns:
+        dict: 路径到值的映射。
+
+    """
+    from src.main import app
     path_2_value = {}
     for param in path:
         members = param.split(",")
         for member in members:
-            value = None
             component_config = get_component_config(member, agent_config.components)
             converter_config = converter.get(member)
-            if not converter_config:
-                # 直接从组件中实例化
-                value = resolve_component(component_config, app.components_data, req)
-                path_2_value[member] = value
+            if converter_config is None:
+                path_2_value[member] = resolve_component(component_config, app.components_data, req)
                 continue
 
             if converter_config.type == "list":
-                # 切割成列表
                 value = []
-                comverter_configs = converter_config.value.split(",")
-                for conver in comverter_configs:
-                    # 解析component
-                    path_2_value[conver] = resolve_component(
-                        get_component_config(conver, agent_config.components),
-                        app.components_data,
-                        req,
+                for conver in converter_config.value.split(","):
+                    value.append(
+                        resolve_component(get_component_config(conver, agent_config.components), app.components_data, req)
                     )
-                    value.append(path_2_value[conver])
+                path_2_value[member] = value
             else:
-                # 直接从组件中实例化
-                value = resolve_component(component_config, app.components_data, req)
+                path_2_value[member] = resolve_component(component_config, app.components_data, req)
 
-            path_2_value[member] = value
+    return path_2_value
 
-    # 执行最终的agent执行器(模型调用)
-    llm = path_2_value[path[-1]]
-    # 取执行参数
+
+def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) -> dict:
+    """构建运行参数。
+
+    Args:
+        path (list[str]): 路径列表。
+        path_2_value (dict): 路径到值的映射。
+        req (RunParameter): 运行参数对象。
+
+    Returns:
+        dict: 运行参数。
+
+    """
     run_params = {}
     if len(path) > 1:
-        param_names = path[len(path) - 2].split(",")
+        param_names = path[-2].split(",")
         for pa in param_names:
             param = path_2_value[pa]
-            pp = None
-            if isinstance(param, list):
-                pp = []
-                for p in param:
-                    pp.append(p.as_param())
-            else:
-                pp = param.as_param()
-            run_params[pa] = pp
-
+            run_params[pa] = (
+                [p.as_param() for p in param] if isinstance(param, list) else param.as_param()
+            )
     run_params.update(req.data)
-    # 执行
-    result = llm(run_params)
-    if isinstance(result, Iterator):
-        for r in result:
-            return r
+    return run_params
 
+
+  # 泛型，用于匹配输入和输出类型
+
+def _process_result(result: Iterator[T] | T) -> T | None:
+    """处理执行结果。
+
+    Args:
+        result (Union[Iterator[T], T]): 执行结果，可以是迭代器或其他任意类型。
+
+    Returns:
+        Optional[T]: 处理后的结果，如果是迭代器则返回其第一个元素，否则返回结果本身。
+
+    """
+    if isinstance(result, Iterator):
+        return next(result, None)  # 返回迭代器的第一个元素或 None
     return result
 
 
@@ -284,7 +344,19 @@ def get_converter_config(
 
 def resolve_component(
     component_config: ComponentConfig, components_data: dict, req: RunParameter
-):
+) -> object | dict | list | str | int | float | None:
+    """根据组件配置、组件数据和请求参数解析组件。
+
+    Args:
+        component_config (ComponentConfig): 组件的配置。
+        components_data (dict): 可用组件的路径字典。
+        req (RunParameter): 运行参数。
+
+    Returns:
+        Union[object, dict, list, str, int, float, None]:
+        解析得到的组件实例或执行结果。
+
+    """
     # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
     param: dict = component_config.param
     if not param:
@@ -305,11 +377,12 @@ def resolve_component(
 
     params = {
         name: parameter.annotation(**param[name])
-        if parameter.annotation != str
+        if parameter.annotation is not str
         else param[name]
         for name, parameter in init_params.items()
         if name != "self"
     }
+    
     instance = class_(**params)
 
     # if isinstance(instance, AbsLLMModel):

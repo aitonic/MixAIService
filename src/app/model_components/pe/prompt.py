@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any
 
 from jinja2 import Environment, Template, meta
@@ -6,17 +7,18 @@ from .base import AbsPrompt
 
 
 class BasePrompt(AbsPrompt):
-    """基础的prompt类
-    使用jinjia2作为模板处理
+    """基础的prompt类.
+    
+    使用jinja2作为模板处理
     """
 
     def __init__(self, role: str, prompt_str: str) -> None:
         super().__init__(role, prompt_str)
 
     def generate_prompt(self, params: dict) -> str:
-        """根据参数处理prompt"""
+        """根据参数处理prompt."""
         # 创建 Jinja2 环境
-        env = Environment()
+        env = Environment(autoescape=True)
 
         # 解析模板源代码，生成抽象语法树（AST）
         parsed_content = env.parse(self.content)
@@ -35,10 +37,26 @@ class BasePrompt(AbsPrompt):
         self.content = Template(self.content).render(params)
         return self
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, *args: tuple[object, ...], **kwds: Mapping[str, Any]) -> str: # noqa: N807
+        """调用对象，生成 prompt。
+
+        Args:
+            *args: 任意类型的参数元组。
+            **kwds: 键为字符串的参数映射。
+
+        Returns:
+            str: 生成的 prompt。
+
+        """
         return self.generate_prompt(args[0])
 
-    def as_param(self):
+    def as_param(self) -> dict:
+        """返回对象的属性字典。
+
+        Returns:
+            dict: 当前对象的属性字典。
+
+        """
         return self.__dict__
 
 

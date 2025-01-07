@@ -96,7 +96,7 @@ class Mix(AbsLLMModel):
         # 实现自定义校验逻辑
         pass
 
-    def completion(self, parameter: BaseCompletionParameter) -> ModelResponse:  # type: ignore
+    def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:  # type: ignore
         # 创建请求模型
         requestModel = self.__build_request_model(
             parameter.messages,
@@ -200,4 +200,4 @@ class Mix(AbsLLMModel):
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         param = args[0]
-        return self.completion(BaseCompletionParameter(**param))
+        return self.generate(BaseCompletionParameter(**param))

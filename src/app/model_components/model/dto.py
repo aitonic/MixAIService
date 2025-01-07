@@ -50,6 +50,7 @@ class BaseLLMParameter(BaseModel):
 
 class BaseCompletionParameter(BaseLLMParameter):
     messages: list[BaseMessage]
-    temperature: float = None
-    max_new_tokens: int = None
+    temperature: float = 0.95
+    max_new_tokens: int = 4096
     stream: bool = False
+    model:str = "llama3pro"

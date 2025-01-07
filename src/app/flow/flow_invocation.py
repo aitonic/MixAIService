@@ -221,7 +221,7 @@ def _get_agent_config(req: RunParameter) -> AgentConfig:
     agent_config = app.agent_config.get(req.app_no)
     if not agent_config:
         raise Exception(f"不存在 app 配置：{req.app_no}")
-    logger.error(f"{req.app_no} 的配置信息：{agent_config}")
+    logger.info(f"{req.app_no} 的配置信息：{agent_config}")
     return AgentConfig(**agent_config)
 
 

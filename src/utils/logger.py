@@ -3,6 +3,7 @@ import gzip
 import logging
 import logging.handlers
 import os
+import re
 import socket
 import sys
 import time
@@ -130,9 +131,15 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
         self.rolloverAt = new_rollover_at
 
 
+# 获取项目的根目录（假设当前文件位于项目内）
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))  # 或更具体的路径逻辑
+
+# 构造 logs 目录路径
+default_logs_path = os.path.join(project_root, "logs")
+
 
 server_name = os.getenv('SERVER.NAME', 'common-log')
-server_logging_path = os.getenv('SERVER.LOGGING.PATH', '~/apps/logs')
+server_logging_path = os.getenv('SERVER.LOGGING.PATH', default_logs_path)
 
 class LoggerFormatter(logging.Formatter):
     """自定义日志格式化器，支持附加上下文信息。"""
@@ -210,6 +217,54 @@ JSON_FILENAME = f'{server_logging_path}/{server_name}/{server_name}-{hostname}.j
 # fmt = LoggerFormatter('[%(traceId)s][%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 fmt = LoggerFormatter('[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
+class ColorFormatter(logging.Formatter):
+    """Formatter that adds colors to specific keywords in log messages."""
+
+    # ANSI escape codes for colors
+    green = "\x1b[32;20m"
+    yellow = "\x1b[33;20m"
+    red = "\x1b[31;20m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+
+    # Keywords to colorize and their corresponding colors
+    keyword_colors = {
+        "INFO": green,
+        "DEBUG": yellow,  # Example: You might want DEBUG in a different color
+        "WARNING": yellow,
+        "ERROR": red,
+        "CRITICAL": bold_red,
+    }
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format the log record and highlight keywords with colors.
+
+        Args:
+            record (logging.LogRecord): The log record to format.
+
+        Returns:
+            str: The formatted log record as a string with color highlights.
+
+        """
+        record.message = record.getMessage()
+        # format_str = '[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s'
+        format_str = '[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s'
+        formatter = logging.Formatter(format_str, datefmt='%Y-%m-%d %H:%M:%S')
+        msg = formatter.format(record)
+        
+        for keyword, color in self.keyword_colors.items():
+            # Escape special characters in the keyword for regex
+            escaped_keyword = re.escape(keyword)
+            
+            # Replace the keyword with the colored version using regex
+            msg = re.sub(
+                rf"\b({escaped_keyword})\b",  # Match whole words only
+                rf"{color}\1{self.reset}",
+                msg,
+                flags=re.IGNORECASE
+            )
+
+        return msg
 
 class Logger:
 
@@ -230,7 +285,7 @@ class Logger:
         log.setLevel(logging.INFO)
         # console
         console_handle = logging.StreamHandler(sys.stdout)
-        console_handle.setFormatter(fmt)
+        console_handle.setFormatter(ColorFormatter())  # Use the custom color formatter
         console_handle.setLevel(logging.INFO)
 
         # file

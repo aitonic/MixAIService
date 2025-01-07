@@ -17,6 +17,7 @@ from .constants import (
     DEFAULT_TEMPERATURE,
     DEFAULT_TOP_N,
     DEFAULT_TOP_P,
+    DEFAULT_EMBED_MODEL
 )
 from .dto import (
     BaseCompletionParameter, 
@@ -76,6 +77,7 @@ class OpenAiStyleLLMParameter(BaseLLMParameter):
     top_p: float = Field(default=DEFAULT_TOP_P)
     top_n: int = Field(default=DEFAULT_TOP_N)
     repetition_penalty: float = Field(default=DEFAULT_REPETITION_PENALTY)
+    embed_model: str = Field(default=DEFAULT_EMBED_MODEL)
 
 
 # 一个类似与openai的模型类，但是可以定义自己的校验
@@ -90,6 +92,7 @@ class OpenAiStyleModel(AbsLLMModel):
         self.full_url = parameter.full_url
         self.base_url = parameter.base_url
         self.model = parameter.model
+        self.embed_model = parameter.embed_model
 
         self.validate_custom_rules()
 
@@ -103,65 +106,57 @@ class OpenAiStyleModel(AbsLLMModel):
         pass
 
     def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
+        # 发送 POST 请求，获取响应，支持流式输出
+        count = 0
+        for response in self.completions.create(parameter):
+            yield response
+            count += 1
+            if count >= parameter.max_new_tokens:  # 根据需要限制输出数量
+                break
 
-        # 发送 POST 请求，获取响应
-        response = self.completions.create(parameter)
-
-        if not parameter.stream:
-            # 如果不使用流式返回
-            data = response.json()  # 获取响应的 JSON 数据
-
-            if not data.get("choices") or len(data["choices"]) == 0:
-                raise ValueError(f"Invalid API response: {data}")
-
-            result = ModelResponse(**data)  # 将响应数据映射到模型
-
-            yield result.choices[0].message.content
-        # 使用流式返回
-        for line in response.iter_lines():
-            if line:
-                if "DONE" in line.decode("utf-8"):
-                    return
-                # 去掉 'data:' 前缀并解析 JSON 数据
-                data = json.loads(line.decode("utf-8").replace("data:", ""))
-                result = ModelResponse(**data)
-                yield result.choices[0].delta.content
 
     async def async_completion(
         self,
-        messages: list[BaseMessage],
-        temperature: float = None,
-        max_new_tokens: int = None,
-        stream: bool = False,
+        parameter: BaseCompletionParameter
     ) -> AsyncGenerator[ModelResponse, None]:
         # 创建请求模型
         request_model = self.__build_request_model(
-            messages, temperature, max_new_tokens, stream
+            parameter.messages, parameter.temperature, parameter.max_new_tokens, parameter.stream
         )
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(
+            async with client.post(
                 self.completion_url,
                 json=request_model.model_dump(),
                 headers={"Authorization": f"Bearer {self.api_key}"},
-            )
-            response.raise_for_status()
-
-            if not stream:
-                # 如果不使用流式返回
-                data = response.json()  # 获取响应的 JSON 数据
-                result = ModelResponse(**data)  # 将响应数据映射到模型
-                yield result.choices[0].message.content
-            else:
-                # 使用流式返回
+            ) as response:
                 async for line in response.aiter_lines():
                     if line:
-                        if "DONE" in line.decode("utf-8"):
-                            return
-                        # 去掉 'data:' 前缀并解析 JSON 数据
-                        data = json.loads(line.decode("utf-8").replace("data:", ""))
-                        result = ModelResponse(**data)
-                        yield result.choices[0].delta.content
+                        yield line  # 逐行输出结果
+
+        # async with httpx.AsyncClient() as client:
+        #     response = await client.post(
+        #         self.completion_url,
+        #         json=request_model.model_dump(),
+        #         headers={"Authorization": f"Bearer {self.api_key}"},
+        #     )
+        #     response.raise_for_status()
+
+        #     if not parameter.stream:
+        #         # 如果不使用流式返回
+        #         data = response.json()  # 获取响应的 JSON 数据
+        #         result = ModelResponse(**data)  # 将响应数据映射到模型
+        #         yield result.choices[0].message.content
+        #     else:
+        #         # 使用流式返回
+        #         async for line in response.aiter_lines():
+        #             if line:
+        #                 if "DONE" in line.decode("utf-8"):
+        #                     return
+        #                 # 去掉 'data:' 前缀并解析 JSON 数据
+        #                 data = json.loads(line.decode("utf-8").replace("data:", ""))
+        #                 result = ModelResponse(**data)
+        #                 yield result.choices[0].delta.content
 
     def __build_request_model(
         self,
@@ -181,8 +176,12 @@ class OpenAiStyleModel(AbsLLMModel):
 
         logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
         return request_model
+    
 
-    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> ModelResponse:
+    def embed(self, text:str)->dict:
+        return self.embeddings.create(text=text, model=self.embed_model)
+
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
 
         param = args[0]
         return self.generate(BaseCompletionParameter(**param))

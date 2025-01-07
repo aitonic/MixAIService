@@ -2,6 +2,7 @@ import importlib
 import inspect
 from collections.abc import Iterator
 from typing import TypeVar
+from fastapi.responses import StreamingResponse
 
 # from model_components.model.base import AbsLLMModel
 from fastapi import APIRouter
@@ -181,6 +182,7 @@ def run_app_with_config(req: RunParameter) -> str:
     
     result = _resolve_app_config(req)
     return ResponseUtil.success(result)
+
 
 
 
@@ -394,7 +396,8 @@ def resolve_component(
 def test():
     from src.app.model_components.model.openai_style import OpenAiStyleModel, OpenAiStyleLLMParameter,BaseCompletionParameter
 
-    result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
+    # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
+    result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).embeddings.create(text="这是一个测试")
 
     if isinstance(result, Iterator):
         for r in result:

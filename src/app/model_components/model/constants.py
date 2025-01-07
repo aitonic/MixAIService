@@ -1,7 +1,8 @@
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_MAX_NEW_TOKENS = 4096
 DEFAULT_TEMPERATURE = 0.7
-DEFAULT_MODEL = "text-davinci-003"
+DEFAULT_MODEL = "llama3pro"
+DEFAULT_EMBED_MODEL = "jina-embeddings-v3"
 DEFAULT_COMPLETION_PATH = "/v1/chat/completions"
 DEFAULT_EMBEDDING_PATH = "/v1/embeddings"
 MODEL_PATH = "/v1/models"

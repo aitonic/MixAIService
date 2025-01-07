@@ -53,12 +53,25 @@ class MixRequestModel(BaseModel):
 
     @classmethod
     def from_messages(
-        cls,
+        cls: type["MixRequestModel"],  # 假设该方法属于类 MixModel
         model: str,
         messages: list[BaseMessage],
         parameter: MixParameter,
         stream: bool = False,
-    ):
+    ) -> "MixRequestModel":  # 返回当前类的实例
+        """根据消息创建 MixRequestModel 的实例。
+
+        Args:
+            cls (Type[MixModel]): 类本身。
+            model (str): 模型名称。
+            messages (list[BaseMessage]): 消息列表。
+            parameter (MixParameter): 混合参数配置。
+            stream (bool, optional): 是否启用流式处理。默认为 False。
+
+        Returns:
+            MixRequestModel: MixRequestModel 的实例。
+
+        """
         messages_dict = [message.model_dump() for message in messages]
         return cls(
             external_call_type=model,
@@ -92,13 +105,22 @@ class Mix(AbsLLMModel):
 
         self.validate_custom_rules()
 
-    def validate_custom_rules(self):
-        # 实现自定义校验逻辑
+
+
+    def validate_custom_rules(self) -> None:
+        """实现自定义校验逻辑。
+
+        Returns:
+            None: 方法不返回任何值。
+
+        """
+    # 实现自定义校验逻辑
         pass
+
 
     def completion(self, parameter: BaseCompletionParameter) -> ModelResponse:  # type: ignore
         # 创建请求模型
-        requestModel = self.__build_request_model(
+        request_model = self.__build_request_model(
             parameter.messages,
             parameter.temperature,
             parameter.max_new_tokens,
@@ -110,14 +132,28 @@ class Mix(AbsLLMModel):
         count = 0
         while count < self.max_retry:
             # print(f"count:{str(count)}")
+            """
+            发送请求到 completion URL。
+
+            Args:
+                request_model: 包含请求数据的模型。
+
+            Returns:
+                Response: 请求的响应。
+            """
             try:
                 response = requests.post(
                     self.completion_url,
-                    json=requestModel.model_dump(),
+                    json=request_model.model_dump(),
                     headers={"Authorization": f"Bearer {self.api_key}"},
+                    timeout=30  # 设置超时时间为 30 秒
+
                 )
                 response.raise_for_status()
                 break
+            except requests.Timeout:
+                print("请求超时，请检查网络或服务状态")
+                count = count + 1
             except requests.RequestException as e:
                 # 处理请求异常
                 logger.info(f"请求失败: {e}")
@@ -155,14 +191,14 @@ class Mix(AbsLLMModel):
         stream: bool = False,
     ) -> ModelResponse:  # type: ignore
         # 创建请求模型
-        requestModel = self.__build_request_model(
+        request_model = self.__build_request_model(
             messages, temperature, max_new_tokens, model, stream
         )
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 self.completion_url,
-                json=requestModel.model_dump(),
+                json=request_model.model_dump(),
                 headers={"Authorization": f"Bearer {self.api_key}"},
             )
             response.raise_for_status()
@@ -189,15 +225,26 @@ class Mix(AbsLLMModel):
         if max_new_tokens:
             parameter.max_new_tokens = max_new_tokens
 
-        requestModel = MixRequestModel.from_messages(
+        request_model = MixRequestModel.from_messages(
             model=model if model else self.external_call_type,
             messages=messages,
             parameter=self.parameter,
             stream=stream,
         )
 
-        return requestModel
+        return request_model
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> ModelResponse:
+        """调用模型完成操作。
+
+        Args:
+            *args: 包含一个参数字典的元组，通常为请求参数。
+            **kwds: 可选的额外关键字参数。
+
+        Returns:
+            ModelResponse: 模型的响应对象。
+
+        """
         param = args[0]
         return self.completion(BaseCompletionParameter(**param))

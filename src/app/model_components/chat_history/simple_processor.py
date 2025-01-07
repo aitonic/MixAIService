@@ -10,16 +10,18 @@ memories: dict[str, dict[str:MessageInfo]] = {}
 
 class DbMemory(AbsMemory):
     """存储在DB中的记忆
+    
     关系型数据库
     redis等非关系型数据库
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # 初始化引擎
         pass
 
     def save_message(self, message: MessageInfo) -> str:
         """保存或者更新消息
+        
         message: 要保存的消息
         return: 该消息对应的id
         """
@@ -27,6 +29,7 @@ class DbMemory(AbsMemory):
 
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
         """查询消息列表
+        
         parameter: 查询参数
         return: 根据条件查询到的消息记录
         """
@@ -40,15 +43,17 @@ memories: dict[str, dict[str, MessageInfo]] = {}
 
 class LocalMemory(AbsMemory):
     """基础记忆
+    
     使用本地内存实现
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # 初始化引擎
         self.memories = memories
 
     def save_message(self, message: MessageInfo) -> str:
         """保存或者更新消息
+        
         message: 要保存的消息
         return: 该消息对应的id
         """
@@ -84,6 +89,7 @@ class LocalMemory(AbsMemory):
 
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
         """查询消息列表
+        
         parameter: 查询参数
         return: 根据条件查询到的消息记录
         """

@@ -18,7 +18,12 @@ from .constants import (
     DEFAULT_TOP_N,
     DEFAULT_TOP_P,
 )
-from .dto import BaseCompletionParameter, BaseLLMParameter, BaseMessage, ModelResponse
+from .dto import (
+    BaseCompletionParameter, 
+    BaseLLMParameter, 
+    BaseMessage, 
+    ModelResponse
+)
 
 
 class RequestModel(BaseModel):
@@ -97,44 +102,10 @@ class OpenAiStyleModel(AbsLLMModel):
         # api_key允许为空
         pass
 
-    def completion(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
-        # 创建请求模型
-        request_model = self.__build_request_model(
-            parameter.messages,
-            parameter.temperature,
-            parameter.max_new_tokens,
-            parameter.stream,
-        )
+    def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
 
         # 发送 POST 请求，获取响应
-        count = 0
-        while count < self.max_retry:
-            # print(f"count:{str(count)}")
-            """
-            发送请求到 completion URL。
-
-            Args:
-                request_model: 包含请求数据的模型。
-
-            Returns:
-                Response: 请求的响应。
-            """
-            try:
-                response = requests.post(
-                    self.completion_url,
-                    json=request_model.model_dump(),
-                    headers={"Authorization": f"Bearer {self.api_key}"},
-                    timeout=30  # 设置超时时间为 30 秒
-                )
-                response.raise_for_status()
-                break
-            except requests.Timeout:
-                print("请求超时，请检查网络或服务状态")
-                count = count + 1
-            except requests.RequestException as e:
-                # 处理请求异常
-                logger.error(f"请求失败: {traceback.format_exc()}")
-                count = count + 1
+        response = self.completions.create(parameter)
 
         if not parameter.stream:
             # 如果不使用流式返回
@@ -198,7 +169,7 @@ class OpenAiStyleModel(AbsLLMModel):
         temperature: float = None,
         max_new_tokens: int = None,
         stream: bool = False,
-    ) -> ModelResponse:  # type: ignore
+    ) -> RequestModel:  # type: ignore
         # 创建请求模型
         request_model = RequestModel.from_messages(
             model=self.model,
@@ -214,4 +185,4 @@ class OpenAiStyleModel(AbsLLMModel):
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> ModelResponse:
 
         param = args[0]
-        return self.completion(BaseCompletionParameter(**param))
+        return self.generate(BaseCompletionParameter(**param))

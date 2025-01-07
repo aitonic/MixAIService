@@ -5,12 +5,9 @@ import sys
 import threading
 
 import uvicorn
-
-import src.CreateApp as CreateApp
-
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
-
+import src.CreateApp as CreateApp
 # app = FastAPI(title='simple-ai', description='简易ai的组件服务')
 app = CreateApp.App.createApp()
 

@@ -177,6 +177,8 @@ def resolve_app_config(req: RunParameter):
     agent_config = app.agent_config.get(req.app_no)
     if not agent_config:
         raise Exception(f"不存在app配置：{req.app_no}")
+    
+    print(f"{req.app_no}的配置信息：{agent_config}")
 
     agent_config = AgentConfig(**agent_config)
 

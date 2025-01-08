@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 
-from .constants import DEFAULT_MAX_RETRIES
+from .constants import (
+    DEFAULT_MAX_RETRIES, 
+    DEFAULT_EMBED_MODEL
+)
 
 
 class BaseMessage(BaseModel):
@@ -54,3 +57,8 @@ class BaseCompletionParameter(BaseLLMParameter):
     max_new_tokens: int = 4096
     stream: bool = False
     model:str = "llama3pro"
+
+class EmbedParameter(BaseModel):
+    query: str
+    model: str = Field(default=DEFAULT_EMBED_MODEL)
+    encoding_format: str = Field(default="float")

@@ -1,7 +1,7 @@
 import importlib
 import inspect
 from collections.abc import Iterator
-from typing import TypeVar
+from typing import TypeVar, Optional
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -30,7 +30,7 @@ class PathConverterConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     excute_path: str = Field(description="执行路径")
-    converter: list[PathConverterConfig] = Field(description="路径参数解析配置")
+    converter: Optional[list[PathConverterConfig]] = Field(description="路径参数解析配置")
     components: list[ComponentConfig] = Field(description="路径使用到的组件实例化配置")
 
 
@@ -172,8 +172,9 @@ def resolve_path(agent_config: AgentConfig) -> list[str]:
 def resolve_converter(agent_config: AgentConfig) -> dict:
     # 生成name->config的映射
     converter_mapping = {}
-    for converter in agent_config.converter:
-        converter_mapping[converter.name] = converter
+    if agent_config.converter:
+        for converter in agent_config.converter:
+            converter_mapping[converter.name] = converter
     return converter_mapping
 
 

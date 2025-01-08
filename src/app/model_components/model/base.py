@@ -14,7 +14,13 @@ from .constants import (
     DEFAULT_EMBED_MODEL,
     DEFAULT_EMBEDDING_PATH,
 )
-from .dto import BaseCompletionParameter, BaseLLMParameter, ModelResponse
+from .dto import (
+    BaseCompletionParameter, 
+    BaseLLMParameter, 
+    ModelResponse, 
+    EmbedParameter
+)
+from .embedding import OpenAiStyleEmbeddings
 
 
 class Completions:
@@ -87,55 +93,6 @@ class Completions:
             # result = MixResponse(**data)  # 将响应数据映射到模型
             # yield result.choices[0].message.content
 
-class Embeddings:
-    suffix = DEFAULT_EMBEDDING_PATH
-
-    def __init__(self, api_key: str = None,
-                        base_url: str = None,
-                        full_url: str = None,
-                        max_retry: int = 3) -> None:
-        self.api_key = api_key
-        self.base_url = base_url
-        self.full_url = full_url
-        self.max_retry = max_retry
-
-    @property
-    def embed_url(self) -> str:
-        if self.full_url:
-            return self.full_url
-        return self.base_url + DEFAULT_EMBEDDING_PATH
-    
-    def create(self, text: str, model: str = DEFAULT_EMBED_MODEL, encoding_format: str = "float") -> dict:
-        """调用 embedding 接口的方法，输入和输出参数与 OpenAI 接口一致。
-
-        Args:
-            text (str): 输入文本。
-            model (str): 使用的嵌入模型，默认为 DEFAULT_EMBED_MODEL。
-            encoding_format (str): 编码格式，默认为 "float"。
-
-        Returns:
-            dict: 调用 embedding 接口的返回值，包含嵌入结果。
-
-        """
-        url = self.embed_url
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "input": text,
-            "model": model,
-            "encoding_format": encoding_format
-        }
-        
-        import httpx
-
-        with httpx.Client(timeout=30) as client:
-            response = client.post(url, headers=headers, json=data)
-            response.raise_for_status()
-            return response.json()
-
-
 class AbsLLMModel(ABC):
     api_key: str = None
     base_url: str = None
@@ -174,8 +131,15 @@ class AbsLLMModel(ABC):
         return Completions(api_key=self.api_key, base_url=self.base_url, full_url=self.full_url, max_retry=self.max_retry)
     
     @property
-    def embeddings(self) -> Embeddings:
-        return Embeddings(api_key=self.api_key, base_url=self.base_url, full_url=self.full_url, max_retry=self.max_retry)
+    def embeddings(self) -> OpenAiStyleEmbeddings:
+        return OpenAiStyleEmbeddings(
+            BaseLLMParameter(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                full_url=self.full_url,
+                max_retry=self.max_retry
+            )
+        )
 
     @abstractmethod
     def generate(self, parameter: BaseCompletionParameter) -> Never:

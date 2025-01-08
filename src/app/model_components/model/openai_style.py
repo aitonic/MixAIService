@@ -166,10 +166,6 @@ class OpenAiStyleModel(AbsLLMModel):
 
         logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
         return request_model
-    
-
-    def embed(self, text:str)->dict:
-        return self.embeddings.create(text=text, model=self.embed_model)
 
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
 

@@ -1,7 +1,7 @@
 import importlib
 import inspect
 from collections.abc import Iterator
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -237,8 +237,10 @@ def resolve_component(
     else:
         return instance(req.data)
 
+
+from typing import Generator
 @run_crtl.post("/simple-ai/test")
-def test() -> None:
+def test() -> Generator[Any, Any, Any]:
     """测试接口，用于验证模型的功能。
 
     该接口创建一个 OpenAiStyleModel 实例，并调用其 embeddings.create 方法进行测试。
@@ -247,13 +249,28 @@ def test() -> None:
     from src.app.model_components.model.openai_style import (
         OpenAiStyleLLMParameter,
         OpenAiStyleModel,
+        BaseCompletionParameter
     )
 
-    # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
-    result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).embeddings.create(text="这是一个测试")
+    result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(stream=True,messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
+    # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).chat.completions.create(text="这是一个测试", )
 
     if isinstance(result, Iterator):
         for r in result:
             return r
     else:
         return result
+
+    # from openai import OpenAI
+    # response = OpenAI(base_url = "http://127.0.0.1:1234/v1", timeout=30, max_retries = 3, api_key="1234").chat.completions.create(model = "qwen",stream=True, messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}])
+    
+    # # for r in response:
+    # #     print(r)
+
+    # # from fastapi.responses import StreamingResponse
+    # # return StreamingResponse(response, media_type="text/event-stream")
+    # for r in response.response.iter_lines():
+    #     if "DONE" in r:
+    #         return
+    #     yield r
+

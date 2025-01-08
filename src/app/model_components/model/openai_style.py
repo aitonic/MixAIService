@@ -97,7 +97,14 @@ class OpenAiStyleModel(AbsLLMModel):
         # api_key允许为空
         pass
 
-    def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
+    def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
+        '''非流式生成。
+        
+        '''
+        return self.completions.create(parameter)
+
+    
+    async def async_generate(self, parameter: BaseCompletionParameter) -> AsyncGenerator[ModelResponse, None]:
         # 发送 POST 请求，获取响应，支持流式输出
         count = 0
         for count, response in enumerate(self.completions.create(parameter), start=1):
@@ -167,7 +174,7 @@ class OpenAiStyleModel(AbsLLMModel):
         logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
         return request_model
 
-    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
+    # def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
 
-        param = args[0]
-        return self.generate(BaseCompletionParameter(**param))
+    #     param = args[0]
+    #     return self.generate(BaseCompletionParameter(**param))

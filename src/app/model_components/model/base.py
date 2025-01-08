@@ -3,8 +3,8 @@ import os
 import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
-from typing import Never
-
+from typing import Never, Any, AsyncGenerator
+import asyncio
 import httpx
 
 from src.utils.logger import logger
@@ -75,16 +75,17 @@ class Completions:
 
                         result = ModelResponse(**data)  # 将响应数据映射到模型
 
-                        yield result.choices[0].message.content
+                        # yield result.choices[0].message.content
+                        yield result
                     # 使用流式返回
                     for line in response.iter_lines():
                         if line:
-                            if "DONE" in line.decode("utf-8"):
+                            if "DONE" in line:
                                 return
                             # 去掉 'data:' 前缀并解析 JSON 数据
-                            data = json.loads(line.decode("utf-8").replace("data:", ""))
+                            data = json.loads(line.replace("data:", ""))
                             result = ModelResponse(**data)
-                            yield result.choices[0].delta.content
+                            yield result
                 except Exception:
                     logger.error(f"completions接口出错：{traceback.format_exc()}")
                     count = count+1
@@ -142,7 +143,20 @@ class AbsLLMModel(ABC):
         )
 
     @abstractmethod
-    def generate(self, parameter: BaseCompletionParameter) -> Never:
+    def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
+        """抽象方法，用于定义具体的生成逻辑。
+
+        参数:
+            parameter (BaseCompletionParameter): 生成所需的参数对象。
+
+        异常:
+            Exception: 如果子类未实现该方法，将引发此异常。
+
+        """
+        raise Exception("未实现的生成方法")
+    
+    @abstractmethod
+    async def async_generate(self, parameter: BaseCompletionParameter) -> AsyncGenerator[ModelResponse, None]:
         """抽象方法，用于定义具体的生成逻辑。
 
         参数:
@@ -164,3 +178,20 @@ class AbsLLMModel(ABC):
         """
         logger.info(f"Processing response: {response}")
         
+
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
+
+        param = args[0]
+        parameter = BaseCompletionParameter(**param)
+        if parameter.stream:
+            # 流式
+            result = self.generate(parameter)
+            for r in result:
+                yield r.choices[0].message.content
+        else:
+            # 同步调用
+            result = self.generate(parameter)
+            for r in result:
+                self.after_response(r)
+                yield r.choices[0].message.content
+

@@ -215,7 +215,7 @@ if not os.path.exists(f"{server_logging_path}/{server_name}"):
 LOG_FILENAME = f'{server_logging_path}/{server_name}/{server_name}-{hostname}.log'
 JSON_FILENAME = f'{server_logging_path}/{server_name}/{server_name}-{hostname}.json'
 # fmt = LoggerFormatter('[%(traceId)s][%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-fmt = LoggerFormatter('[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+fmt = LoggerFormatter('[%(levelname)s][%(asctime)s][%(threadName)s][%(funcName)s][%(filename)s:%(lineno)d] - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 class ColorFormatter(logging.Formatter):
     """Formatter that adds colors to specific keywords in log messages."""
@@ -248,7 +248,7 @@ class ColorFormatter(logging.Formatter):
         """
         record.message = record.getMessage()
         # format_str = '[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s'
-        format_str = '[%(threadName)s][%(funcName)s][%(levelname)s][%(asctime)s][%(filename)s:%(lineno)d] - %(message)s'
+        format_str = '[%(levelname)s][%(asctime)s][%(threadName)s][%(funcName)s][%(filename)s:%(lineno)d] - %(message)s'
         formatter = logging.Formatter(format_str, datefmt='%Y-%m-%d %H:%M:%S')
         msg = formatter.format(record)
         

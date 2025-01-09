@@ -2,23 +2,21 @@ import json
 import os
 import traceback
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
-from typing import Never, Any, AsyncGenerator
-import asyncio
+from collections.abc import AsyncGenerator, Iterator
+from typing import Any
+
 import httpx
 
 from src.utils.logger import logger
 
 from .constants import (
     DEFAULT_COMPLETION_PATH,
-    DEFAULT_EMBED_MODEL,
     DEFAULT_EMBEDDING_PATH,
 )
 from .dto import (
-    BaseCompletionParameter, 
-    BaseLLMParameter, 
-    ModelResponse, 
-    EmbedParameter
+    BaseCompletionParameter,
+    BaseLLMParameter,
+    ModelResponse,
 )
 from .embedding import OpenAiStyleEmbeddings
 

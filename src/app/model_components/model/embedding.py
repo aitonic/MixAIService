@@ -1,18 +1,18 @@
 from typing import Any
-from .dto import (
-    BaseLLMParameter, 
-    EmbedParameter
-)
+
 from .constants import (
     DEFAULT_EMBEDDING_PATH,
 )
+from .dto import BaseLLMParameter, EmbedParameter
+
 
 class OpenAiStyleEmbeddings:
-    """
-    The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API. 
-    This class provides a method to create embeddings, allowing users to input text and receive 
+    """The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API.
+    
+    This class provides a method to create embeddings, allowing users to input text and receive
     the corresponding embedding results. Users can specify the embedding model and encoding format to be used.
     """
+
     suffix = DEFAULT_EMBEDDING_PATH
 
     def __init__(self, parameter: BaseLLMParameter) -> None:
@@ -28,12 +28,14 @@ class OpenAiStyleEmbeddings:
         return self.base_url + DEFAULT_EMBEDDING_PATH
     
     def create(self, parameter:EmbedParameter) -> dict:
-        """Method to call the embedding interface, with input and output parameters consistent with the OpenAI interface.
+        """Call the embedding interface, ensuring input and output parameters are consistent with the OpenAI interface.
 
         Args:
             text (str): Input text.
             model (str): The embedding model to use, default is DEFAULT_EMBED_MODEL.
             encoding_format (str): The encoding format, default is "float".
+            parameter (EmbedParameter): An object containing the input query, model, and encoding format.
+
 
         Returns:
             dict: The return value of the embedding interface call, containing the embedding results.
@@ -57,5 +59,16 @@ class OpenAiStyleEmbeddings:
             response.raise_for_status()
             return response.json()
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> dict:
+        """Call the embedding interface with the provided parameters.
+
+        Args:
+            *args (tuple[dict[str, Any], ...]): Positional arguments containing a dictionary
+                of parameters to initialize EmbedParameter.
+            **kwds (dict[str, Any]): Keyword arguments (unused in this method).
+
+        Returns:
+            dict: The result of the embedding interface call.
+
+        """
         return self.create(EmbedParameter(**args[0]))

@@ -1,22 +1,15 @@
 import importlib
 import inspect
-from collections.abc import Iterator
-from typing import TypeVar, Optional, Any
+from collections.abc import Generator, Iterator
+from typing import Any, TypeVar
 
 from fastapi import APIRouter
-from pydantic import BaseModel, Field
 
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
-from .dto.agent_dto import(
-    AgentConfig,
-    PathConverterConfig,
-    ComponentConfig
-)
-from ..vo.request import (
-    RunParameter
-)
+from ..vo.request import RunParameter
+from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
 
 run_crtl = APIRouter()
 
@@ -238,7 +231,7 @@ def resolve_component(
         return instance(req.data)
 
 
-from typing import Generator
+
 @run_crtl.post("/simple-ai/test")
 def test() -> Generator[Any, Any, Any]:
     """测试接口，用于验证模型的功能。
@@ -247,9 +240,9 @@ def test() -> Generator[Any, Any, Any]:
     返回的结果将根据其类型进行处理，如果是迭代器，则逐个返回结果；否则直接返回结果。
     """
     from src.app.model_components.model.openai_style import (
+        BaseCompletionParameter,
         OpenAiStyleLLMParameter,
         OpenAiStyleModel,
-        BaseCompletionParameter
     )
 
     result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(stream=True,messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))

@@ -10,4 +10,5 @@ print(result)
 
 
 from openai import OpenAI
-OpenAI().embeddings.create
+
+# OpenAI().embeddings.create

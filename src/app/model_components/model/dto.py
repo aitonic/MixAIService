@@ -1,9 +1,6 @@
 from pydantic import BaseModel, Field
 
-from .constants import (
-    DEFAULT_MAX_RETRIES, 
-    DEFAULT_EMBED_MODEL
-)
+from .constants import DEFAULT_EMBED_MODEL, DEFAULT_MAX_RETRIES
 
 
 class BaseMessage(BaseModel):

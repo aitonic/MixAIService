@@ -1,5 +1,4 @@
-from collections.abc import AsyncGenerator, Iterator
-from typing import Any
+from collections.abc import AsyncGenerator
 
 import httpx
 from pydantic import BaseModel, Field
@@ -98,9 +97,7 @@ class OpenAiStyleModel(AbsLLMModel):
         pass
 
     def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
-        '''非流式生成。
-        
-        '''
+        """非流式生成。"""
         return self.completions.create(parameter)
 
     

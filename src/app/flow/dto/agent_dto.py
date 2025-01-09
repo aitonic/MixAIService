@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel, Field
-from typing import Optional
+
 
 class ComponentConfig(BaseModel):
     name: str = Field(description="组件名，不区分大小写")
@@ -18,5 +19,5 @@ class PathConverterConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     excute_path: str = Field(description="执行路径")
-    converter: Optional[list[PathConverterConfig]] = Field(description="路径参数解析配置")
+    converter: list[PathConverterConfig] | None = Field(description="路径参数解析配置")
     components: list[ComponentConfig] = Field(description="路径使用到的组件实例化配置")

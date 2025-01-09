@@ -3,13 +3,12 @@ from typing import Any
 from .constants import (
     DEFAULT_EMBEDDING_PATH,
 )
-from .dto import BaseLLMParameter, EmbedParameter
+from ..base_component import BaseComponent
 
-
-class OpenAiStyleEmbeddings:
-    """The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API.
-    
-    This class provides a method to create embeddings, allowing users to input text and receive
+class OpenAiStyleEmbeddings(BaseComponent):
+    """
+    The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API. 
+    This class provides a method to create embeddings, allowing users to input text and receive 
     the corresponding embedding results. Users can specify the embedding model and encoding format to be used.
     """
 
@@ -57,7 +56,7 @@ class OpenAiStyleEmbeddings:
         with httpx.Client(timeout=30) as client:
             response = client.post(url, headers=headers, json=data)
             response.raise_for_status()
-            return response.json()
+            return response.json()["data"]
 
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> dict:
         """Call the embedding interface with the provided parameters.
@@ -72,3 +71,14 @@ class OpenAiStyleEmbeddings:
 
         """
         return self.create(EmbedParameter(**args[0]))
+    
+
+class ChromaAdaptEmbeddings(OpenAiStyleEmbeddings):
+    """
+    The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API. 
+    This class provides a method to create embeddings, allowing users to input text and receive 
+    the corresponding embedding results. Users can specify the embedding model and encoding format to be used.
+    """
+   
+    def __call__(self, input:list[str]) -> Any:
+        return self.create(EmbedParameter({"query":input[0]}))

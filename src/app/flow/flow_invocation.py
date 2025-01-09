@@ -19,6 +19,10 @@ T = TypeVar("T")
 @run_crtl.post("/simple-ai/run")
 def run_app_with_config(req: RunParameter) -> str:
     
+    datas = req.data
+    req.data["text"] = datas["query"]
+    req.data["input"] = datas["query"]
+    req.data["query_text"] = datas["query"]
     result = _resolve_app_config(req)
     return ResponseUtil.success(result)
 
@@ -79,24 +83,41 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
     """
     from src.main import app
     path_2_value = {}
+    path_2_value.update(req.data)
     for param in path:
         members = param.split(",")
         for member in members:
             component_config = get_component_config(member, agent_config.components)
             converter_config = converter.get(member)
-            if converter_config is None:
-                path_2_value[member] = resolve_component(component_config, app.components_data, req)
+            if not converter_config:
+                path_2_value[member] = resolve_component(
+                                            component_config=component_config, 
+                                            components_data=app.components_data, 
+                                            all_params=path_2_value)
                 continue
 
             if converter_config.type == "list":
                 value = []
                 for conver in converter_config.value.split(","):
                     value.append(
-                        resolve_component(get_component_config(conver, agent_config.components), app.components_data, req)
+                        resolve_component(get_component_config(
+                            component_name=conver, 
+                            components=agent_config.components), 
+                            components_data=app.components_data, 
+                            all_params=path_2_value
+                            )
                     )
                 path_2_value[member] = value
             else:
-                path_2_value[member] = resolve_component(component_config, app.components_data, req)
+                if not component_config:
+                    # 没有组件配置，那就是value获取
+                    value = converter_config.value
+                    component_config = get_component_config(component_name=value, components=agent_config.components)
+
+                path_2_value[member] = resolve_component(component_config=component_config, 
+                                                         components_data=app.components_data, 
+                                                         all_params=path_2_value,
+                                                         return_instance=converter_config.type == "instance")
 
     return path_2_value
 
@@ -119,7 +140,7 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
         for pa in param_names:
             param = path_2_value[pa]
             run_params[pa] = (
-                [p.as_param() for p in param] if isinstance(param, list) else param.as_param()
+                [p.as_parameter() for p in param] if isinstance(param, list) else param.as_parameter()
             )
     run_params.update(req.data)
     return run_params
@@ -181,7 +202,7 @@ def get_converter_config(
 
 
 def resolve_component(
-    component_config: ComponentConfig, components_data: dict, req: RunParameter
+    component_config: ComponentConfig, components_data: dict, all_params:dict, return_instance:bool = False
 ) -> object | None:
     """根据组件配置、组件数据和请求参数解析组件。
 
@@ -200,7 +221,7 @@ def resolve_component(
     if not param:
         param = {}
     # 接口入参替换
-    param.update(req.data)
+    param.update(all_params)
     # 前一个直接关联的组件执行结果的替换
     # TODO
     # 通过指定的类名字符串，获取类对象
@@ -213,46 +234,63 @@ def resolve_component(
     init_signature = inspect.signature(class_.__init__)
     init_params = init_signature.parameters
 
-    params = {
-        name: parameter.annotation(**param[name])
-        if parameter.annotation is not str
-        else param[name]
-        for name, parameter in init_params.items()
-        if name != "self"
-    }
+    params = {}
+    for name, parameter in init_params.items():
+        if name == "self":
+            continue
+        if parameter.annotation is not str:
+            p = param[name]
+            if isinstance(p, dict):
+                params[name] = parameter.annotation(**p)
+            else:
+                params[name] = p
+        else:
+            params[name] = param[name]
+
+
+    # params = {
+    #     name: parameter.annotation(**param[name])
+    #     if parameter.annotation is not str
+    #     else param[name]
+    #     for name, parameter in init_params.items()
+    #     if name != "self"
+    # }
     
     instance = class_(**params)
+    if return_instance:
+        return instance
 
     # if isinstance(instance, AbsLLMModel):
     if "model_components.model" in component_path:
         # 模型的调用就是执行结果了
         return instance
     else:
-        return instance(req.data)
+        return instance(all_params)
+
 
 
 
 @run_crtl.post("/simple-ai/test")
-def test() -> Generator[Any, Any, Any]:
+def test() -> None:
     """测试接口，用于验证模型的功能。
 
     该接口创建一个 OpenAiStyleModel 实例，并调用其 embeddings.create 方法进行测试。
     返回的结果将根据其类型进行处理，如果是迭代器，则逐个返回结果；否则直接返回结果。
     """
-    from src.app.model_components.model.openai_style import (
-        BaseCompletionParameter,
-        OpenAiStyleLLMParameter,
-        OpenAiStyleModel,
-    )
+    # from src.app.model_components.model.openai_style import (
+    #     OpenAiStyleLLMParameter,
+    #     OpenAiStyleModel,
+    #     BaseCompletionParameter
+    # )
 
-    result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(stream=True,messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
-    # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).chat.completions.create(text="这是一个测试", )
+    # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", full_url = "http://127.0.0.1:1234/v1/chat/completions")).chat.completions.create(BaseCompletionParameter(stream=True,messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}]))
+    # # result = OpenAiStyleModel(OpenAiStyleLLMParameter(api_key = "123", base_url = "http://192.168.11.11:8070")).chat.completions.create(text="这是一个测试", )
 
-    if isinstance(result, Iterator):
-        for r in result:
-            return r
-    else:
-        return result
+    # if isinstance(result, Iterator):
+    #     for r in result:
+    #         return r
+    # else:
+    #     return result
 
     # from openai import OpenAI
     # response = OpenAI(base_url = "http://127.0.0.1:1234/v1", timeout=30, max_retries = 3, api_key="1234").chat.completions.create(model = "qwen",stream=True, messages=[{"role":"system", "content":"你是一个数学家"}, {"role":"user","content":"10的20倍是多少"}])
@@ -267,3 +305,17 @@ def test() -> Generator[Any, Any, Any]:
     #         return
     #     yield r
 
+    from ..model_components.store.vector_store import ChromaVectorStore, VectorQueryParameter
+    from ..model_components.model.embedding import OpenAiStyleEmbeddings,BaseLLMParameter
+
+    client = ChromaVectorStore.create_client()
+    
+    # 新增
+    # collection_name = "test-collection"
+    # client.create_collection(collection_name)
+    # client.add_text(text="测试文本embedding", collection_name=collection_name, embed_function=OpenAiStyleEmbeddings(BaseLLMParameter(api_key="1234", base_url="http://127.0.0.1:1234")))
+    result = client.query(VectorQueryParameter(
+        query_text="于谦", 
+        embed_function=OpenAiStyleEmbeddings(BaseLLMParameter(api_key="1234", base_url="http://192.168.11.11:8070"))))
+
+    return result

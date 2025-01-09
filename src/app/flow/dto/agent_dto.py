@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 class ComponentConfig(BaseModel):
     name: str = Field(description="组件名，不区分大小写")
-    param: dict = Field(
+    param: Optional[dict] = Field(
+        default={},
         description="初始化该组件，调用__init__时候的入参，参数名和具体配置的映射(只有一个入参)"
     )
 

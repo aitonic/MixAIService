@@ -50,7 +50,7 @@ class BasePrompt(AbsPrompt):
         """
         return self.generate_prompt(args[0])
 
-    def as_param(self) -> dict:
+    def as_parameter(self) -> dict:
         """返回对象的属性字典。
 
         Returns:

@@ -1,8 +1,10 @@
 import importlib
 import os
 import sys
+import traceback
 
 import yaml
+from src.utils.logger import logger
 
 exclude_name = ["datetime", "Undefined", "Path"]
 
@@ -28,7 +30,10 @@ def load_classes_from_components() -> dict[str, str]:
     # 遍历 components 目录及其子目录
     for root, _, files in os.walk(components_path):
         for file in files:
-            if file.endswith(".py") and file != "__init__.py":
+            if not file.endswith(".py") or file == "__init__.py":
+                continue
+
+            try:
                 module_name = os.path.splitext(file)[0]
                 module_path = os.path.relpath(root, components_path).replace(
                     os.sep, "."
@@ -39,7 +44,7 @@ def load_classes_from_components() -> dict[str, str]:
                     else f"model_components.{module_name}"
                 )
 
-                # logger.info(f"Importing module: {full_module_name}")  # 调试信息
+                logger.info(f"Importing module, module_name: {module_name}, module_path:{module_path}, full_module_name:{full_module_name}")  # 调试信息
                 module = importlib.import_module(full_module_name)
 
                 for attr_name in dir(module):
@@ -51,8 +56,9 @@ def load_classes_from_components() -> dict[str, str]:
                             and attr_name not in exclude_name
                         ):
                             classes_dict[attr_name.lower()] = f"{full_module_name}.{attr_name}"
-                            # 加载类尝试一下
-                            # importlib.import_module(classes_dict[attr_name])
+            except Exception as e:
+                logger.warn(f"组件导入出错：{traceback.format_exc()}")
+
 
     return classes_dict
 

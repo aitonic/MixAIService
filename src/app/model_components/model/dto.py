@@ -56,6 +56,13 @@ class BaseCompletionParameter(BaseLLMParameter):
     model:str = "llama3pro"
 
 class EmbedParameter(BaseModel):
-    query: str
+    query: str 
     model: str = Field(default=DEFAULT_EMBED_MODEL)
     encoding_format: str = Field(default="float")
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        # 检查并赋值参数
+        self.query = data.get("query") or data.get("text") or data.get("input")
+        self.model = data.get("model", DEFAULT_EMBED_MODEL)
+        self.encoding_format = data.get("encoding_format", "float")

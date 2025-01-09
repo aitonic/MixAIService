@@ -2,10 +2,10 @@ import json
 import os
 import traceback
 from abc import ABC, abstractmethod
-from collections.abc import AsyncGenerator, Iterator
-from typing import Any
-
+from collections.abc import Iterator
+from typing import Never, Any, AsyncGenerator
 import httpx
+from ..base_component import BaseComponent
 
 from src.utils.logger import logger
 
@@ -92,7 +92,7 @@ class Completions:
             # result = MixResponse(**data)  # 将响应数据映射到模型
             # yield result.choices[0].message.content
 
-class AbsLLMModel(ABC):
+class AbsLLMModel(ABC, BaseComponent):
     api_key: str = None
     base_url: str = None
     full_url: str = None

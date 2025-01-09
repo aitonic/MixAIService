@@ -44,7 +44,9 @@ def load_classes_from_components() -> dict[str, str]:
                     else f"model_components.{module_name}"
                 )
 
-                logger.info(f"Importing module, module_name: {module_name}, module_path:{module_path}, full_module_name:{full_module_name}")  # 调试信息
+                if "base_component" in full_module_name:
+                    continue
+                # logger.info(f"Importing module, module_name: {module_name}, module_path:{module_path}, full_module_name:{full_module_name}")  # 调试信息
                 module = importlib.import_module(full_module_name)
 
                 for attr_name in dir(module):

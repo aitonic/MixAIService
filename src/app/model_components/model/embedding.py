@@ -1,5 +1,8 @@
 from typing import Any
-
+from .dto import (
+    EmbedParameter,
+    BaseLLMParameter
+)
 from .constants import (
     DEFAULT_EMBEDDING_PATH,
 )

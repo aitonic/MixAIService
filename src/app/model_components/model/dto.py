@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 from .constants import DEFAULT_EMBED_MODEL, DEFAULT_MAX_RETRIES
@@ -60,7 +62,13 @@ class EmbedParameter(BaseModel):
     model: str = Field(default=DEFAULT_EMBED_MODEL)
     encoding_format: str = Field(default="float")
 
-    def __init__(self, **data):
+    def __init__(self, **data: dict[str, Any]) -> None:
+        """初始化方法，接收动态的键值对数据。
+
+        Args:
+            **data (dict[str, Any]): 动态传入的键值对数据。
+
+        """
         super().__init__(**data)
         # 检查并赋值参数
         self.query = data.get("query") or data.get("text") or data.get("input")

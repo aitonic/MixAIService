@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from ..base_component import BaseComponent
+
 from pydantic import Field
+
+from ..base_component import BaseComponent
 
 
 class AbsPrompt(ABC, BaseComponent):

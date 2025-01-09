@@ -4,6 +4,7 @@ import sys
 import traceback
 
 import yaml
+
 from src.utils.logger import logger
 
 exclude_name = ["datetime", "Undefined", "Path"]
@@ -58,7 +59,7 @@ def load_classes_from_components() -> dict[str, str]:
                             and attr_name not in exclude_name
                         ):
                             classes_dict[attr_name.lower()] = f"{full_module_name}.{attr_name}"
-            except Exception as e:
+            except Exception:
                 logger.warn(f"组件导入出错：{traceback.format_exc()}")
 
 

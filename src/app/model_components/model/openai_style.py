@@ -15,12 +15,7 @@ from .constants import (
     DEFAULT_TOP_N,
     DEFAULT_TOP_P,
 )
-from .dto import (
-    BaseCompletionParameter, 
-    BaseLLMParameter, 
-    BaseMessage, 
-    ModelResponse
-)
+from .dto import BaseCompletionParameter, BaseLLMParameter, BaseMessage, ModelResponse
 
 
 class RequestModel(BaseModel):

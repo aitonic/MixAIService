@@ -1,15 +1,14 @@
 
+
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class ComponentConfig(BaseModel):
     name: str = Field(description="组件名，不区分大小写")
-    param: Optional[dict] = Field(
+    param: dict | None = Field(
         default={},
-        description="初始化该组件，调用__init__时候的入参，参数名和具体配置的映射(只有一个入参)"
+        description="初始化该组件，调用 __init__ 时的入参，参数名和具体配置的映射（只有一个入参）"
     )
-
 
 class PathConverterConfig(BaseModel):
     name: str = Field(description="执行路径中的参数名称")

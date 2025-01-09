@@ -1,7 +1,7 @@
 import importlib
 import inspect
-from collections.abc import Generator, Iterator
-from typing import Any, TypeVar
+from collections.abc import Iterator
+from typing import TypeVar
 
 from fastapi import APIRouter
 
@@ -91,8 +91,8 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
             converter_config = converter.get(member)
             if not converter_config:
                 path_2_value[member] = resolve_component(
-                                            component_config=component_config, 
-                                            components_data=app.components_data, 
+                                            component_config=component_config,
+                                            components_data=app.components_data,
                                             all_params=path_2_value)
                 continue
 
@@ -102,8 +102,8 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
                     value.append(
                         resolve_component(get_component_config(
                             component_name=conver, 
-                            components=agent_config.components), 
-                            components_data=app.components_data, 
+                            components=agent_config.components),
+                            components_data=app.components_data,
                             all_params=path_2_value
                             )
                     )
@@ -209,11 +209,11 @@ def resolve_component(
     Args:
         component_config (ComponentConfig): 组件的配置。
         components_data (dict): 可用组件的路径字典。
-        req (RunParameter): 运行参数。
+        all_params (dict): 组件参数的映射表，用于初始化组件时的参数解析。
+        return_instance (bool): 是否直接返回组件实例。如果为 True，返回组件实例；否则返回执行结果。
 
     Returns:
-        Union[object, dict, list, str, int, float, None]:
-        解析得到的组件实例或执行结果。
+        Union[object, None]: 解析得到的组件实例或执行结果。
 
     """
     # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
@@ -305,8 +305,14 @@ def test() -> None:
     #         return
     #     yield r
 
-    from ..model_components.store.vector_store import ChromaVectorStore, VectorQueryParameter
-    from ..model_components.model.embedding import OpenAiStyleEmbeddings,BaseLLMParameter
+    from ..model_components.model.embedding import (
+        BaseLLMParameter,
+        OpenAiStyleEmbeddings,
+    )
+    from ..model_components.store.vector_store import (
+        ChromaVectorStore,
+        VectorQueryParameter,
+    )
 
     client = ChromaVectorStore.create_client()
     
@@ -316,6 +322,11 @@ def test() -> None:
     # client.add_text(text="测试文本embedding", collection_name=collection_name, embed_function=OpenAiStyleEmbeddings(BaseLLMParameter(api_key="1234", base_url="http://127.0.0.1:1234")))
     result = client.query(VectorQueryParameter(
         query_text="于谦", 
-        embed_function=OpenAiStyleEmbeddings(BaseLLMParameter(api_key="1234", base_url="http://192.168.11.11:8070"))))
+        embed_function=OpenAiStyleEmbeddings(BaseLLMParameter(api_key="1234", 
+                                                              base_url="http://192.168.11.11:8070"
+                                                              )
+                                             )
+                                            )
+                          )
 
     return result

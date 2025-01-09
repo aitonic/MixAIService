@@ -1,43 +1,49 @@
-from pydantic import BaseModel, Field
+# from pydantic import BaseModel, Field
+
+import os
 from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any
+
 import chromadb
 from chromadb import Settings
 from chromadb.api import ClientAPI
-import os
+
 from src.utils import identifier_util
-from typing import Any
 
 from .dto import (
-    DEFAULT_COLECCTION, 
+    # DEFAULT_COLECCTION, 
     VectorAddParameter,
     VectorQueryParameter,
-    VectorRetriverResult
+    VectorRetriverResult,
 )
+
 
 class AbsVectorStore(ABC):
 
     @abstractmethod
-    def create_client(cls, embedding_func:object = None) -> bool:
+    def create_client(self, embedding_func:object = None) -> bool:
         """创建 ChromaVectorStore 实例并返回客户端。
     
         Args:
             embedding_func (Callable, optional): 可选的嵌入函数。如果提供，将用于生成嵌入。
     
         Returns:
-            Chroma
+            bool: 如果创建成功返回 True，否则返回 False。
+
         """
         pass
 
     @abstractmethod
     def create_collection(self, collection_name:str) -> bool:
-        """
-        创建集合的方法，返回布尔值表示是否成功。
+        """创建集合的方法，返回布尔值表示是否成功。
 
         Args:
             collection_name (str): 要创建的集合名称。
 
         Returns:
             bool: 如果集合创建成功返回 True，否则返回 False。
+
         """
         pass
 
@@ -53,6 +59,7 @@ class AbsVectorStore(ABC):
 
         Raises:
             如果集合不存在，将抛出异常。
+
         """
         pass
 
@@ -61,20 +68,18 @@ class AbsVectorStore(ABC):
         pass
 
     @abstractmethod
-    def query(self, parameter:VectorQueryParameter) -> VectorRetriverResult:
-        """
-        查询指定集合的方法，返回查询结果。
+    def query(self, parameter: VectorQueryParameter) -> VectorRetriverResult:
+        """查询指定集合的方法，返回查询结果。
 
         Args:
-            query_text (str): 要查询的文本。
-            collection_name (str): 要查询的集合名称，默认为 DEFAULT_COLECCTION。
-            embed_function: 用于生成嵌入的函数，默认为 None。
+            parameter (VectorQueryParameter): 包含查询参数的信息，包括查询文本、集合名称，以及嵌入函数。
 
         Returns:
-            str: 查询结果，包含与查询文本相关的前5个结果。
+            VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
 
         Raises:
             Exception: 如果指定的集合不存在，将抛出异常。
+
         """
         pass
 
@@ -111,26 +116,28 @@ class ChromaVectorStore(AbsVectorStore):
             self.embedding_func = embedding_func
     
     @classmethod
-    def create_client(cls, embedding_func = None) -> "ChromaVectorStore":
+    def create_client(cls, embedding_func: Callable | None = None) -> "ChromaVectorStore":
         """创建 ChromaVectorStore 实例并返回客户端。
-    
+
         Args:
             embedding_func (Callable, optional): 可选的嵌入函数。如果提供，将用于生成嵌入。
-    
+
         Returns:
             ChromaVectorStore: 返回创建的 ChromaVectorStore 实例。
+
         """
-        return ChromaVectorStore(embedding_func = embedding_func)
+        return ChromaVectorStore(embedding_func=embedding_func)
     
-    def __embedding(self, text: str, embed_function=None) -> list[float]:
+    def __embedding(self, text: str, embed_function: Callable[[str], list[float]] | None = None) -> list[float]:
         """生成文本的嵌入向量。
 
         Args:
-            text (str): 要生成嵌入的文本。
-            embed_function (Callable, optional): 可选的嵌入函数。如果提供，将使用此函数生成嵌入。
+            text (str): 输入文本。
+            embed_function (Callable[[str], list[float]], optional): 可选的嵌入函数，用于生成嵌入向量。如果未提供，将使用默认逻辑。
 
         Returns:
             list[float]: 生成的嵌入向量。
+
         """
         # 使用提供的嵌入函数生成嵌入向量
         if embed_function:
@@ -145,14 +152,14 @@ class ChromaVectorStore(AbsVectorStore):
 
     # 创建集合的方法，返回布尔值表示是否成功
     def create_collection(self, collection_name:str) -> bool:
-        """
-        创建集合的方法，返回布尔值表示是否成功。
+        """创建集合的方法，返回布尔值表示是否成功。
 
         Args:
             collection_name (str): 要创建的集合名称。
 
         Returns:
             bool: 如果集合创建成功返回 True，否则返回 False。
+
         """
         try:
             self.__client.get_or_create_collection(name=collection_name)
@@ -172,6 +179,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Raises:
             如果集合不存在，将抛出异常。
+
         """
         collection = self.__client.get_or_create_collection(name=parameter.collection_name)
 
@@ -191,14 +199,14 @@ class ChromaVectorStore(AbsVectorStore):
 
     # 删除指定集合的方法，返回布尔值表示是否成功
     def delete_collection(self, collection_name: str) -> bool:
-        """
-        删除指定集合的方法，返回布尔值表示是否成功。
+        """删除指定集合的方法，返回布尔值表示是否成功。
 
         Args:
             collection_name (str): 要删除的集合名称。
 
         Returns:
             bool: 如果集合删除成功返回 True，否则返回 False。
+
         """
         try:
             self.__client.delete_collection(name=collection_name)
@@ -208,19 +216,17 @@ class ChromaVectorStore(AbsVectorStore):
 
     # 查询指定集合的方法，返回查询结果
     def query(self, parameter:VectorQueryParameter) -> VectorRetriverResult:
-        """
-        查询指定集合的方法，返回查询结果。
+        """查询指定集合的方法，返回查询结果。
 
         Args:
-            query_text (str): 要查询的文本。
-            collection_name (str): 要查询的集合名称，默认为 DEFAULT_COLECCTION。
-            embed_function: 用于生成嵌入的函数，默认为 None。
+            parameter (VectorQueryParameter): 包含查询文本、集合名称和嵌入函数的参数对象。
 
         Returns:
-            str: 查询结果，包含与查询文本相关的前5个结果。
+            VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
 
         Raises:
             Exception: 如果指定的集合不存在，将抛出异常。
+
         """
         collection = self.__client.get_collection(name=parameter.collection_name)
 
@@ -238,14 +244,33 @@ class ChromaVectorStore(AbsVectorStore):
         return VectorRetriverResult(**results)  # 返回查询结果
     
 class ChromaUpsertStore(ChromaVectorStore):
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> str:
+        """添加文本向量的调用方法。
 
-    def __call__(self, *args, **kwds) -> str:
-        params = args[0]
+        Args:
+            *args (tuple[dict[str, Any], ...]): 包含向量添加参数的字典元组。
+            **kwds (dict[str, Any]): 其他可选关键字参数（当前未使用）。
+
+        Returns:
+            str: 添加文本后的结果。
+
+        """
+        params = args[0]  # 获取第一个参数字典
         return self.add_text(VectorAddParameter(**params))
     
 
 class ChromaRetriverStore(ChromaVectorStore):
 
-    def __call__(self, *args, **kwds) -> VectorRetriverResult:
-        params = args[0]
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> str:
+        """添加文本向量的调用方法。
+
+        Args:
+            *args (tuple[dict[str, Any], ...]): 包含向量添加参数的字典元组。
+            **kwds (dict[str, Any]): 其他可选关键字参数（当前未使用）。
+
+        Returns:
+            str: 添加文本后的结果。
+
+        """
+        params = args[0]  # 获取第一个参数字典
         return self.query(VectorQueryParameter(**params))

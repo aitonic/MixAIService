@@ -2,13 +2,14 @@ import json
 import os
 import traceback
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
-from typing import Never, Any, AsyncGenerator
+from collections.abc import AsyncGenerator, Iterator
+from typing import Any
+
 import httpx
-from ..base_component import BaseComponent
 
 from src.utils.logger import logger
 
+from ..base_component import BaseComponent
 from .constants import (
     DEFAULT_COMPLETION_PATH,
     DEFAULT_EMBEDDING_PATH,

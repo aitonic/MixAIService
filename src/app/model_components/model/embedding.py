@@ -1,16 +1,15 @@
 from typing import Any
-from .dto import (
-    EmbedParameter,
-    BaseLLMParameter
-)
+
+from ..base_component import BaseComponent
 from .constants import (
     DEFAULT_EMBEDDING_PATH,
 )
-from ..base_component import BaseComponent
+from .dto import BaseLLMParameter, EmbedParameter
+
 
 class OpenAiStyleEmbeddings(BaseComponent):
-    """
-    The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API. 
+    """The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API.
+    
     This class provides a method to create embeddings, allowing users to input text and receive 
     the corresponding embedding results. Users can specify the embedding model and encoding format to be used.
     """
@@ -77,11 +76,20 @@ class OpenAiStyleEmbeddings(BaseComponent):
     
 
 class ChromaAdaptEmbeddings(OpenAiStyleEmbeddings):
-    """
-    The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API. 
+    """The OpenAiStyleEmbeddings class is designed to interact with the OpenAI embedding API.
+    
     This class provides a method to create embeddings, allowing users to input text and receive 
     the corresponding embedding results. Users can specify the embedding model and encoding format to be used.
     """
    
-    def __call__(self, input:list[str]) -> Any:
-        return self.create(EmbedParameter({"query":input[0]}))
+    def __call__(self, input: list[str]) -> dict:
+        """Call the embedding interface with the provided input.
+
+        Args:
+            input (list[str]): A list of input strings for embedding.
+
+        Returns:
+            dict: The result of the embedding interface call.
+
+        """
+        return self.create(EmbedParameter({"query": input[0]}))

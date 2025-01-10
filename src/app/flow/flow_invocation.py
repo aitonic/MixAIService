@@ -309,7 +309,7 @@ def test() -> None:
         BaseLLMParameter,
         OpenAiStyleEmbeddings,
     )
-    from ..model_components.store.vector_store import (
+    from ..model_components.store.chroma_vector_store import (
         ChromaVectorStore,
         VectorQueryParameter,
     )

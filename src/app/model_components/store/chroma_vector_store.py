@@ -13,6 +13,7 @@ from .dto import (
     VectorAddParameter,
     VectorQueryParameter,
     VectorRetriverResult,
+    VectorBacthQueryParameter
 )
 from .vector_base import AbsVectorStore
 
@@ -162,6 +163,7 @@ class ChromaVectorStore(AbsVectorStore):
             query_embeddings=embed_result,
             n_results=5  # 返回前5个结果
         )
+        results["collection_name"] = parameter.collection_name
         
         return VectorRetriverResult(**results)  # 返回查询结果
     
@@ -183,7 +185,7 @@ class ChromaUpsertStore(ChromaVectorStore):
 
 class ChromaRetriverStore(ChromaVectorStore):
 
-    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> str:
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> list[VectorRetriverResult]:
         """添加文本向量的调用方法。
 
         Args:
@@ -195,4 +197,5 @@ class ChromaRetriverStore(ChromaVectorStore):
 
         """
         params = args[0]  # 获取第一个参数字典
-        return self.query(VectorQueryParameter(**params))
+        parameter = VectorBacthQueryParameter(**params)
+        return self.batch_query(parameter)

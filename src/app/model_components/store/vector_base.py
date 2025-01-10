@@ -1,18 +1,22 @@
 from abc import ABC, abstractmethod
+import traceback
 
 from ..base_component import BaseComponent
 from .dto import (
     # DEFAULT_COLECCTION, 
     VectorAddParameter,
     VectorQueryParameter,
+    VectorBacthQueryParameter,
     VectorRetriverResult,
+    VectorParameter
 )
 from src.utils import identifier_util
+from src.utils.logger import logger
 
 class AbsVectorStore(ABC, BaseComponent):
 
     @abstractmethod
-    def create_client(self, embedding_func:object = None) -> bool:
+    def create_client(self, parameter:VectorParameter) -> bool:
         """创建 ChromaVectorStore 实例并返回客户端。
     
         Args:
@@ -82,3 +86,17 @@ class AbsVectorStore(ABC, BaseComponent):
             return f"{prefix}-{uuid}"
         
         return uuid  # 返回生成的UUID
+    
+    def batch_query(self, parameter: VectorBacthQueryParameter) -> list[VectorRetriverResult]:
+        
+        result = []
+        for col in parameter.search_collections:
+            try:
+                result.append(self.query(VectorQueryParameter(query_text=parameter.query_text, 
+                                                          collection_name=col, 
+                                                          embed_function=parameter.embed_function)))
+            except Exception as e:
+                logger.error(f"从collection:{col}  中检索数据出错：{traceback.format_exc()}")
+        
+        return result
+            

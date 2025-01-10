@@ -1,5 +1,3 @@
-# from log_common import logger
-# from config import initialConfig, get_config_value, DbEngineFactory as dbEngineFactory
 import time
 import traceback
 from collections.abc import Awaitable, Callable
@@ -7,10 +5,28 @@ from collections.abc import Awaitable, Callable
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import StreamingResponse
+from pydantic import ValidationError
 
 from src.utils.logger import logger
+from src.utils.response import ResponseUtil
 
+def exception_handler(request: Request, e: Exception) -> Response:
+    # This function handles exceptions that occur during request processing
+    # It logs the error and returns a structured response to the client
+    # The response includes error details if the exception is a validation error
+    try:
+        logger.error(f"serverErr error: {traceback.format_exc()}")
 
+        if isinstance(e, ValidationError):
+            logger.error(f"{e.errors()}")
+            return ResponseUtil.fail(msg=e.errors())
+
+        message = e.args[0]
+        return ResponseUtil.fail(msg=message)
+    except Exception as ex:
+        logger.error(f"serverErr error: {traceback.format_exc()}")
+        return ResponseUtil.fail(msg='fail', result='系统异常，请联系管理员')
+    
 def is_json_type(request: Request) -> bool:
     """检查请求头是否包含 JSON 类型的 Content-Type。
 
@@ -33,16 +49,6 @@ class HttpMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
 
         logger.info(f"请求头信息:{request.headers}")
-
-        # 做请求限流
-        # from util import request_util
-        # key = request.headers.get('x-real-ip')
-        # if not key:
-        #     key = request.headers.get('host')
-
-        # reachLimit = request_util.time_limit(key)
-        # if not reachLimit:
-        #     raise RequestLimitException('近一分钟内请求次数超限（不得超过180次/分）')
 
         # 做日志
         if request.method == "POST" and is_json_type(request):
@@ -104,9 +110,7 @@ class App:
             #     validation_exception_handler,
             #     max_exception_handler
             # )
-            # app.add_exception_handler(RequestValidationError, validation_exception_handler)
-            # app.add_exception_handler(Exception, max_exception_handler)
-            # app.add_event_handler('startup', on_start_up(app))
+            app.add_exception_handler(Exception, exception_handler)
 
             # 注册蓝图
             _register_routers(app)  # 应用模板

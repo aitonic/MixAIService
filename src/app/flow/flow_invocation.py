@@ -20,9 +20,9 @@ T = TypeVar("T")
 def run_app_with_config(req: RunParameter) -> str:
     
     datas = req.data
-    req.data["text"] = datas["query"]
-    req.data["input"] = datas["query"]
-    req.data["query_text"] = datas["query"]
+    req.data.text = datas.query
+    req.data.input = datas.query
+    req.data.query_text = datas.query
     result = _resolve_app_config(req)
     return ResponseUtil.success(result)
 
@@ -83,7 +83,7 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
     """
     from src.main import app
     path_2_value = {}
-    path_2_value.update(req.data)
+    path_2_value.update(req.data.model_dump(exclude_none=True))
     for param in path:
         members = param.split(",")
         for member in members:
@@ -142,7 +142,7 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
             run_params[pa] = (
                 [p.as_parameter() for p in param] if isinstance(param, list) else param.as_parameter()
             )
-    run_params.update(req.data)
+    run_params.update(req.data.model_dump(exclude_none=True))
     return run_params
 
 
@@ -221,7 +221,11 @@ def resolve_component(
     if not param:
         param = {}
     # 接口入参替换
+    for key, val in param.items():
+        if isinstance(val, dict):
+            val.update(all_params)
     param.update(all_params)
+
     # 前一个直接关联的组件执行结果的替换
     # TODO
     # 通过指定的类名字符串，获取类对象

@@ -3,12 +3,13 @@ import traceback
 from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request, Response
+from pydantic import ValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import StreamingResponse
-from pydantic import ValidationError
 
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
+
 
 def exception_handler(request: Request, e: Exception) -> Response:
     # This function handles exceptions that occur during request processing
@@ -23,7 +24,7 @@ def exception_handler(request: Request, e: Exception) -> Response:
 
         message = e.args[0]
         return ResponseUtil.fail(msg=message)
-    except Exception as ex:
+    except Exception:
         logger.error(f"serverErr error: {traceback.format_exc()}")
         return ResponseUtil.fail(msg='fail', result='系统异常，请联系管理员')
     

@@ -11,11 +11,12 @@ from chromadb.api import ClientAPI
 from .dto import (
     # DEFAULT_COLECCTION, 
     VectorAddParameter,
+    VectorBacthQueryParameter,
     VectorQueryParameter,
     VectorRetriverResult,
-    VectorBacthQueryParameter
 )
 from .vector_base import AbsVectorStore
+
 
 class ChromaVectorStore(AbsVectorStore):
 

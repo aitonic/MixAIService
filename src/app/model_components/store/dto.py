@@ -1,5 +1,6 @@
 from collections.abc import Callable
-from pydantic import BaseModel, Field, field_validator
+
+from pydantic import BaseModel, Field
 
 # from typing import Optional
 

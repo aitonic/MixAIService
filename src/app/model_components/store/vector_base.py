@@ -1,33 +1,38 @@
-from abc import ABC, abstractmethod
 import traceback
+from abc import ABC, abstractmethod
+
+from src.utils import identifier_util
+from src.utils.logger import logger
 
 from ..base_component import BaseComponent
 from .dto import (
     # DEFAULT_COLECCTION, 
     VectorAddParameter,
-    VectorQueryParameter,
     VectorBacthQueryParameter,
+    VectorParameter,
+    VectorQueryParameter,
     VectorRetriverResult,
-    VectorParameter
 )
-from src.utils import identifier_util
-from src.utils.logger import logger
+
 
 class AbsVectorStore(ABC, BaseComponent):
 
     @abstractmethod
-    def create_client(self, parameter:VectorParameter) -> bool:
+    def create_client(self, parameter: VectorParameter) -> bool:
         """创建 ChromaVectorStore 实例并返回客户端。
-    
+
         Args:
-            embedding_func (Callable, optional): 可选的嵌入函数。如果提供，将用于生成嵌入。
-    
+            parameter (VectorParameter): 含有创建客户端所需信息的参数对象。
+
         Returns:
-            bool: 如果创建成功返回 True，否则返回 False。
+            bool: 表示客户端创建是否成功。
+
+        Raises:
+            ValueError: 如果参数无效或客户端创建失败，将抛出异常。
 
         """
         pass
-
+    
     @abstractmethod
     def create_collection(self, collection_name:str) -> bool:
         """创建集合的方法，返回布尔值表示是否成功。
@@ -95,7 +100,7 @@ class AbsVectorStore(ABC, BaseComponent):
                 result.append(self.query(VectorQueryParameter(query_text=parameter.query_text, 
                                                           collection_name=col, 
                                                           embed_function=parameter.embed_function)))
-            except Exception as e:
+            except Exception:
                 logger.error(f"从collection:{col}  中检索数据出错：{traceback.format_exc()}")
         
         return result

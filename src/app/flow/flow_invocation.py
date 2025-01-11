@@ -221,7 +221,7 @@ def resolve_component(
     if not param:
         param = {}
     # 接口入参替换
-    for key, val in param.items():
+    for _, val in param.items():
         if isinstance(val, dict):
             val.update(all_params)
     param.update(all_params)

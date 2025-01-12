@@ -3,7 +3,7 @@ import json
 import os
 from typing import Any
 
-from .base_reader import BaseDocReader
+from .base import BaseDocReader
 from .markdown_formatter import MarkdownFormatter
 
 

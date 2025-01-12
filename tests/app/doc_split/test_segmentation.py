@@ -2,10 +2,10 @@ import os
 import sys
 import unittest
 
-from src.app.model_components.text_segmentation.chinese_segmentation import (
+from src.app.model_components.doc_split.chinese_segmentation import (
     ChineseSegmentation,
 )
-from src.app.model_components.text_segmentation.segmentation_context import (
+from src.app.model_components.doc_split.segmentation_context import (
     SegmentationContext,
 )
 

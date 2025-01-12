@@ -6,7 +6,7 @@ from .segmentation_strategy import SegmentationStrategy
 class SegmentationContext:
     """Context class that uses a segmentation strategy to segment text."""
 
-    def __init__(self, strategy: SegmentationStrategy):
+    def __init__(self, strategy: SegmentationStrategy) -> None:
         """Initialize the context with a segmentation strategy.
 
         Args:
@@ -20,7 +20,7 @@ class SegmentationContext:
     The strategy can be changed at runtime.
     """
 
-    def set_strategy(self, strategy: SegmentationStrategy):
+    def set_strategy(self, strategy: SegmentationStrategy) ->None:
         """Set the segmentation strategy.
 
         Args:

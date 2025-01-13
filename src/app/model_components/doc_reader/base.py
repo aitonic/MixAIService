@@ -71,5 +71,8 @@ class BaseDocReader(BaseComponent, ABC):
 
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
-        source = args[0]
-        return self.process(source["query"])
+        arg = args[0]
+        if "source" in arg:
+            return self.process(arg["source"])
+        else:
+            return self.process(arg["query"])

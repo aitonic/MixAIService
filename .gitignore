@@ -86,5 +86,7 @@ __pycache__
 chromadb
 
 # 忽略日志文件
-*.json.*
-*.log.*
+# logs/*.json.*
+# logs/*.log.*
+logs/*/*.json.*
+logs/*/*.log.*

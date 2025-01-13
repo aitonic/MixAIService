@@ -16,7 +16,7 @@ class BaseDocReader(BaseComponent, ABC):
         super().__init__(name=name)
 
     @abstractmethod
-    def read_data(self) -> str | bytes:
+    def read_data(self, source: str | list | dict) -> str | bytes:
         """读取并返回原始内容，可以是文本、字节流等。
 
         Args:

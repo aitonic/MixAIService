@@ -7,6 +7,8 @@ from typing import Any
 import chromadb
 from chromadb import Settings
 from chromadb.api import ClientAPI
+from chromadb.errors import InvalidCollectionException
+
 
 from .dto import (
     # DEFAULT_COLECCTION, 
@@ -16,6 +18,7 @@ from .dto import (
     VectorRetriverResult,
 )
 from .vector_base import AbsVectorStore
+from src.utils.logger import logger
 
 
 class ChromaVectorStore(AbsVectorStore):
@@ -152,21 +155,24 @@ class ChromaVectorStore(AbsVectorStore):
             Exception: 如果指定的集合不存在，将抛出异常。
 
         """
-        collection = self.__client.get_collection(name=parameter.collection_name)
+        try:
+            collection = self.__client.get_collection(name=parameter.collection_name)
+            
+            embed_result = self.__embedding(parameter.query_text, parameter.embed_function)
 
-        if not collection:
-            raise Exception(f"collection is not exsit : {parameter.collection_name}")
-        
-        embed_result = self.__embedding(parameter.query_text, parameter.embed_function)
+            # 执行查询
+            results = collection.query(
+                query_embeddings=embed_result,
+                n_results=5  # 返回前5个结果
+            )
+            results["collection_name"] = parameter.collection_name
+            
+            return VectorRetriverResult(**results)  # 返回查询结果
+        except InvalidCollectionException as ice:
+            # raise Exception(f"collection is not exsit : {parameter.collection_name}")
+            logger.warn(f"collection is not exsit : {parameter.collection_name}")
+            return VectorRetriverResult.empty(collection_name = parameter.collection_name)
 
-        # 执行查询
-        results = collection.query(
-            query_embeddings=embed_result,
-            n_results=5  # 返回前5个结果
-        )
-        results["collection_name"] = parameter.collection_name
-        
-        return VectorRetriverResult(**results)  # 返回查询结果
     
 class ChromaUpsertStore(ChromaVectorStore):
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> str:

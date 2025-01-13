@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -46,7 +46,7 @@ class ModelResponse(BaseModel):
 class BaseLLMParameter(BaseModel):
     api_key: str = None
     base_url: str = None
-    full_url: str = None
+    full_url: Optional[str] = Field(default=None)
     max_retry: int = DEFAULT_MAX_RETRIES
 
 

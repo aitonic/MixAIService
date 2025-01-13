@@ -30,6 +30,10 @@ class VectorRetriverResult(BaseModel):
     metadatas:list[list[dict]] = Field(description="元素据，根据id排序")
     distances:list[list[float]] = Field(description="分数，根据id排序")
 
+    @classmethod
+    def empty(cls, collection_name:str = DEFAULT_COLECCTION) -> "VectorRetriverResult":
+        return VectorRetriverResult(collection_name=collection_name, ids=[], metadatas=[], distances=[])
+
 
 class VectorParameter(BaseModel):
     embedding_func:Callable | None = Field(default=None, description="embedding的实例")

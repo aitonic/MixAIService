@@ -81,5 +81,10 @@ config.ini
 
 # 忽略文件夹
 __pycache__
+
+# 忽略chroma向量
 chromadb
-logs
+
+# 忽略日志文件
+*.json.*
+*.log.*

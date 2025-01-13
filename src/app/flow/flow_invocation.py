@@ -23,6 +23,7 @@ def run_app_with_config(req: RunParameter) -> str:
     req.data.text = datas.query
     req.data.input = datas.query
     req.data.query_text = datas.query
+    # req.data.source = datas.query
     result = _resolve_app_config(req)
     return ResponseUtil.success(result)
 
@@ -261,11 +262,11 @@ def resolve_component(
     # }
     
     instance = class_(**params)
-    if return_instance:
-        return instance
+    # if return_instance:
+    #     return instance
 
     # if isinstance(instance, AbsLLMModel):
-    if "model_components.model" in component_path:
+    if "model_components.model" in component_path or return_instance:
         # 模型的调用就是执行结果了
         return instance
     else:

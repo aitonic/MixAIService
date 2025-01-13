@@ -81,3 +81,27 @@ query_text_vector:
     - name: ChromaRetriverStore
       param:
         embedding_func: 
+
+structured_reader:
+  excute_path: StructuredDocReader
+  # 需要转换的参数，指定转换形式
+  converter:
+     - name: StructuredDocReader
+       type: instance
+       value: StructuredDocReader
+  components:  
+    - name: StructuredDocReader
+      param:
+        name: StructuredDocReader            
+
+unstructured_reader:
+  excute_path: UnStructuredDocReader
+  # 需要转换的参数，指定转换形式
+  converter:
+     - name: UnStructuredDocReader
+       type: instance
+       value: UnStructuredDocReader
+  components:  
+    - name: UnStructuredDocReader
+      param:
+        name: UnStructuredDocReader   

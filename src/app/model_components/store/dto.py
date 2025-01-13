@@ -16,11 +16,13 @@ class VectorQueryParameter(BaseModel):
     query_text: str 
     collection_name: str = Field(default=DEFAULT_COLECCTION)
     embed_function:object = None
+    result_count:int = 5
 
 class VectorBacthQueryParameter(BaseModel):
     query_text: str 
     search_collections: list[str] = Field(default=[DEFAULT_COLECCTION])
     embed_function:object = None
+    result_count:int = 5
 
 
 class VectorRetriverResult(BaseModel):

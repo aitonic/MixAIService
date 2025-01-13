@@ -143,6 +143,7 @@ class ChromaVectorStore(AbsVectorStore):
 
     # 查询指定集合的方法，返回查询结果
     def query(self, parameter:VectorQueryParameter) -> VectorRetriverResult:
+        
         """查询指定集合的方法，返回查询结果。
 
         Args:
@@ -150,11 +151,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
-
-        Raises:
-            Exception: 如果指定的集合不存在，将抛出异常。
-
-        """
+        """        
         try:
             collection = self.__client.get_collection(name=parameter.collection_name)
             
@@ -163,7 +160,7 @@ class ChromaVectorStore(AbsVectorStore):
             # 执行查询
             results = collection.query(
                 query_embeddings=embed_result,
-                n_results=5  # 返回前5个结果
+                n_results=parameter.result_count  # 返回前5个结果
             )
             results["collection_name"] = parameter.collection_name
             

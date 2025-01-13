@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ..base_component import BaseComponent
+from .dto import Source
 
 
 class BaseDocReader(BaseComponent, ABC):
@@ -9,12 +10,13 @@ class BaseDocReader(BaseComponent, ABC):
     
     可读取各种输入文件/数据内容，并最终将其转换为 Markdown 格式。
     """
+    source:str | bytes
 
     def __init__(self, name: str = "BaseDocReader") -> None:
         super().__init__(name=name)
 
     @abstractmethod
-    def read_data(self, source: str | bytes) -> str | bytes:
+    def read_data(self) -> str | bytes:
         """读取并返回原始内容，可以是文本、字节流等。
 
         Args:
@@ -66,3 +68,8 @@ class BaseDocReader(BaseComponent, ABC):
         parsed_data = self.parse_content(raw_content)
         markdown_result = self.to_markdown(parsed_data)
         return markdown_result
+
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        source = args[0]
+        return self.process(source["query"])

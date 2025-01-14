@@ -105,3 +105,44 @@ unstructured_reader:
     - name: UnStructuredDocReader
       param:
         name: UnStructuredDocReader   
+
+
+format_split:
+  excute_path: FormatSplitter
+  # 需要转换的参数，指定转换形式
+  converter:
+     - name: FormatSplitter
+       type: instance
+       value: FormatSplitter
+  components:  
+    - name: FormatSplitter
+      param:
+        name: FormatSplitter  
+        parameter:
+          max_length: 50
+
+
+semantic_split:
+  excute_path: embedding_model-SemanticSplitterWithEmbedding
+  # 需要转换的参数，指定转换形式
+  converter:
+    - name: embedding_model
+      type: instance
+      value: OpenAiStyleEmbeddings
+    - name: SemanticSplitterWithEmbedding
+      type: instance
+      value: SemanticSplitterWithEmbedding
+
+  components:  
+    - name: OpenAiStyleEmbeddings
+      param:
+        parameter:
+            model: "jina-embeddings-v3"
+            api_key: '123'
+            base_url: http://192.168.11.11:8070
+            # full_url: http://192.168.11.11:8070/v1/chat/completions
+            max_retry: 2
+    - name: SemanticSplitterWithEmbedding
+      param:
+        embedding_model: 
+        similarity_threshold: 70

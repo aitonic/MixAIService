@@ -143,7 +143,7 @@ class FormatSplitter(DocSplitBase):
             strategy=SplitStrategy.FORMAT
         )
 
-    def __call__(self, text: str, **kwargs: dict[str, Any]) -> list[str]:
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
         """Split the input text using default or overridden parameters.
 
         Args:
@@ -151,15 +151,16 @@ class FormatSplitter(DocSplitBase):
             **kwargs: Additional parameters to override defaults
             
         Returns:
-            List of split segments
+            List[str]: Split segments
 
         """
+        param = args[0]
         params = {
-            "text": text,
+            "text": param["text"],
             "strategy": SplitStrategy.FORMAT,
-            "min_length": kwargs.get("min_length", 50),
-            "max_length": kwargs.get("max_length", 1000),
-            "separator": kwargs.get("separator")
+            "min_length": param.get("min_length", 50),
+            "max_length": param.get("max_length", 1000),
+            "model_name": param.get("model_name")
         }
         
         result = self.split(SplitParameter(**params))

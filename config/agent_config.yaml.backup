@@ -1,28 +1,20 @@
-chat_model:
-  excute_path: messages-ModelFactory
+test01:
+  excute_path: messages-OpenAiStyleModel
   # 需要转换的参数，指定转换形式
   converter:
     - name: messages
       type: list
       value: systemprompt,humanprompt
-    - name: ModelFactory
-      type: instance
-      value: ModelFactory
 
   components:  # 添加一个新的键来包含列表
-    - name: PromtFactory
-      alias: humanprompt
+    - name: HumanPrompt
       param:
-        component_type: human
         human_message: "{{query}}"
-    - name: PromtFactory
-      alias: systemprompt
+    - name: SystemPrompt
       param:
-        component_type: system
         system_prompt: 你是一个小助手，可以根据要求，执行任何任务。
-    - name: ModelFactory
+    - name: OpenAiStyleModel
       param:
-        component_type: openai
         parameter:
             model: "llama3pro"
             api_key: '123'
@@ -31,16 +23,12 @@ chat_model:
             max_retry: 2
 
 embedding:
-  excute_path: ModelFactory
+  excute_path: OpenAiStyleEmbeddings
   # 需要转换的参数，指定转换形式
   converter:
-    - name: ModelFactory
-      type: instance
-      value: ModelFactory
   components:  
-    - name: ModelFactory
+    - name: OpenAiStyleEmbeddings
       param:
-        component_type: openai_embedding
         parameter:
             model: "jina-embeddings-v3"
             api_key: '123'
@@ -94,55 +82,67 @@ query_text_vector:
       param:
         embedding_func: 
 
-doc_reader:
-  excute_path: DocReaderFactory
+structured_reader:
+  excute_path: StructuredDocReader
   # 需要转换的参数，指定转换形式
   converter:
-     - name: DocReaderFactory
+     - name: StructuredDocReader
        type: instance
-       value: DocReaderFactory
+       value: StructuredDocReader
   components:  
-    - name: DocReaderFactory
+    - name: StructuredDocReader
       param:
-        query:             
+        name: StructuredDocReader            
+
+unstructured_reader:
+  excute_path: UnStructuredDocReader
+  # 需要转换的参数，指定转换形式
+  converter:
+     - name: UnStructuredDocReader
+       type: instance
+       value: UnStructuredDocReader
+  components:  
+    - name: UnStructuredDocReader
+      param:
+        name: UnStructuredDocReader   
+
 
 format_split:
-  excute_path: DocSplitterFactory
+  excute_path: FormatSplitter
   # 需要转换的参数，指定转换形式
   converter:
-     - name: DocSplitterFactory
+     - name: FormatSplitter
        type: instance
-       value: DocSplitterFactory
+       value: FormatSplitter
   components:  
-    - name: DocSplitterFactory
+    - name: FormatSplitter
       param:
-        name: DocSplitterFactory
-        component_type: format
+        name: FormatSplitter  
+        parameter:
+          max_length: 50
 
 
 semantic_split:
-  excute_path: embedding_model-DocSplitterFactory
+  excute_path: embedding_model-SemanticSplitterWithEmbedding
   # 需要转换的参数，指定转换形式
   converter:
     - name: embedding_model
       type: instance
-      value: ModelFactory
-    - name: DocSplitterFactory
+      value: OpenAiStyleEmbeddings
+    - name: SemanticSplitterWithEmbedding
       type: instance
-      value: DocSplitterFactory
+      value: SemanticSplitterWithEmbedding
 
   components:  
-    - name: ModelFactory
+    - name: OpenAiStyleEmbeddings
       param:
-        component_type: openai_embedding
         parameter:
             model: "jina-embeddings-v3"
             api_key: '123'
             base_url: http://192.168.11.11:8070
             # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
-    - name: DocSplitterFactory
+    - name: SemanticSplitterWithEmbedding
       param:
         embedding_model: 
         similarity_threshold: 70
-        component_type: semantic

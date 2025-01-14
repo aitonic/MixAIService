@@ -1,14 +1,22 @@
-
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 class ComponentConfig(BaseModel):
     name: str = Field(description="组件名，不区分大小写")
+    alias: Optional[str] = Field(default= None ,description="别名，当需要多次使用的时候，可以设置这个值")
     param: dict | None = Field(
         default={},
         description="初始化该组件，调用 __init__ 时的入参，参数名和具体配置的映射（只有一个入参）"
     )
+
+    @property
+    def component_name(self) -> str:
+        if "alias" in self.__dict__ and self.alias:
+            return self.alias
+        
+        return self.name
 
 class PathConverterConfig(BaseModel):
     name: str = Field(description="执行路径中的参数名称")
@@ -20,5 +28,5 @@ class PathConverterConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     excute_path: str = Field(description="执行路径")
-    converter: list[PathConverterConfig] | None = Field(description="路径参数解析配置")
-    components: list[ComponentConfig] = Field(description="路径使用到的组件实例化配置")
+    converter: list[PathConverterConfig] | None = Field(default=[], description="路径参数解析配置")
+    components: list[ComponentConfig] = Field(default=[], description="路径使用到的组件实例化配置")

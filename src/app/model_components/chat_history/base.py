@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 
 from .dto import MessageInfo, MessageListParameter
+from ..base_component import BaseComponent
 
 
-class AbsMemory(ABC):
+class AbsMemory(ABC, BaseComponent):
     @abstractmethod
     def save_message(self, message: MessageInfo) -> str:
         """保存或者更新消息

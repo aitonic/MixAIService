@@ -5,11 +5,16 @@ from typing import TypeVar
 
 from fastapi import APIRouter
 
+from src.app.model_components.base_component import BaseFactory
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
 from ..vo.request import RunParameter
-from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
+from .dto.agent_dto import (
+    AgentConfig, 
+    ComponentConfig, 
+    PathConverterConfig
+) 
 
 run_crtl = APIRouter()
 
@@ -91,9 +96,10 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
             component_config = get_component_config(member, agent_config.components)
             converter_config = converter.get(member)
             if not converter_config:
-                path_2_value[member] = resolve_component(
+                path_2_value[member] = get_bean(
                                             component_config=component_config,
-                                            components_data=app.components_data,
+                                            # components_data=app.components_data,
+                                            components_data=app.factory,
                                             all_params=path_2_value)
                 continue
 
@@ -101,10 +107,11 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
                 value = []
                 for conver in converter_config.value.split(","):
                     value.append(
-                        resolve_component(get_component_config(
+                        get_bean(get_component_config(
                             component_name=conver, 
                             components=agent_config.components),
-                            components_data=app.components_data,
+                            # components_data=app.components_data,
+                            components_data=app.factory,
                             all_params=path_2_value
                             )
                     )
@@ -115,8 +122,9 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
                     value = converter_config.value
                     component_config = get_component_config(component_name=value, components=agent_config.components)
 
-                path_2_value[member] = resolve_component(component_config=component_config, 
-                                                         components_data=app.components_data, 
+                path_2_value[member] = get_bean(component_config=component_config, 
+                                                        #  components_data=app.components_data, 
+                                                         components_data=app.factory, 
                                                          all_params=path_2_value,
                                                          return_instance=converter_config.type == "instance")
 
@@ -182,7 +190,7 @@ def get_component_config(
     component_name: str, components: list[ComponentConfig]
 ) -> ComponentConfig:
     filter_result = [
-        com for com in components if com.name.lower() == component_name.lower()
+        com for com in components if com.component_name.lower() == component_name.lower()
     ]
     if not filter_result:
         return None
@@ -200,6 +208,46 @@ def get_converter_config(
         return None
 
     return filter_result[0]
+
+
+def get_bean(
+    component_config: ComponentConfig, components_data: dict, all_params:dict, return_instance:bool = False
+) -> object|None:
+    """获取指定的factory，之后调用get_bean方法，获取bean。
+
+    Args:
+        component_config (ComponentConfig): 组件的配置。
+        components_data (dict): 可用组件的路径字典。
+        all_params (dict): 组件参数的映射表，用于初始化组件时的参数解析。
+        return_instance (bool): 是否直接返回组件实例。如果为 True，返回组件实例；否则返回执行结果。
+
+    Returns:
+        Union[object, None]: 解析得到的组件实例或执行结果。
+
+    """
+    # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
+    param: dict = component_config.param
+    if not param:
+        param = {}
+    # 接口入参替换
+    for _, val in param.items():
+        if isinstance(val, dict):
+            val.update(all_params)
+    param.update(all_params)
+
+    component_path = components_data.get(component_config.name.lower())
+    if not component_path:
+        raise Exception(f"Not exist component name:{component_config.name}")
+    module_name, class_name = component_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+     # 获取类
+    component_class = getattr(module, class_name)
+    
+    bean = component_class().get_bean(param)
+    if return_instance:
+        return bean
+    
+    return bean(param)
 
 
 def resolve_component(
@@ -231,7 +279,7 @@ def resolve_component(
     # TODO
     # 通过指定的类名字符串，获取类对象
     # class_path = app.components_data[component_class]
-    component_path = components_data.get(component_config.name.lower())
+    component_path = components_data.get(component_config.component_name.lower())
     module_name, class_name = component_path.rsplit(".", 1)
     module = importlib.import_module(module_name)
     class_ = getattr(module, class_name)
@@ -251,15 +299,6 @@ def resolve_component(
                 params[name] = p
         else:
             params[name] = param[name]
-
-
-    # params = {
-    #     name: parameter.annotation(**param[name])
-    #     if parameter.annotation is not str
-    #     else param[name]
-    #     for name, parameter in init_params.items()
-    #     if name != "self"
-    # }
     
     instance = class_(**params)
     # if return_instance:

@@ -7,6 +7,7 @@ from ..model.embedding import OpenAiStyleEmbeddings
 from .base import DocSplitBase
 from .format_splitter import FormatSplitter
 from .semantic_splitter import SemanticSplitterWithEmbedding
+from ..base_component import BaseFactory
 
 
 class SplitterType(Enum):
@@ -15,15 +16,10 @@ class SplitterType(Enum):
     FORMAT = "format"
     SEMANTIC = "semantic"
 
-class DocSplitterFactory:
+class DocSplitterFactory(BaseFactory):
     """Factory class for creating document splitters."""
     
-    @staticmethod
-    def create_splitter(
-        splitter_type: SplitterType,
-        embedding_model: OpenAiStyleEmbeddings | None = None,
-        **kwargs: dict[str, Any]
-    ) -> DocSplitBase:
+    def get_bean(self, param:dict) -> DocSplitBase:
         """Create a document splitter instance.
         
         Args:
@@ -38,12 +34,16 @@ class DocSplitterFactory:
             ValueError: If splitter_type is not recognized
 
         """
-        if splitter_type == SplitterType.FORMAT:
-            return FormatSplitter(**kwargs)
-        elif splitter_type == SplitterType.SEMANTIC:
+        if "component_type" not in param:
+            raise ValueError(f"component_type must not be null")
+
+        splitter_type = param["component_type"]
+        if splitter_type == SplitterType.FORMAT.value:
+            return FormatSplitter()
+        elif splitter_type == SplitterType.SEMANTIC.value:
             return SemanticSplitterWithEmbedding(
-                embedding_model=embedding_model,
-                **kwargs
+                embedding_model=param["embedding_model"],
+                similarity_threshold = param["similarity_threshold"]
             )
         else:
             raise ValueError(f"Unknown splitter type: {splitter_type}")

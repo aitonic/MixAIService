@@ -1,35 +1,7 @@
-# from langchain_text_splitters import SpacyTextSplitter
-# splitter = SpacyTextSplitter(chunk_size = 100, chunk_overlap  = 2)
-
-text = '''
-# Programming
-Programming is a fundamental skill in software development.
-Python is one of the most popular programming languages.
-It's widely used in AI and web development.
-
-# Cooking
-Cooking is both an art and a science.
-Baking bread requires precise measurements and timing.
-Understanding temperature control is crucial.
-
-# Gardening
-Gardening helps connect with nature.
-Growing vegetables requires patience and care.
-Different plants need different soil conditions.
-'''
-# splits = splitter.split_text(text.replace('-',''))
-
-# print(len(splits))
-# for s in splits:
-#     print(f'====={s}=======')
-
-import requests
-result = requests.post(url="http://127.0.0.1:8899/simple-ai/run", json={
+{
     "appNo":"format_split",
     "data":{
-        "query":text,
+        "query":"# Programming \r\nProgramming is a fundamental skill in software development. \r\nPython is one of the most popular programming languages. \r\nIt's widely used in AI and web development. \r\n\r\n# Cooking \r\nCooking is both an art and a science. \r\nBaking bread requires precise measurements and timing. \r\nUnderstanding temperature control is crucial. \r\n\r\n# Gardening \r\nGardening helps connect with nature. \r\nGrowing vegetables requires patience and care. \r\nDifferent plants need different soil conditions.",
         "max_length": 50
     }
-}).json()
-
-print(result)
+}

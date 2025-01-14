@@ -25,6 +25,7 @@ def on_start_up() -> None:
         load_agent_config,
         load_app_config,
         load_classes_from_components,
+        load_factories
     )
 
     app.components_data = load_classes_from_components()
@@ -34,6 +35,9 @@ def on_start_up() -> None:
 
     # 加载agent配置
     app.agent_config = load_agent_config()
+
+    # 加载所有的factory
+    app.factory = load_factories()
 
 
 if __name__ == "__main__":

@@ -46,6 +46,7 @@
 *.docx
 *.pdf
 *.ppt
+*.txt
 
 # 忽略log文件
 

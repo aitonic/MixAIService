@@ -2,14 +2,18 @@ import os
 
 from .structured_reader import StructuredDocReader
 from .unstructured_reader import UnstructuredDocReader
+from ..base_component import (
+    BaseFactory, 
+    BaseComponent
+)
 
 
-class DocReaderFactory:
+
+class DocReaderFactory(BaseFactory):
     """工厂类，用于根据文件类型或其他逻辑自动选择合适的 Reader。
     """
 
-    @staticmethod
-    def get_reader(source: str | dict | list) -> StructuredDocReader | UnstructuredDocReader:
+    def get_bean(self, param:dict) -> StructuredDocReader | UnstructuredDocReader:
         """根据输入数据类型获取适当的文档读取器。
 
         Args:
@@ -22,6 +26,8 @@ class DocReaderFactory:
             ValueError: 如果输入的 `source` 类型不受支持，将抛出异常。
 
         """
+
+        source = param.get("component_type", param.get("query"))
         if isinstance(source, str) and os.path.isfile(source):
             # 根据文件后缀做简单判定
             if source.endswith(".csv") or source.endswith(".json"):

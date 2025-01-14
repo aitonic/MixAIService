@@ -51,15 +51,17 @@ class Completions:
          with httpx.Client(timeout=30) as client:
             while count < self.max_retry:
                 try:
-                    response = client.post(
-                        self.completion_url,
-                        json={
+                    request_json = {
                             "messages":[message.model_dump() for message in parameter.messages],
                             "temperature":parameter.temperature,
                             "stream":parameter.stream,
                             "max_new_tokens":parameter.max_new_tokens,
                             "model":parameter.model
-                        },
+                        }
+                    logger.info(f"调用模型，请求参数：{request_json}")
+                    response = client.post(
+                        self.completion_url,
+                        json=request_json,
                         headers={"Authorization": f"Bearer {self.api_key}"},
                     )
                     response.raise_for_status()

@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 class BaseComponent:
     """基础组件。
     
@@ -13,3 +15,19 @@ class BaseComponent:
         # 该方法用于将当前组件作为参数返回，方便其他组件使用。
         # 通过调用此方法，用户可以获取到当前组件的实例。
         return self
+
+
+class BaseFactory(ABC):
+    """基础的工厂类。
+    所有工厂的基类，所有组件的工厂都*必须*实现这个组件。
+    get_bean是唯一的获取对应组件的入口
+    未实现该基类的工厂，将不被服务容器管理！
+    """
+
+    @abstractmethod
+    def get_bean(self, param:dict) -> BaseComponent:
+        """获取bean实例。
+        这个是使用工厂获取bean的唯一方式。
+        至于是单例还是多态，或者是否有其他特殊属性，均可自行定义。
+        """
+        pass

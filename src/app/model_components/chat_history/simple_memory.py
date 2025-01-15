@@ -17,7 +17,7 @@ class DbMemory(AbsMemory):
 
     def __init__(self) -> None:
         # 初始化引擎
-        pass
+        raise Exception("Unimplemented memory: DB Memory")
 
     def save_message(self, message: MessageInfo) -> str:
         """保存或者更新消息

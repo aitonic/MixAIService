@@ -49,49 +49,53 @@ embedding:
             max_retry: 2
 
 add_text_vector:
-  excute_path: embed_function-ChromaUpsertStore
+  excute_path: embed_function-VectorFactory
   # 需要转换的参数，指定转换形式
   converter:
     - name: embed_function
       type: instance
-      value: OpenAiStyleEmbeddings
-    - name: ChromaUpsertStore
+      value: ModelFactory
+    - name: VectorFactory
       type: instance
-      value: ChromaUpsertStore
+      value: VectorFactory
   components:  
-    - name: OpenAiStyleEmbeddings
+    - name: ModelFactory
       param:
+        component_type: openai_embedding
         parameter:
             model: "jina-embeddings-v3"
             api_key: '123'
             base_url: http://192.168.11.11:8070
             # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
-    - name: ChromaUpsertStore
+    - name: VectorFactory
       param:
+        component_type: add
         embedding_func: 
 
 query_text_vector:
-  excute_path: embed_function-ChromaRetriverStore
+  excute_path: embed_function-VectorFactory
   # 需要转换的参数，指定转换形式
   converter:
     - name: embed_function
       type: instance
-      value: OpenAiStyleEmbeddings
-    - name: ChromaRetriverStore
+      value: ModelFactory
+    - name: VectorFactory
       type: instance
-      value: ChromaRetriverStore
+      value: VectorFactory
   components:  
-    - name: OpenAiStyleEmbeddings
+    - name: ModelFactory
       param:
+        component_type: openai_embedding
         parameter:
             model: "jina-embeddings-v3"
             api_key: '123'
             base_url: http://192.168.11.11:8070
             # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
-    - name: ChromaRetriverStore
+    - name: VectorFactory
       param:
+        component_type: retriver
         embedding_func: 
 
 doc_reader:

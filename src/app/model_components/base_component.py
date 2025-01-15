@@ -24,6 +24,14 @@ class BaseFactory(ABC):
     未实现该基类的工厂，将不被服务容器管理！
     """
 
+    def check(self, param:dict) -> None:
+        if "component_type" not in param:
+            raise Exception(f"component_type must be specified")
+        
+    def get_component(self, param:dict) -> BaseComponent:
+        self.check(param)
+        return self.get_bean(param)
+
     @abstractmethod
     def get_bean(self, param:dict) -> BaseComponent:
         """获取bean实例。

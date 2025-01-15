@@ -243,7 +243,7 @@ def get_bean(
      # 获取类
     component_class = getattr(module, class_name)
     
-    bean = component_class().get_bean(param)
+    bean = component_class().get_component(param)
     if return_instance:
         return bean
     

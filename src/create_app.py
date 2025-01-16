@@ -12,9 +12,21 @@ from src.utils.response import ResponseUtil
 
 
 def exception_handler(request: Request, e: Exception) -> Response:
-    # This function handles exceptions that occur during request processing
-    # It logs the error and returns a structured response to the client
-    # The response includes error details if the exception is a validation error
+    """Handle exceptions that occur during request processing.
+
+    Args:
+        request (Request): The incoming HTTP request object
+        e (Exception): The exception that occurred during processing
+
+    Returns:
+        Response: A structured JSON response containing error details
+
+    This function performs the following tasks:
+    1. Logs the error details including stack trace
+    2. Returns a structured JSON response to the client
+    3. Includes specific error details if the exception is a validation error
+    4. Provides a generic error message for other types of exceptions
+    """
     try:
         logger.error(f"serverErr error: {traceback.format_exc()}")
 
@@ -29,13 +41,13 @@ def exception_handler(request: Request, e: Exception) -> Response:
         return ResponseUtil.fail(msg='fail', result='系统异常，请联系管理员')
     
 def is_json_type(request: Request) -> bool:
-    """检查请求头是否包含 JSON 类型的 Content-Type。
+    """Check if the request header contains JSON Content-Type.
 
     Args:
-        request (Request): HTTP 请求对象。
+        request (Request): HTTP request object.
 
     Returns:
-        bool: 如果 Content-Type 包含 'json' 则返回 True，否则返回 False。
+        bool: Returns True if Content-Type contains 'json', otherwise False.
 
     """
     return (

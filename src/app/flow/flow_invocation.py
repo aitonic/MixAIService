@@ -23,6 +23,25 @@ T = TypeVar("T")
 
 @run_crtl.post("/simple-ai/run")
 def run_agent_with_config(req: RunParameter) -> str:
+    """运行指定配置的AI代理。
+
+    该接口接收一个RunParameter请求对象，包含运行所需的所有参数。
+    主要功能包括：
+    1. 处理输入数据，将查询文本赋值到多个字段
+    2. 解析并执行代理配置
+    3. 返回执行结果
+
+    Args:
+        req (RunParameter): 包含运行参数的对象，主要字段包括：
+            - app_no: 应用编号
+            - data: 输入数据，包含查询文本等信息
+
+    Returns:
+        str: 执行结果的JSON字符串表示，包含状态码和结果数据
+
+    Raises:
+        Exception: 如果指定的app_no不存在对应的配置
+    """
     
     datas = req.data
     req.data.text = datas.query

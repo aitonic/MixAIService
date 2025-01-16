@@ -1,18 +1,13 @@
-test01:
-  compose: 
-    path: messages=systemprompt+humanprompt-OpenAiStyleModel  
-    components:  # 添加一个新的键来包含列表
-      - name: OpenAiStyleModel
-        param:
-          parameter:
-              model: "llama3pro"
-              api_key: '123'
-              base_url: http://127.0.0.1:1234
-              full_url: http://192.168.11.11:8070/v1/chat/completions
-              max_retry: 2
-      - name: HumanPrompt
-        param:
-          human_message: "{{query}}"
-      - name: SystemPrompt
-        param:
-          system_prompt: 你是一个小助手，可以根据要求，执行任何任务。
+file_to_vectort:
+  # excute_path: doc_reader-semantic_split-add_text_vector
+  - agent_name: doc_reader
+    run_order: 1
+    result_name: text
+  - agent_name: semantic_split
+    run_order: 2
+    result_name: text
+  - agent_name: add_text_vector
+    run_order: 3
+    result_name: text
+    param:
+      collection_name: app_test

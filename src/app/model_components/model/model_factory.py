@@ -1,17 +1,17 @@
-from typing import Any
-
-from ..base_component import BaseFactory
-from .dto import BaseLLMParameter
-from src.app.model_components.base_component import BaseComponent
-from .openai_style import (
-    OpenAiStyleModel,
-    OpenAiStyleLLMParameter
+from ..base_component import (
+    BaseFactory,
+    BaseComponent
 )
+from .dto import BaseLLMParameter
+from .embedding import OpenAiStyleEmbeddings
 from .mix import (
     Mix,
     MixLLMParameter
 )
-from .embedding import OpenAiStyleEmbeddings
+from .openai_style import (
+    OpenAiStyleModel,
+    OpenAiStyleLLMParameter
+)
 
 
 class ModelFactory(BaseFactory):

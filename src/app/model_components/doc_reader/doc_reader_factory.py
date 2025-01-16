@@ -12,8 +12,8 @@ from ..base_component import (
 class DocReaderFactory(BaseFactory):
     """工厂类，用于根据文件类型或其他逻辑自动选择合适的 Reader。
     """
-
-    def get_bean(self, param:dict) -> StructuredDocReader | UnstructuredDocReader:
+        
+    def get_bean(self, param:dict) -> BaseComponent:
         """根据输入数据类型获取适当的文档读取器。
 
         Args:

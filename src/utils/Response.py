@@ -113,6 +113,11 @@ def convert_obj(
 
     if isinstance(obi, list):
         return [i.model_dump() if isinstance(i, BaseModel) else i for i in obi]
+    elif isinstance(obi, dict):
+        for key, value in obi.items():
+            obi[key] = convert_obj(value)
+        
+        return obi
     return obi.model_dump() if isinstance(obi, BaseModel) else obi
 
 

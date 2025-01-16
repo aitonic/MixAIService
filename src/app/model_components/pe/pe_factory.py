@@ -1,7 +1,7 @@
-from typing import Any
-
-from ..base_component import BaseFactory
-from src.app.model_components.base_component import BaseComponent
+from ..base_component import (
+    BaseFactory,
+    BaseComponent
+)
 from .prompt import (
     SystemPrompt,
     HumanPrompt
@@ -11,8 +11,6 @@ from .prompt import (
 class PromtFactory(BaseFactory):
 
     def get_bean(self, param: dict) -> BaseComponent:
-        if "component_type" not in param:
-            raise Exception(f"component_type must be specified")
         component_type = param["component_type"]
         if "system" == component_type:
             return SystemPrompt(param["system_prompt"])

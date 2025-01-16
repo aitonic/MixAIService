@@ -2,7 +2,6 @@ from ..base_component import (
     BaseFactory, 
     BaseComponent
 )
-
 from .simple_memory import (
     LocalMemory, 
     DbMemory

@@ -1,5 +1,7 @@
-from ..base_component import BaseFactory
-from src.app.model_components.base_component import BaseComponent
+from ..base_component import (
+    BaseFactory,
+    BaseComponent
+)
 from .chroma_vector_store import (
     ChromaUpsertStore,
     ChromaRetriverStore

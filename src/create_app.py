@@ -144,5 +144,7 @@ def _register_routers(app: FastAPI) -> None:
 
     # 应用模板
     from src.app.flow.flow_invocation import run_crtl
-
-    app.include_router(run_crtl)
+    app.include_router(run_crtl) 
+    
+    from src.app.flow.app_invocation import app_crtl
+    app.include_router(app_crtl)

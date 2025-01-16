@@ -9,7 +9,11 @@ from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
 from ..vo.request import RunParameter
-from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
+from .dto.agent_dto import (
+    AgentConfig, 
+    ComponentConfig, 
+    PathConverterConfig
+)
 
 run_crtl = APIRouter()
 
@@ -148,7 +152,6 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
 
 
   # 泛型，用于匹配输入和输出类型
-
 def _process_result(result: Iterator[T] | T) -> T | None:
     """处理执行结果。
 
@@ -251,21 +254,8 @@ def resolve_component(
                 params[name] = p
         else:
             params[name] = param[name]
-
-
-    # params = {
-    #     name: parameter.annotation(**param[name])
-    #     if parameter.annotation is not str
-    #     else param[name]
-    #     for name, parameter in init_params.items()
-    #     if name != "self"
-    # }
     
     instance = class_(**params)
-    # if return_instance:
-    #     return instance
-
-    # if isinstance(instance, AbsLLMModel):
     if "model_components.model" in component_path or return_instance:
         # 模型的调用就是执行结果了
         return instance

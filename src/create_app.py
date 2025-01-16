@@ -12,9 +12,11 @@ from src.utils.response import ResponseUtil
 
 
 def exception_handler(request: Request, e: Exception) -> Response:
-    # This function handles exceptions that occur during request processing
-    # It logs the error and returns a structured response to the client
-    # The response includes error details if the exception is a validation error
+    """
+    Handles exceptions that occur during request processing.
+    Logs the error and returns a structured response to the client.
+    Includes error details in the response if the exception is a validation error.
+    """
     try:
         logger.error(f"serverErr error: {traceback.format_exc()}")
 
@@ -29,13 +31,13 @@ def exception_handler(request: Request, e: Exception) -> Response:
         return ResponseUtil.fail(msg='fail', result='系统异常，请联系管理员')
     
 def is_json_type(request: Request) -> bool:
-    """检查请求头是否包含 JSON 类型的 Content-Type。
+    """Check if the request header contains a JSON Content-Type.
 
     Args:
-        request (Request): HTTP 请求对象。
+        request (Request): HTTP request object.
 
     Returns:
-        bool: 如果 Content-Type 包含 'json' 则返回 True，否则返回 False。
+        bool: Returns True if Content-Type contains 'json', otherwise False.
 
     """
     return (
@@ -85,58 +87,37 @@ class HttpMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class App:
-    app: FastAPI = None
+from fastapi import FastAPI
+from src.utils.logger import logger
 
-    def create_app()-> FastAPI:
-        """获取 App 的应用实例。
+def create_app() -> FastAPI:
+    """创建并返回 FastAPI 应用实例。
 
-        Returns:
-            Any: App 的应用实例。
+    Returns:
+        FastAPI: FastAPI 应用实例。
+    """
+    logger.info("开始创建服务=======")
+    app = FastAPI(title="ai组件", description="ai组件服务")
 
-        """
-        if App.app:
-            return App.app
-        logger.info("开始创建服务=======")
-        app = FastAPI(app_dir="main.py", title="ai组件", description="ai组件服务")
+    try:
+        # 添加全局异常处理器
+        app.add_exception_handler(Exception, exception_handler)
 
-        try:
-            # 数据库
-            # dbEngineFactory.init_db_engine(initialConfig.dbConfig, get_config_value('database.sql_echo', False))
+        # 添加中间件
+        app.add_middleware(HttpMiddleware)
 
-            # 添加拦截器
-            # app.add_middleware(RequestLoggingMiddleware)
-            # app.add_event_handler
-            # from handler.global_handler import (
-            #     validation_exception_handler,
-            #     max_exception_handler
-            # )
-            app.add_exception_handler(Exception, exception_handler)
+        # 注册路由
+        _register_routers(app)
 
-            # 注册蓝图
-            _register_routers(app)  # 应用模板
+        # 做一些启动后的事件
+        __on_start_up(app)
 
-            app.add_middleware(HttpMiddleware)
+    except Exception as e:
+        logger.error(f"启动报错，错误信息：{traceback.format_exc()}")
+        raise e  # 重新抛出异常，避免返回不完整的应用实例
 
-            # 导入nacos注册
-            # import nacos_common
-
-        except Exception:
-            logger.error(f"启动报错，错误信息：{traceback.format_exc()}")
-
-        # langchain 在dev环境开启debug
-        logger.info(f"注册的url列表：{app.routes}")
-        App.app = app
-        return app
-
-    def get_app() -> FastAPI:
-        """获取 App 的应用实例。
-
-        Returns:
-            FastAPI: App 的应用实例。
-
-        """
-        return App.app
+    logger.info(f"注册的url列表：{app.routes}")
+    return app
 
 
 def _register_routers(app: FastAPI) -> None:
@@ -146,3 +127,20 @@ def _register_routers(app: FastAPI) -> None:
     from src.app.flow.flow_invocation import run_crtl
 
     app.include_router(run_crtl)
+
+
+def __on_start_up(app:FastAPI) -> None:
+    # 加载组件
+    from src.app.core.business_logic import (
+        load_agent_config,
+        load_app_config,
+        load_classes_from_components,
+    )
+
+    app.components_data = load_classes_from_components()
+
+    # 加载app配置
+    app.app_config = load_app_config()
+
+    # 加载agent配置
+    app.agent_config = load_agent_config()

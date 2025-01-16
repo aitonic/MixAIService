@@ -22,18 +22,18 @@ T = TypeVar("T")
 
 
 @run_crtl.post("/simple-ai/run")
-def run_app_with_config(req: RunParameter) -> str:
+def run_agent_with_config(req: RunParameter) -> str:
     
     datas = req.data
     req.data.text = datas.query
     req.data.input = datas.query
     req.data.query_text = datas.query
     # req.data.source = datas.query
-    result = _resolve_app_config(req)
+    result = resolve_agent_config(req)
     return ResponseUtil.success(result)
 
 
-def _resolve_app_config(req: RunParameter) -> str | dict | list | None:
+def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
     """根据 app_no 获取 app 配置并解析执行结果。
 
     Args:

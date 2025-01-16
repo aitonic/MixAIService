@@ -6,12 +6,18 @@ from ..base_component import (
     BaseFactory, 
     BaseComponent
 )
+from src.utils.logger import logger
 
 
 
 class DocReaderFactory(BaseFactory):
     """工厂类，用于根据文件类型或其他逻辑自动选择合适的 Reader。
     """
+
+    def check(self, param:dict) -> None:
+        # 这个不需要component_type，直接使用query就可以
+        logger.info(f"重写check方法，reader_factory无需校验component_type")
+
         
     def get_bean(self, param:dict) -> BaseComponent:
         """根据输入数据类型获取适当的文档读取器。
@@ -27,7 +33,7 @@ class DocReaderFactory(BaseFactory):
 
         """
 
-        source = param.get("component_type", param.get("query"))
+        source = param.get("query")
         if isinstance(source, str) and os.path.isfile(source):
             # 根据文件后缀做简单判定
             if source.endswith(".csv") or source.endswith(".json"):

@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 
 class AgentInfo(BaseModel):
     agent_name: str = Field(description="agent_config中的agent名字")
-    run_order: Optional[int] = Field(description="执行顺序,根据数值从小到大排序，同样的值，一起执行")
-    result_name: Optional[str] = Field(description="agent执行结果，作为下一个agent入参时候的名称。只有最终输出可以不必指定")
+    run_order: int|None = Field(description="执行顺序,根据数值从小到大排序，同样的值，一起执行")
+    result_name: str|None = Field(description="agent执行结果，作为下一个agent入参时候的名称。只有最终输出可以不必指定")
 
 class AppConfig(BaseModel):
     agents: list[AgentInfo]

@@ -6,6 +6,8 @@ from fastapi import APIRouter
 from src.app.model_components.base_component import BaseFactory
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
+from src.app.flow.flow_invocation import resolve_agent_config
+
 
 from ..vo.request import RunParameter
 from .dto.app_dto import (
@@ -27,9 +29,32 @@ def run_app_with_config(req: RunParameter) -> str:
     req.data.query_text = datas.query
     
  
-    return ResponseUtil.success(arrange_agent(req))
+    return ResponseUtil.success(run_app(req))
 
-def arrange_agent(req: RunParameter):
+def run_app(req: RunParameter) -> str:
+    # agent分组构建
+    agents:dict[int, list[AgentInfo]] = arrange_agent(req)
+
+    # 根据顺序执行agent
+    params = req.data.model_dump()
+    # 取出最大的run_order，也就是flow的终极执行
+    orders = list(agents.keys())
+    orders.sort()
+    final_order = orders[-1]
+    for order in orders:
+        value = agents.get(order)
+        for v in value:
+            new_req = req.model_copy(update={"app_no":v.agent_name})
+            result = resolve_agent_config(new_req)
+            if order == final_order:
+                return result
+            
+            if v.result_name:
+                # 将执行结果，作为参数继续传递
+                params[v.result_name] = result
+            
+
+def arrange_agent(req: RunParameter) -> dict[int, list[AgentInfo]]:
     from src.main import app
     app_configs = app.app_config.get(req.app_no)
     if not app_configs:

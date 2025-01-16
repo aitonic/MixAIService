@@ -85,58 +85,42 @@ class HttpMiddleware(BaseHTTPMiddleware):
         return response
 
 
-class App:
-    app: FastAPI = None
+def create_app()-> FastAPI:
+    """获取 App 的应用实例。
 
-    def create_app()-> FastAPI:
-        """获取 App 的应用实例。
+    Returns:
+        Any: App 的应用实例。
 
-        Returns:
-            Any: App 的应用实例。
+    """
+    logger.info("开始创建服务=======")
+    app = FastAPI(app_dir="main.py", title="ai组件", description="ai组件服务")
 
-        """
-        if App.app:
-            return App.app
-        logger.info("开始创建服务=======")
-        app = FastAPI(app_dir="main.py", title="ai组件", description="ai组件服务")
+    try:
+        # 数据库
+        # dbEngineFactory.init_db_engine(initialConfig.dbConfig, get_config_value('database.sql_echo', False))
 
-        try:
-            # 数据库
-            # dbEngineFactory.init_db_engine(initialConfig.dbConfig, get_config_value('database.sql_echo', False))
+        # 添加拦截器
+        # app.add_middleware(RequestLoggingMiddleware)
+        # app.add_event_handler
+        # from handler.global_handler import (
+        #     validation_exception_handler,
+        #     max_exception_handler
+        # )
+        app.add_exception_handler(Exception, exception_handler)
 
-            # 添加拦截器
-            # app.add_middleware(RequestLoggingMiddleware)
-            # app.add_event_handler
-            # from handler.global_handler import (
-            #     validation_exception_handler,
-            #     max_exception_handler
-            # )
-            app.add_exception_handler(Exception, exception_handler)
+        # 注册蓝图
+        _register_routers(app)  # 应用模板
 
-            # 注册蓝图
-            _register_routers(app)  # 应用模板
+        app.add_middleware(HttpMiddleware)
 
-            app.add_middleware(HttpMiddleware)
+        # 启动后事件
+        _on_start_up(app)
 
-            # 导入nacos注册
-            # import nacos_common
+    except Exception:
+        logger.error(f"启动报错，错误信息：{traceback.format_exc()}")
 
-        except Exception:
-            logger.error(f"启动报错，错误信息：{traceback.format_exc()}")
-
-        # langchain 在dev环境开启debug
-        logger.info(f"注册的url列表：{app.routes}")
-        App.app = app
-        return app
-
-    def get_app() -> FastAPI:
-        """获取 App 的应用实例。
-
-        Returns:
-            FastAPI: App 的应用实例。
-
-        """
-        return App.app
+    logger.info(f"注册的url列表：{app.routes}")
+    return app
 
 
 def _register_routers(app: FastAPI) -> None:
@@ -148,3 +132,25 @@ def _register_routers(app: FastAPI) -> None:
     
     from src.app.flow.app_invocation import app_crtl
     app.include_router(app_crtl)
+
+
+
+def _on_start_up(app:FastAPI) -> None:
+    # 加载组件
+    from src.app.core.business_logic import (
+        load_agent_config,
+        load_app_config,
+        load_classes_from_components,
+        load_factories
+    )
+
+    app.components_data = load_classes_from_components()
+
+    # 加载app配置
+    app.app_config = load_app_config()
+
+    # 加载agent配置
+    app.agent_config = load_agent_config()
+
+    # 加载所有的factory
+    app.factory = load_factories()

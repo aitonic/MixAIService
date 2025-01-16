@@ -312,8 +312,6 @@ def resolve_component(
         return instance(all_params)
 
 
-
-
 @run_crtl.post("/simple-ai/test")
 def test() -> None:
     """测试接口，用于验证模型的功能。

@@ -51,6 +51,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             ChromaVectorStore: Returns created ChromaVectorStore instance.
+
         """
         return ChromaVectorStore(embedding_func=embedding_func)
     
@@ -63,6 +64,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             list[float]: Generated embedding vector.
+
         """
         # Use provided embedding function to generate embeddings
         if embed_function:
@@ -83,6 +85,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             bool: Returns True if collection created successfully, False otherwise.
+
         """
         try:
             self.__client.get_or_create_collection(name=collection_name)
@@ -101,6 +104,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Raises:
             Exception: If collection does not exist.
+
         """
         collection = self.__client.get_or_create_collection(name=parameter.collection_name)
 
@@ -126,6 +130,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             bool: Returns True if collection deleted successfully, False otherwise.
+
         """
         try:
             self.__client.delete_collection(name=collection_name)
@@ -141,6 +146,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             VectorRetriverResult: Query results containing top 5 results related to query text.
+
         """
         try:
             collection = self.__client.get_collection(name=parameter.collection_name)
@@ -155,7 +161,7 @@ class ChromaVectorStore(AbsVectorStore):
             results["collection_name"] = parameter.collection_name
             
             return VectorRetriverResult(**results)  # Return query results
-        except InvalidCollectionException as ice:
+        except InvalidCollectionException:
             # raise Exception(f"collection is not exsit : {parameter.collection_name}")
             logger.warn(f"collection is not exsit : {parameter.collection_name}")
             return VectorRetriverResult.empty(collection_name=parameter.collection_name)
@@ -171,6 +177,7 @@ class ChromaUpsertStore(ChromaVectorStore):
 
         Returns:
             str: Result after adding text.
+
         """
         params = args[0]  # Get first parameter dictionary
         return self.add_text(VectorAddParameter(**params))
@@ -187,6 +194,7 @@ class ChromaRetriverStore(ChromaVectorStore):
 
         Returns:
             str: Result after adding text.
+
         """
         params = args[0]  # Get first parameter dictionary
         parameter = VectorBacthQueryParameter(**params)

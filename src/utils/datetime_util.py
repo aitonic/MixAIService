@@ -6,5 +6,6 @@ def get_current_timestamp() -> float:
 
     Returns:
         float: The current timestamp in milliseconds.
+
     """
     return datetime.now().timestamp() * 1000

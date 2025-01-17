@@ -101,6 +101,7 @@ def convert_obj(
 
     Returns:
         Union[Dict, List, str, int, float, None]: Converted object.
+
     """
     obi = (
         convert_value(obj)

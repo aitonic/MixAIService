@@ -25,5 +25,6 @@ class AbsPrompt(ABC, BaseComponent):
 
         Returns:
             str: The generated prompt string.
+
         """
         pass

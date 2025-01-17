@@ -9,7 +9,6 @@ from .base import AbsLLMModel
 from .constants import (
     DEFAULT_EMBED_MODEL,
     DEFAULT_MAX_NEW_TOKENS,
-    DEFAULT_MODEL,
     DEFAULT_REPETITION_PENALTY,
     DEFAULT_TEMPERATURE,
     DEFAULT_TOP_N,

@@ -18,6 +18,7 @@ class BasePrompt(AbsPrompt):
         Args:
             role (str): Role of the prompt (system/user).
             prompt_str (str): Prompt template string.
+
         """
         super().__init__(role, prompt_str)
 
@@ -32,6 +33,7 @@ class BasePrompt(AbsPrompt):
 
         Raises:
             ValueError: If any required parameter is missing.
+
         """
         # Create Jinja2 environment
         env = Environment(autoescape=True)
@@ -63,6 +65,7 @@ class BasePrompt(AbsPrompt):
 
         Returns:
             str: The generated prompt.
+
         """
         return self.generate_prompt(args[0])
 
@@ -71,6 +74,7 @@ class BasePrompt(AbsPrompt):
 
         Returns:
             dict: The attribute dictionary of the current object.
+
         """
         return self.__dict__
 

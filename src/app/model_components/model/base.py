@@ -189,8 +189,8 @@ class AbsLLMModel(ABC, BaseComponent):
 
         Returns:
             Iterator[ModelResponse]: Iterator yielding model response content
-        """
 
+        """
         param = args[0]
         parameter = BaseCompletionParameter(**param)
         if parameter.stream:

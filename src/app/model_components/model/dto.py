@@ -31,7 +31,9 @@ class CompletionsChoice(BaseModel):
         index: The index of the choice
         logprobs: The log probabilities of the tokens
         finish_reason: The reason why the response finished
+
     """
+
     message: AIMessage | None = Field(default=None, description="Message for non-streaming responses")
     delta: AIMessage | None = Field(default=None, description="Message for streaming responses")
     index: int = Field(default=0, description="Index of the choice")
@@ -76,6 +78,7 @@ class EmbedParameter(BaseModel):
 
         Args:
             **data (dict[str, Any]): Dynamic key-value pairs data.
+
         """
         super().__init__(**data)
         # 检查并赋值参数

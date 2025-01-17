@@ -35,29 +35,26 @@ class AbsVectorStore(ABC, BaseComponent):
     
     @abstractmethod
     def create_collection(self, collection_name:str) -> bool:
-        """Method to create a collection, returns a boolean indicating success.
+        """Create a collection and return a boolean indicating success.
 
         Args:
-            collection_name (str): Name of the collection to create.
+            collection_name (str): The name of the collection to create.
 
         Returns:
-            bool: Returns True if collection creation is successful, otherwise False.
+            bool: True if the collection is created successfully, False otherwise.
 
         """
         pass
 
     @abstractmethod
     def add_text(self, parameter:VectorAddParameter) -> str:
-        """Method to add text to the specified collection, returns a boolean indicating success.
+        """Add text to the specified collection and return a success indicator.
 
         Args:
-            parameter (VectorAddParameter): Parameter containing the text to be added, collection name, and embedding function.
+            parameter (VectorAddParameter): Parameters containing the text and target collection details.
 
         Returns:
-            str: Returns the ID of the added text if successful, otherwise returns None.
-
-        Raises:
-            Exception: Will raise an exception if the collection does not exist.
+            str: A success indicator, typically a status message or identifier.
 
         """
         pass
@@ -68,17 +65,14 @@ class AbsVectorStore(ABC, BaseComponent):
 
     @abstractmethod
     def query(self, parameter: VectorQueryParameter) -> VectorRetriverResult:
-        """Method to query the specified collection and return the query results.
+        """Query the specified collection and return the query results.
 
         Args:
-            parameter (VectorQueryParameter): Contains query parameters including query text, 
-                collection name, and embedding function.
+            parameter (VectorQueryParameter): The parameters for the query, including the collection name 
+                and query-specific configurations.
 
         Returns:
-            VectorRetriverResult: Query results containing top 5 results related to the query text.
-
-        Raises:
-            Exception: Raises an exception if the specified collection does not exist.
+            VectorRetriverResult: The results of the query operation, including matching items and metadata.
 
         """
         pass
@@ -102,7 +96,7 @@ class AbsVectorStore(ABC, BaseComponent):
                                                           collection_name=col, 
                                                           embed_function=parameter.embed_function,
                                                           result_count=parameter.result_count)))
-            except Exception as e:
+            except Exception:
                 logger.error(f"Error retrieving data from collection:{col}: error info{traceback.format_exc()}")
         
         return result

@@ -1,50 +1,56 @@
 import os
 
-from .structured_reader import StructuredDocReader
-from .unstructured_reader import UnstructuredDocReader
-from ..base_component import (
-    BaseFactory, 
-    BaseComponent
-)
 from src.utils.logger import logger
 
+from ..base_component import BaseComponent, BaseFactory
+from .structured_reader import StructuredDocReader
+from .unstructured_reader import UnstructuredDocReader
 
 
 class DocReaderFactory(BaseFactory):
-    """工厂类，用于根据文件类型或其他逻辑自动选择合适的 Reader。
-    """
+    """Factory class to automatically select the appropriate Readerbased on file type or other logic."""
 
-    def check(self, param:dict) -> None:
-        # 这个不需要component_type，直接使用query就可以
-        logger.info(f"重写check方法，reader_factory无需校验component_type")
-
+    def check(self, param: dict) -> None:
+        """Override the `check` method. This factory does not require
         
-    def get_bean(self, param:dict) -> BaseComponent:
-        """根据输入数据类型获取适当的文档读取器。
+        `component_type` validation and can use the `query` directly.
 
         Args:
-            source (Union[str, dict, list]): 数据源，可能是文件路径字符串、字典或列表。
-
-        Returns:
-            Union[StructuredDocReader, UnstructuredDocReader]: 返回适当的文档读取器实例。
-
-        Raises:
-            ValueError: 如果输入的 `source` 类型不受支持，将抛出异常。
+            param (dict): Input parameters for the factory.
 
         """
+        logger.info("Overridden check method, reader_factory does not require component_type validation.")
 
+    def get_bean(self, param: dict) -> BaseComponent:
+        """Get the appropriate document reader based on the input data type.
+
+        Args:
+            param (dict): Input parameters containing the key "query".
+
+        Returns:
+            BaseComponent: An instance of either `StructuredDocReader` or `UnstructuredDocReader`.
+
+        Raises:
+            ValueError: If the `query` data type is not supported.
+
+        Example:
+            ```python
+            factory = DocReaderFactory()
+            reader = factory.get_bean({"query": "example.csv"})
+            ```
+
+        """
         source = param.get("query")
         if isinstance(source, str) and os.path.isfile(source):
-            # 根据文件后缀做简单判定
+            # Determine reader type based on file extension
             if source.endswith(".csv") or source.endswith(".json"):
                 return StructuredDocReader()
             else:
-                # 假设其他都当做非结构化
+                # Default to unstructured for other file types
                 return UnstructuredDocReader()
         else:
-            # 可能是纯文本、网络链接、或者字典/列表数据
-            # 做更精细的判定
-            if isinstance(source, dict | list):   # 合并 isinstance 调用
+            # Handle plain text, URLs, or structured data
+            if isinstance(source, dict | list):  # Combine isinstance checks
                 return StructuredDocReader()
             elif isinstance(source, str):
                 return UnstructuredDocReader()

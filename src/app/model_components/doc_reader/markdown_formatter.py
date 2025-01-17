@@ -1,5 +1,4 @@
 # markdown_formatter.py
-from typing import Iterator
 
 from src.app.model_components.model.dto import BaseCompletionParameter, BaseMessage
 from src.app.model_components.model.openai_style import OpenAiStyleModel
@@ -20,6 +19,7 @@ class MarkdownFormatter:
             llm_model (OpenAiStyleModel): LLM model instance
             max_tokens (int, optional): Maximum tokens for completion. Defaults to 8192.
             temperature (float, optional): Temperature for generation. Defaults to 0.
+
         """
         self.llm_model = llm_model
         self.max_tokens = max_tokens
@@ -34,6 +34,7 @@ class MarkdownFormatter:
 
         Returns:
             str: Converted Markdown content
+
         """
         messages = [
             BaseMessage(role="system", content=prompt),

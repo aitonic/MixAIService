@@ -5,16 +5,11 @@ from typing import TypeVar
 
 from fastapi import APIRouter
 
-from src.app.model_components.base_component import BaseFactory
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
 from ..vo.request import RunParameter
-from .dto.agent_dto import (
-    AgentConfig, 
-    ComponentConfig, 
-    PathConverterConfig
-) 
+from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
 
 run_crtl = APIRouter()
 
@@ -41,8 +36,8 @@ def run_agent_with_config(req: RunParameter) -> str:
 
     Raises:
         Exception: 如果指定的app_no不存在对应的配置
+
     """
-    
     datas = req.data
     req.data.text = datas.query
     req.data.input = datas.query

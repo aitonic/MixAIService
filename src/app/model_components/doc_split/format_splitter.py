@@ -143,18 +143,18 @@ class FormatSplitter(DocSplitBase):
             strategy=SplitStrategy.FORMAT
         )
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+    def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> list[str]:
         """Split the input text using default or overridden parameters.
 
         Args:
-            text: Input text to split
-            **kwargs: Additional parameters to override defaults
-            
+            *args (tuple[Dict[str, Any], ...]): Arguments containing input parameters as a dictionary.
+            **kwds (Dict[str, Any]): Additional keyword arguments.
+
         Returns:
-            List[str]: Split segments
+            List[str]: Split segments.
 
         """
-        param = args[0]
+        param = args[0]  # Expecting a dictionary as the first argument
         params = {
             "text": param["text"],
             "strategy": SplitStrategy.FORMAT,

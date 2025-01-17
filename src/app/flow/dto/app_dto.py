@@ -1,5 +1,5 @@
-from typing import Optional
 from pydantic import BaseModel, Field
+
 
 class AgentInfo(BaseModel):
     agent_name: str = Field(description="agent_config中的agent名字")
@@ -11,13 +11,13 @@ class AppConfig(BaseModel):
     order_configs: dict[int, list[AgentInfo]] = Field(default_factory=dict)
 
     def __get_order_list(self) -> dict[int, list[AgentInfo]]:
-        """
-        Get a dictionary of agent information grouped by execution order
+        """Get a dictionary of agent information grouped by execution order
 
         Returns:
             dict[int, list[AgentInfo]]:
                 Key is the execution order value, value is the list of agent information for that order
                 The returned dictionary will be sorted from smallest to largest by execution order
+
         """
         order_dict = {}
         for agent in self.agents:
@@ -28,7 +28,7 @@ class AppConfig(BaseModel):
             order_dict[order].append(agent)
         return dict(sorted(order_dict.items()))
 
-    def __init__(self, agents: list[AgentInfo]):
+    def __init__(self, agents: list[AgentInfo]) -> None:
         # print(data)
         super().__init__(agents = agents)  # 调用 Pydantic 的 __init__ 方法
         # self.agents = agents

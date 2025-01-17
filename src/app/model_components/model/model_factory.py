@@ -1,22 +1,13 @@
-from ..base_component import (
-    BaseFactory,
-    BaseComponent
-)
+from ..base_component import BaseComponent, BaseFactory
 from .dto import BaseLLMParameter
 from .embedding import OpenAiStyleEmbeddings
-from .mix import (
-    Mix,
-    MixLLMParameter
-)
-from .openai_style import (
-    OpenAiStyleModel,
-    OpenAiStyleLLMParameter
-)
+from .mix import Mix, MixLLMParameter
+from .openai_style import OpenAiStyleLLMParameter, OpenAiStyleModel
 
 
 class ModelFactory(BaseFactory):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._component_map = {
             "openai": lambda p: OpenAiStyleModel(OpenAiStyleLLMParameter(**p)),
             "mix": lambda p: Mix(MixLLMParameter(**p)),

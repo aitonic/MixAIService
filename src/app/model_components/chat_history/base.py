@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from .dto import MessageInfo, MessageListParameter
 from ..base_component import BaseComponent
+from .dto import MessageInfo, MessageListParameter
 
 
 class AbsMemory(ABC, BaseComponent):

@@ -9,6 +9,7 @@ from chromadb import Settings
 from chromadb.api import ClientAPI
 from chromadb.errors import InvalidCollectionException
 
+from src.utils.logger import logger
 
 from .dto import (
     # DEFAULT_COLECCTION, 
@@ -18,7 +19,6 @@ from .dto import (
     VectorRetriverResult,
 )
 from .vector_base import AbsVectorStore
-from src.utils.logger import logger
 
 
 class ChromaVectorStore(AbsVectorStore):
@@ -143,7 +143,6 @@ class ChromaVectorStore(AbsVectorStore):
 
     # 查询指定集合的方法，返回查询结果
     def query(self, parameter:VectorQueryParameter) -> VectorRetriverResult:
-        
         """查询指定集合的方法，返回查询结果。
 
         Args:
@@ -151,6 +150,7 @@ class ChromaVectorStore(AbsVectorStore):
 
         Returns:
             VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
+
         """        
         try:
             collection = self.__client.get_collection(name=parameter.collection_name)
@@ -165,7 +165,7 @@ class ChromaVectorStore(AbsVectorStore):
             results["collection_name"] = parameter.collection_name
             
             return VectorRetriverResult(**results)  # 返回查询结果
-        except InvalidCollectionException as ice:
+        except InvalidCollectionException:
             # raise Exception(f"collection is not exsit : {parameter.collection_name}")
             logger.warn(f"collection is not exsit : {parameter.collection_name}")
             return VectorRetriverResult.empty(collection_name = parameter.collection_name)

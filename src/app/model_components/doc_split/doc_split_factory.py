@@ -2,12 +2,9 @@
 
 from enum import Enum
 
+from ..base_component import BaseComponent, BaseFactory
 from .format_splitter import FormatSplitter
 from .semantic_splitter import SemanticSplitterWithEmbedding
-from ..base_component import (
-    BaseFactory,
-    BaseComponent
-)
 
 
 class SplitterType(Enum):
@@ -21,17 +18,18 @@ class DocSplitterFactory(BaseFactory):
     
     def get_bean(self, param:dict) -> BaseComponent:
         """Create a document splitter instance.
-        
+
         Args:
-            splitter_type: Type of splitter to create
-            embedding_model: Optional embedding model for semantic splitting
-            **kwargs: Additional configuration parameters
-            
+            param (dict): Input parameters for creating the splitter. 
+                - component_type (str): Type of splitter to create, e.g., "FORMAT" or "SEMANTIC".
+                - embedding_model (Optional[EmbeddingModel]): Embedding model for semantic splitting (only required for "SEMANTIC").
+                - similarity_threshold (float): Threshold for semantic similarity (only required for "SEMANTIC").
+
         Returns:
-            DocSplitBase: An instance of the requested splitter
-            
+            BaseComponent: An instance of the requested document splitter.
+
         Raises:
-            ValueError: If splitter_type is not recognized
+            ValueError: If `component_type` is not recognized.
 
         """
         splitter_type = param["component_type"]

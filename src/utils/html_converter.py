@@ -6,7 +6,6 @@ and include proper documentation.
 """
 
 import re
-from typing import Optional
 
 
 class HTMLConverter:
@@ -23,6 +22,7 @@ class HTMLConverter:
         _LINK_PATTERN (str): Regular expression pattern for link tags
         _BASE64_IMG_PATTERN (str): Regular expression pattern for base64 encoded images
         _SVG_PATTERN (str): Regular expression pattern for SVG elements
+
     """
 
     _SCRIPT_PATTERN = r"<[ ]*script.*?\/[ ]*script[ ]*>"
@@ -49,6 +49,7 @@ class HTMLConverter:
 
         Returns:
             str: The cleaned HTML content
+
         """
         if not isinstance(html, str):
             raise ValueError("Input HTML must be a string")
@@ -85,6 +86,7 @@ class HTMLConverter:
 
         Returns:
             str: HTML content with SVG elements replaced
+
         """
         return re.sub(
             cls._SVG_PATTERN,
@@ -107,6 +109,7 @@ class HTMLConverter:
 
         Returns:
             str: HTML content with base64 images replaced
+
         """
         return re.sub(
             cls._BASE64_IMG_PATTERN,
@@ -124,6 +127,7 @@ class HTMLConverter:
 
         Returns:
             str: HTML content with matched patterns removed
+
         """
         return re.sub(
             pattern,

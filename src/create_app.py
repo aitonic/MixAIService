@@ -26,6 +26,7 @@ def exception_handler(request: Request, e: Exception) -> Response:
     2. Returns a structured JSON response to the client
     3. Includes specific error details if the exception is a validation error
     4. Provides a generic error message for other types of exceptions
+
     """
     try:
         logger.error(f"serverErr error: {traceback.format_exc()}")
@@ -153,7 +154,7 @@ def _on_start_up(app:FastAPI) -> None:
         load_agent_config,
         load_app_config,
         load_classes_from_components,
-        load_factories
+        load_factories,
     )
 
     app.components_data = load_classes_from_components()

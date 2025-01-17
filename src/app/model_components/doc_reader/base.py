@@ -1,67 +1,70 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from ..base_component import BaseComponent
-from .dto import Source
 
 
 class BaseDocReader(BaseComponent, ABC):
-    """DocReader 组件的抽象基类，继承自 BaseComponent。
+    """Abstract base class for DocReader components, inheriting from BaseComponent.
     
-    可读取各种输入文件/数据内容，并最终将其转换为 Markdown 格式。
+    This class can read various input files/data content and convert them to Markdown format.
     """
-    source:str | bytes
+
+    source: str | bytes
 
     def __init__(self, name: str = "BaseDocReader") -> None:
         super().__init__(name=name)
 
     @abstractmethod
     def read_data(self, source: str | list | dict) -> str | bytes:
-        """读取并返回原始内容，可以是文本、字节流等。
+        """Read and return the raw content, which can be text, byte streams, etc.
 
         Args:
-            source (Union[str, bytes]): 数据源，可以是文件路径、URL、字节流等。
+            source (Union[str, list, dict]): Data source, such as file path, URL, or structured data.
 
         Returns:
-            Union[str, bytes]: 读取的原始内容。
+            Union[str, bytes]: The raw content read from the source.
 
         """
         pass
 
     @abstractmethod
-    def parse_content(self, raw_content: str | bytes) -> dict[str, Any]:
-        """对原始内容进行解析，可根据具体文档类型做结构化处理。
+    def parse_content(self, raw_content: str | bytes) -> dict[str, str | list | dict]:
+        """Parse the raw content into a structured format based on the document type.
 
         Args:
-            raw_content (Union[str, bytes]): 原始内容，可以是文本或字节流。
+            raw_content (Union[str, bytes]): Raw content, which can be text or byte streams.
 
         Returns:
-            dict[str, Any]: 返回的中间数据结构。
+            dict[str, Union[str, list, dict]]: Intermediate data structure for further processing.
 
         """
         pass
 
     @abstractmethod
-    def to_markdown(self, parsed_data: dict[str, Any]) -> str:
-        """将解析后的数据转为 Markdown 格式并返回。
+    def to_markdown(self, parsed_data: dict[str, str | list | dict]) -> str:
+        """Convert the parsed data to Markdown format and return the result.
 
         Args:
-            parsed_data (dict[str, Any]): 解析后的中间数据结构。
+            parsed_data (dict[str, Union[str, list, dict]]): Parsed data structure.
 
         Returns:
-            str: 转换后的 Markdown 文本。
+            str: Converted Markdown text.
 
         """
         pass
 
     def process(self, source: str | bytes) -> str:
-        """主流程：从读取到转换。对外只需调用此方法即可获取最终 Markdown。
+        """Process the source by reading and converting it to Markdown.
+
+        This method handles the entire workflow, from reading the input 
+        to converting it into Markdown format. Users only need to call 
+        this method to get the final output.
 
         Args:
-            source (Union[str, bytes]): 数据源，可以是文件路径、URL、字节流等。
+            source (str | bytes): The data source, such as a file path, URL, or byte stream.
 
         Returns:
-            str: 转换后的 Markdown 文本。
+            str: The converted Markdown text.
 
         """
         raw_content = self.read_data(source)
@@ -69,8 +72,17 @@ class BaseDocReader(BaseComponent, ABC):
         markdown_result = self.to_markdown(parsed_data)
         return markdown_result
 
+    def __call__(self, *args: tuple[dict[str, str | list | dict], ...], **kwds: dict) -> str:
+        """Callable method to process the input data and return Markdown output.
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        Args:
+            *args (tuple[dict[str, Union[str, list, dict]], ...]): Arguments containing input data.
+            **kwds (dict): Additional keyword arguments.
+
+        Returns:
+            str: The processed Markdown output.
+
+        """
         arg = args[0]
         if "source" in arg:
             return self.process(arg["source"])

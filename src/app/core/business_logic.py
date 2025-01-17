@@ -1,4 +1,6 @@
 import importlib
+import importlib.util
+import inspect
 import os
 import sys
 import traceback
@@ -97,8 +99,8 @@ def load_factories() -> dict[str, str]:
 
     Returns:
         Dict[str, str]: 一个字典，键是类名的小写形式，值是完整的模块路径。
-    """
 
+    """
     # from src.app.model_components.doc_reader.doc_reader_factory import DocReaderFactory
     # from src.app.model_components.base_component import BaseFactory
 
@@ -147,19 +149,17 @@ def load_factories() -> dict[str, str]:
                     ):
                         classes_dict[attr_name.lower()] = f"{full_module_name}.{attr_name}"
 
-            except Exception as e:
+            except Exception:
                 logger.warning(f"加载组件时出错：{traceback.format_exc()}")
 
     return classes_dict
 
 
-import inspect
-import importlib.util
-from typing import List, Type
 
-def get_classes_from_file(file_path: str) -> List[Type]:
-    """
-    从指定文件中加载所有类。
+
+
+def get_classes_from_file(file_path: str) -> list[type]:
+    """从指定文件中加载所有类。
     
     :param file_path: 文件路径
     :return: 文件中定义的所有类
@@ -172,15 +172,14 @@ def get_classes_from_file(file_path: str) -> List[Type]:
 
     # 获取文件中的所有类
     classes = []
-    for name, obj in inspect.getmembers(module, inspect.isclass):
+    for _, obj in inspect.getmembers(module, inspect.isclass):
         if obj.__module__ == module_name:  # 过滤掉导入的类，仅保留本文件定义的类
             classes.append(obj)
     return classes
 
 
-def filter_subclasses(base_class: Type, classes: List[Type]) -> List[Type]:
-    """
-    筛选指定类的子类。
+def filter_subclasses(base_class: type, classes: list[type]) -> list[type]:
+    """筛选指定类的子类。
     
     :param base_class: 基类
     :param classes: 所有类列表

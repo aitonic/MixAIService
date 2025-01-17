@@ -101,7 +101,7 @@ class AbsVectorStore(ABC, BaseComponent):
                                                           collection_name=col, 
                                                           embed_function=parameter.embed_function,
                                                           result_count=parameter.result_count)))
-            except Exception as e:
+            except Exception:
                 logger.error(f"从collection:{col}  中检索数据出错：{traceback.format_exc()}")
         
         return result

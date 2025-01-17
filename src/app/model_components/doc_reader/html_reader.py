@@ -1,12 +1,11 @@
 # html_reader.py
-import os
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from src.app.model_components.model.openai_style import OpenAiStyleModel
+from src.utils.html_converter import HTMLConverter
 
 from .base import BaseDocReader
-from src.utils.html_converter import HTMLConverter
 from .markdown_formatter import MarkdownFormatter
 
 
@@ -27,6 +26,7 @@ class HTMLDocReader(BaseDocReader):
             name (str, optional): Reader name. Defaults to "HTMLDocReader".
             max_tokens (int, optional): Maximum tokens for completion. Defaults to 8192.
             temperature (float, optional): Temperature for generation. Defaults to 0.
+
         """
         super().__init__(name=name)
         self.llm_model = llm_model
@@ -50,6 +50,7 @@ class HTMLDocReader(BaseDocReader):
         Raises:
             FileNotFoundError: If the HTML file does not exist
             ValueError: If the file is not an HTML file
+
         """
         path = Path(file_path)
         
@@ -59,7 +60,7 @@ class HTMLDocReader(BaseDocReader):
         if path.suffix.lower() not in ['.html', '.htm']:
             raise ValueError(f"File must be HTML format: {file_path}")
             
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, encoding='utf-8') as file:
             return file.read()
             
     def parse_content(self, raw_content: str) -> dict[str, Any]:
@@ -70,6 +71,7 @@ class HTMLDocReader(BaseDocReader):
 
         Returns:
             dict[str, Any]: Parsed content with 'content' key
+
         """
         cleaned_content = HTMLConverter.clean_html(raw_content)
         return {"content": cleaned_content}
@@ -83,6 +85,7 @@ class HTMLDocReader(BaseDocReader):
 
         Returns:
             str: Markdown formatted content
+
         """
         return self.markdown_formatter.convert_html_by_llm(
             content=parsed_data,
@@ -98,6 +101,7 @@ class HTMLDocReader(BaseDocReader):
 
         Returns:
             str: Processed Markdown content
+
         """
         raw_content = self.read_data(file_path)
         parsed_content = self.parse_content(raw_content)

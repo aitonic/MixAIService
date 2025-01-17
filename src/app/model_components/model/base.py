@@ -66,30 +66,33 @@ class Completions:
                     )
                     response.raise_for_status()
 
-                    # data = response.json()  # 获取响应的 JSON 数据
                     if not parameter.stream:
-                        # 如果不使用流式返回
-                        data = response.json()  # 获取响应的 JSON 数据
-
+                        # 非流式处理
+                        data = response.json()
                         if not data.get("choices") or len(data["choices"]) == 0:
                             raise ValueError(f"Invalid API response: {data}")
-
-                        result = ModelResponse(**data)  # 将响应数据映射到模型
-
-                        # yield result.choices[0].message.content
+                        result = ModelResponse(**data)
                         yield result
-                    # 使用流式返回
-                    for line in response.iter_lines():
-                        if line:
+                    else:
+                        # 流式处理
+                        for line in response.iter_lines():
+                            if not line:
+                                continue
                             if "DONE" in line:
-                                return
-                            # 去掉 'data:' 前缀并解析 JSON 数据
-                            data = json.loads(line.replace("data:", ""))
-                            result = ModelResponse(**data)
-                            yield result
-                except Exception:
+                                break
+                            try:
+                                # 解析流式数据
+                                json_data = json.loads(line.replace("data:", ""))
+                                if "choices" in json_data and len(json_data["choices"]) > 0:
+                                    yield ModelResponse(**json_data)
+                            except json.JSONDecodeError:
+                                logger.warning(f"Failed to parse stream data: {line}")
+                                continue
+                except Exception as e:
                     logger.error(f"completions接口出错：{traceback.format_exc()}")
-                    count = count+1
+                    count += 1
+                    if count >= self.max_retry:
+                        raise RuntimeError(f"Max retries ({self.max_retry}) exceeded") from e
             # 如果不使用流式返回
             
             # result = MixResponse(**data)  # 将响应数据映射到模型

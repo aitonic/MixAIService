@@ -48,7 +48,7 @@ class Completions:
     
     def create(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
          count = 0
-         with httpx.Client(timeout=30) as client:
+         with httpx.Client(timeout=300) as client:
             while count < self.max_retry:
                 try:
                     request_json = {

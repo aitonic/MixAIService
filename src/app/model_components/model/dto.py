@@ -1,8 +1,12 @@
-from typing import Any
+from typing import Any, Optional
+import os
 
 from pydantic import BaseModel, Field
 
-from .constants import DEFAULT_EMBED_MODEL, DEFAULT_MAX_RETRIES
+from .constants import (
+    DEFAULT_EMBED_MODEL, 
+    DEFAULT_MAX_RETRIES
+)
 
 
 class BaseMessage(BaseModel):
@@ -53,8 +57,8 @@ class ModelResponse(BaseModel):
 
 
 class BaseLLMParameter(BaseModel):
-    api_key: str = None
-    base_url: str = None
+    api_key: str = os.getenv("MODEL_API_KEY")
+    base_url: str = os.getenv("MODEL_BASE_URL")
     full_url: str | None = Field(default=None)
     max_retry: int = DEFAULT_MAX_RETRIES
 
@@ -62,13 +66,13 @@ class BaseLLMParameter(BaseModel):
 class BaseCompletionParameter(BaseLLMParameter):
     messages: list[BaseMessage]
     temperature: float = 0.95
-    max_new_tokens: int = 4096
+    max_new_tokens: int = os.getenv("MODEL_MAX_TOKENS")
     stream: bool = False
-    model:str = "llama3pro"
+    model:str = os.getenv("CHAT_MODEL_NAME")
 
 class EmbedParameter(BaseModel):
     query: str 
-    model: str = Field(default=DEFAULT_EMBED_MODEL)
+    model: str = os.getenv("EMBEDDING_MODEL_NAME")
     encoding_format: str = Field(default="float")
 
     def __init__(self, **data: dict[str, Any]) -> None:

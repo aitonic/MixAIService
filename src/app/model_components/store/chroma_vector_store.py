@@ -29,7 +29,6 @@ class ChromaVectorStore(AbsVectorStore):
         super().__init__()
         chromadb_client = chromadb.Client(
             Settings(
-                # chroma_db_impl='duckdb+parquet',
                 chroma_server_host=os.getenv("CHROMA_HOST", "localhost").strip(),
                 chroma_server_http_port=int(os.getenv("CHROMA_PORT", "8000").strip()),
                 persist_directory=os.getenv("CHROMA_PERSIST_DIRECTORY", "/chromadb/persist/").strip(),
@@ -38,7 +37,8 @@ class ChromaVectorStore(AbsVectorStore):
             )
         )
 
-        self.__client = chromadb_client  # Set instance's __client attribute
+        # Set instance's __client attribute
+        self.__client = chromadb_client  
         if embedding_func:
             self.embedding_func = embedding_func
     

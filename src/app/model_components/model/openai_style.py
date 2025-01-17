@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+import os
 
 import httpx
 from pydantic import BaseModel, Field
@@ -62,27 +63,21 @@ class RequestModel(BaseModel):
 
 
 class OpenAiStyleLLMParameter(BaseLLMParameter):
-    # model: str = Field(default=DEFAULT_MODEL)
-    # max_new_tokens: int = Field(default=DEFAULT_MAX_NEW_TOKENS)
-    # temperature: float = Field(default=DEFAULT_TEMPERATURE)
     top_p: float = Field(default=DEFAULT_TOP_P)
     top_n: int = Field(default=DEFAULT_TOP_N)
     repetition_penalty: float = Field(default=DEFAULT_REPETITION_PENALTY)
-    embed_model: str = Field(default=DEFAULT_EMBED_MODEL)
+    embed_model: str = os.getenv("EMBEDDING_MODEL_NAME")
 
 
 # 一个类似与openai的模型类，但是可以定义自己的校验
 class OpenAiStyleModel(AbsLLMModel):
     def __init__(self, parameter: OpenAiStyleLLMParameter) -> None:
         super().__init__(parameter)
-        # self.temperature = parameter.temperature
         self.top_p = parameter.top_p
         self.top_n = parameter.top_n
         self.repetition_penalty = parameter.repetition_penalty
-        # self.max_new_tokens = parameter.max_new_tokens
         self.full_url = parameter.full_url
         self.base_url = parameter.base_url
-        # self.model = parameter.model
         self.embed_model = parameter.embed_model
 
         self.validate_custom_rules()

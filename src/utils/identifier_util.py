@@ -23,7 +23,3 @@ def generate_by_uuid(name: str = None) -> str:
         return uuid.uuid4().__str__().replace("-", "")
     # 生成uuid5
     return uuid.uuid5(uuid.NAMESPACE_X500, name).__str__().replace("-", "")
-
-
-# if __name__ == '__main__':
-#     print(generate_by_uuid())

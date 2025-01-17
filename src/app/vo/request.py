@@ -3,24 +3,24 @@ from pydantic import BaseModel, Field
 
 
 class RunData(BaseModel):
-    query:str = Field(description="调用的数据")
-    base_url:str | None = Field(default = None, description="模型（completions/embeddings）的基础url，例如:http://127.0.0.1:1234")
-    full_url:str | None = Field(default = None, description="模型（completions/embeddings）的全路径url，当不是openai格式的地址的时候，需要指定")
-    system_prompt:str | None = Field(default = None, description="system message")
-    search_collections:list[str] | None = Field(default = None, description="vector检索的时候，可以指定检索的collection")
-    collection_name:str | None = Field(default = None, description="vector添加文本的时候，可以指定检索的collection")
-
+    query: str = Field(description="Input data for the request")
+    base_url: str | None = Field(default=None, description="Base URL for the model (completions/embeddings), e.g. http://127.0.0.1:1234")
+    full_url: str | None = Field(default=None, description="Full URL for the model (completions/embeddings), required when not using OpenAI format URL")
+    system_prompt: str | None = Field(default=None, description="System message content")
+    search_collections: list[str] | None = Field(default=None, description="Collections to search when performing vector retrieval")
+    collection_name: str | None = Field(default=None, description="Collection name when adding text to vector storage")
+    result_count: int | None = Field(default=5, description="Number of records to return when performing vector search")
 
     class Config:
-        """配置类，用于指定模型的额外选项。
+        """Specify additional model options by this Configuration class.
 
         Attributes:
-            extra (str): 指定模型是否允许额外的字段，值为 "allow" 表示允许。
-
+            extra (str): Specifies whether the model allows extra fields. 
+                         Value "allow" means extra fields are allowed.
         """
-
         extra = "allow"
+
 
 class RunParameter(BaseModel):
     app_no: str = Field(alias="appNo")
-    data: RunData = Field(description="执行参数，执行组件时候会进行应用")
+    data: RunData = Field(description="Execution parameters that will be applied when executing components")

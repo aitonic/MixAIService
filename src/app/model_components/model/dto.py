@@ -1,12 +1,9 @@
-from typing import Any, Optional
 import os
+from typing import Any
 
 from pydantic import BaseModel, Field
 
-from .constants import (
-    DEFAULT_EMBED_MODEL, 
-    DEFAULT_MAX_RETRIES
-)
+from .constants import DEFAULT_EMBED_MODEL, DEFAULT_MAX_RETRIES
 
 
 class BaseMessage(BaseModel):

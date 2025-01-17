@@ -1,5 +1,5 @@
-from collections.abc import AsyncGenerator
 import os
+from collections.abc import AsyncGenerator
 
 import httpx
 from pydantic import BaseModel, Field
@@ -47,6 +47,7 @@ class RequestModel(BaseModel):
 
         Returns:
             RequestModel: Instance of current class.
+
         """
         messages_dict = [message.model_dump() for message in messages]
         return cls(
@@ -99,6 +100,7 @@ class OpenAiStyleModel(AbsLLMModel):
         
         Returns:
             AsyncGenerator[ModelResponse, None]: An async generator yielding ModelResponse objects
+
         """
         count = 0
         for count, response in enumerate(self.completions.create(parameter), start=1):

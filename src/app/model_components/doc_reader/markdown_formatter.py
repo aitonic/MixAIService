@@ -6,19 +6,19 @@ from src.app.model_components.model.openai_style import OpenAiStyleModel
 
 
 class MarkdownFormatter:
-    """Helper class for converting data to Markdown format using LLM."""
+    """Convert data to Markdown format using LLM."""
     
     def __init__(
         self,
-        llm_model : OpenAiStyleModel,
-        parameter : BaseCompletionParameter
+        llm_model: OpenAiStyleModel,
+        parameter: BaseCompletionParameter
     ) -> None:
-        """Initialize MarkdownFormatter with LLM model.
+        """Initialize MarkdownFormatter with an LLM model and parameters.
 
         Args:
-            llm_model (OpenAiStyleModel): LLM model instance
-            max_tokens (int, optional): Maximum tokens for completion. Defaults to 8192.
-            temperature (float, optional): Temperature for generation. Defaults to 0.
+            llm_model (OpenAiStyleModel): Instance of the language model to be used for formatting.
+            parameter (BaseCompletionParameter): Parameters for completion, including model name,
+                maximum tokens, and temperature.
 
         """
         self.llm_model = llm_model

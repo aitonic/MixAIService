@@ -96,8 +96,8 @@ def load_factories() -> dict[str, str]:
 
     Returns:
         Dict[str, str]: A dictionary where keys are lowercase class names and values are full module paths.
-    """
 
+    """
     components_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "../model_components")
     )
@@ -155,6 +155,7 @@ def get_classes_from_file(file_path: str) -> list[type]:
         
     Returns:
         list[type]: List of all classes defined in the file.
+
     """
     # Dynamically load the module
     module_name = file_path.replace("/", ".").replace("\\", ".").rsplit(".", 1)[0]
@@ -178,6 +179,7 @@ def filter_subclasses(base_class: type, classes: list[type]) -> list[type]:
         classes: List of all classes to filter from
     Returns:
         List of classes that are subclasses of the specified base class
+
     """
     return [cls for cls in classes if issubclass(cls, base_class) and cls != base_class]
 

@@ -45,20 +45,80 @@ class Completions:
         if self.full_url:
             return self.full_url
         return self.base_url + DEFAULT_COMPLETION_PATH
-    
+
+    # Helper methods
+    def _prepare_request(self, parameter: BaseCompletionParameter) -> dict:
+        """Prepare the JSON payload for the completion request.
+
+        Args:
+            parameter (BaseCompletionParameter): The completion parameters.
+
+        Returns:
+            dict: The request payload.
+
+        """
+        return {
+            "messages": [message.model_dump() for message in parameter.messages],
+            "temperature": parameter.temperature,
+            "stream": parameter.stream,
+            "max_new_tokens": parameter.max_new_tokens,
+            "model": parameter.model,
+        }
+
+    def _handle_non_stream_response(self, response: httpx.Response) -> Iterator[ModelResponse]:
+        """Handle the response for non-streaming requests.
+
+        Args:
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            Iterator[ModelResponse]: Parsed model responses.
+
+        """
+        data = response.json()
+        if not data.get("choices") or len(data["choices"]) == 0:
+            raise ValueError(f"Invalid API response: {data}")
+        yield ModelResponse(**data)
+
+    def _handle_stream_response(self, response: httpx.Response) -> Iterator[ModelResponse]:
+        """Handle the response for streaming requests.
+
+        Args:
+            response (httpx.Response): The HTTP response.
+
+        Returns:
+            Iterator[ModelResponse]: Parsed model responses from the stream.
+
+        """
+        for line in response.iter_lines():
+            if not line:
+                continue
+            if "DONE" in line:
+                break
+            try:
+                json_data = json.loads(line.replace("data:", ""))
+                if "choices" in json_data and len(json_data["choices"]) > 0:
+                    yield ModelResponse(**json_data)
+            except json.JSONDecodeError:
+                logger.warning(f"Failed to parse stream data: {line}")
+                continue
+                
     def create(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
-         count = 0
-         with httpx.Client(timeout=300) as client:
+        """Send a completion request and handle the response.
+
+        Args:
+            parameter (BaseCompletionParameter): The completion parameters.
+
+        Returns:
+            Iterator[ModelResponse]: Stream of model responses.
+
+        """
+        count = 0
+        with httpx.Client(timeout=300) as client:
             while count < self.max_retry:
                 try:
-                    request_json = {
-                            "messages":[message.model_dump() for message in parameter.messages],
-                            "temperature":parameter.temperature,
-                            "stream":parameter.stream,
-                            "max_new_tokens":parameter.max_new_tokens,
-                            "model":parameter.model
-                        }
-                    logger.info(f"LLM invoke parameters：{request_json}")
+                    request_json = self._prepare_request(parameter)
+                    logger.info(f"LLM invoke parameters: {request_json}")
                     response = client.post(
                         self.completion_url,
                         json=request_json,
@@ -67,36 +127,16 @@ class Completions:
                     response.raise_for_status()
 
                     if not parameter.stream:
-                        # 非流式处理
-                        data = response.json()
-                        if not data.get("choices") or len(data["choices"]) == 0:
-                            raise ValueError(f"Invalid API response: {data}")
-                        result = ModelResponse(**data)
-                        yield result
+                        yield from self._handle_non_stream_response(response)
                     else:
-                        # 流式处理
-                        for line in response.iter_lines():
-                            if not line:
-                                continue
-                            if "DONE" in line:
-                                break
-                            try:
-                                # 解析流式数据
-                                json_data = json.loads(line.replace("data:", ""))
-                                if "choices" in json_data and len(json_data["choices"]) > 0:
-                                    yield ModelResponse(**json_data)
-                            except json.JSONDecodeError:
-                                logger.warning(f"Failed to parse stream data: {line}")
-                                continue
+                        yield from self._handle_stream_response(response)
+
                 except Exception as e:
-                    logger.error(f"completions接口出错：{traceback.format_exc()}")
+                    logger.error(f"Error in completions interface: {traceback.format_exc()}")
                     count += 1
                     if count >= self.max_retry:
                         raise RuntimeError(f"Max retries ({self.max_retry}) exceeded") from e
-            # 如果不使用流式返回
-            
-            # result = MixResponse(**data)  # 将响应数据映射到模型
-            # yield result.choices[0].message.content
+
 
 class AbsLLMModel(ABC, BaseComponent):
     api_key: str = None

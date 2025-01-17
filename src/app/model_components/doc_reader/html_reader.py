@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Any
 
+from src.app.model_components.model.dto import BaseCompletionParameter
 from src.app.model_components.model.openai_style import OpenAiStyleModel
 from src.utils.html_converter import HTMLConverter
 
@@ -14,7 +15,7 @@ class HTMLDocReader(BaseDocReader):
     
     def __init__(
         self,
-        llm_model: OpenAiStyleModel,  # 改为必需参数
+        llm_model: OpenAiStyleModel,  
         name: str = "HTMLDocReader",
         max_tokens: int = 8192,
         temperature: float = 0
@@ -32,10 +33,20 @@ class HTMLDocReader(BaseDocReader):
         self.llm_model = llm_model
         self.max_tokens = max_tokens
         self.temperature = temperature
+        
+        # Create an instance of BaseCompletionParameter with default values.
+        parameter = BaseCompletionParameter(
+            model="readerlm",  # The model name, or retrieve it from configuration.
+            messages=[],  # Initialize with an empty list, to be populated during use.
+            max_new_tokens=max_tokens,  # The maximum number of tokens to generate.
+            temperature=temperature,  # The temperature parameter for generation.
+            stream=False  # Whether to enable streaming mode.
+        )
+
+        # Initialize the MarkdownFormatter using the updated approach.
         self.markdown_formatter = MarkdownFormatter(
-            llm_model=llm_model,
-            max_tokens=max_tokens,
-            temperature=temperature
+            llm_model=llm_model,  # The language model instance.
+            parameter=parameter  # The configuration parameters for the formatter.
         )
 
     def read_data(self, file_path: str) -> str:

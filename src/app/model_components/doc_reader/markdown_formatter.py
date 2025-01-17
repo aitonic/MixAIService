@@ -9,9 +9,8 @@ class MarkdownFormatter:
     
     def __init__(
         self,
-        llm_model: OpenAiStyleModel,
-        max_tokens: int = 8192,
-        temperature: float = 0
+        llm_model : OpenAiStyleModel,
+        parameter : BaseCompletionParameter
     ) -> None:
         """Initialize MarkdownFormatter with LLM model.
 
@@ -22,8 +21,9 @@ class MarkdownFormatter:
 
         """
         self.llm_model = llm_model
-        self.max_tokens = max_tokens
-        self.temperature = temperature
+        self.model = parameter.model
+        self.max_tokens = parameter.max_new_tokens
+        self.temperature = parameter. temperature
 
     def convert_html_by_llm(self, content: str, prompt: str) -> str:
         """Convert HTML to Markdown using LLM.
@@ -42,7 +42,7 @@ class MarkdownFormatter:
         ]
         
         parameter = BaseCompletionParameter(
-            model="readerlm",
+            model=self.model,
             messages=messages,
             max_new_tokens=self.max_tokens,
             temperature=self.temperature,

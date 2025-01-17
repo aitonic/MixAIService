@@ -19,8 +19,6 @@ class TestHTMLDocReader(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
         self.config = {
-            "model": "readerlm",
-            "api_key": "123",
             "base_url": "http://192.168.11.11:8070"
         }
         
@@ -36,7 +34,7 @@ class TestHTMLDocReader(unittest.TestCase):
             temperature=0
         )
         # 设置测试文件路径
-        self.test_file_path = "/Users/Documents/Google.html"
+        self.test_file_path = "/Users/micro/Documents/Google.html"
         
         self.invalid_file_path = "/Users/Documents/test.txt"
         self.nonexistent_file_path = "/Users/Documents/nonexistent.html"

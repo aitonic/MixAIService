@@ -19,45 +19,45 @@ class AbsVectorStore(ABC, BaseComponent):
 
     @abstractmethod
     def create_client(self, parameter: VectorParameter) -> bool:
-        """创建 ChromaVectorStore 实例并返回客户端。
+        """Create a ChromaVectorStore instance and return the client.
 
         Args:
-            parameter (VectorParameter): 含有创建客户端所需信息的参数对象。
+            parameter (VectorParameter): Parameter object containing information required to create the client.
 
         Returns:
-            bool: 表示客户端创建是否成功。
+            bool: Indicates whether the client creation was successful.
 
         Raises:
-            ValueError: 如果参数无效或客户端创建失败，将抛出异常。
+            ValueError: If the parameter is invalid or client creation fails, an exception will be raised.
 
         """
         pass
     
     @abstractmethod
     def create_collection(self, collection_name:str) -> bool:
-        """创建集合的方法，返回布尔值表示是否成功。
+        """Method to create a collection, returns a boolean indicating success.
 
         Args:
-            collection_name (str): 要创建的集合名称。
+            collection_name (str): Name of the collection to create.
 
         Returns:
-            bool: 如果集合创建成功返回 True，否则返回 False。
+            bool: Returns True if collection creation is successful, otherwise False.
 
         """
         pass
 
     @abstractmethod
     def add_text(self, parameter:VectorAddParameter) -> str:
-        """添加文本到指定集合的方法，返回布尔值表示是否成功。
+        """Method to add text to the specified collection, returns a boolean indicating success.
 
         Args:
-            parameter (VectorAddParameter): 包含要添加的文本、集合名称和嵌入函数的参数。
+            parameter (VectorAddParameter): Parameter containing the text to be added, collection name, and embedding function.
 
         Returns:
-            str: 如果成功，返回添加文本的 ID；否则返回 None。
+            str: Returns the ID of the added text if successful, otherwise returns None.
 
         Raises:
-            如果集合不存在，将抛出异常。
+            Exception: Will raise an exception if the collection does not exist.
 
         """
         pass
@@ -68,29 +68,30 @@ class AbsVectorStore(ABC, BaseComponent):
 
     @abstractmethod
     def query(self, parameter: VectorQueryParameter) -> VectorRetriverResult:
-        """查询指定集合的方法，返回查询结果。
+        """Method to query the specified collection and return the query results.
 
         Args:
-            parameter (VectorQueryParameter): 包含查询参数的信息，包括查询文本、集合名称，以及嵌入函数。
+            parameter (VectorQueryParameter): Contains query parameters including query text, 
+                collection name, and embedding function.
 
         Returns:
-            VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
+            VectorRetriverResult: Query results containing top 5 results related to the query text.
 
         Raises:
-            Exception: 如果指定的集合不存在，将抛出异常。
+            Exception: Raises an exception if the specified collection does not exist.
 
         """
         pass
 
     # 生成唯一ID的方法，支持可选前缀
     def get_id(self, prefix: str = None) -> str:
-        # 使用前缀生成UUID
+        # Generate UUID with optional prefix
         uuid = identifier_util.generate_by_uuid()
-        # 如果提供了前缀，则返回前缀和UUID的组合
+        # If prefix is provided, return combination of prefix and UUID
         if prefix:
             return f"{prefix}-{uuid}"
         
-        return uuid  # 返回生成的UUID
+        return uuid  # Return generated UUID
     
     def batch_query(self, parameter: VectorBacthQueryParameter) -> list[VectorRetriverResult]:
         
@@ -102,7 +103,7 @@ class AbsVectorStore(ABC, BaseComponent):
                                                           embed_function=parameter.embed_function,
                                                           result_count=parameter.result_count)))
             except Exception as e:
-                logger.error(f"从collection:{col}  中检索数据出错：{traceback.format_exc()}")
+                logger.error(f"Error retrieving data from collection:{col}: error info{traceback.format_exc()}")
         
         return result
             

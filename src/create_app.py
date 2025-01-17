@@ -129,9 +129,11 @@ def create_app()-> FastAPI:
         _on_start_up(app)
 
     except Exception:
-        logger.error(f"启动报错，错误信息：{traceback.format_exc()}")
+        # Log error message when startup fails
+        logger.error(f"Startup error, error info: {traceback.format_exc()}")
 
-    logger.info(f"注册的url列表：{app.routes}")
+    # Log registered URL list
+    logger.info(f"Registered URL list: {app.routes}")
     return app
 
 
@@ -139,8 +141,8 @@ def _register_routers(app: FastAPI) -> None:
     # 引用Controlls里面的蓝图并注册
 
     # 应用模板
-    from src.app.flow.flow_invocation import run_crtl
-    app.include_router(run_crtl) 
+    from src.app.flow.flow_invocation import agent_crtl
+    app.include_router(agent_crtl) 
     
     from src.app.flow.app_invocation import app_crtl
     app.include_router(app_crtl)

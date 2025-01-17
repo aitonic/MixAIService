@@ -6,9 +6,9 @@ from .dto import Source
 
 
 class BaseDocReader(BaseComponent, ABC):
-    """DocReader 组件的抽象基类，继承自 BaseComponent。
+    """Abstract base class for DocReader component, inherits from BaseComponent.
     
-    可读取各种输入文件/数据内容，并最终将其转换为 Markdown 格式。
+    Can read various input files/data content and finally convert them to Markdown format.
     """
     source:str | bytes
 
@@ -17,51 +17,51 @@ class BaseDocReader(BaseComponent, ABC):
 
     @abstractmethod
     def read_data(self, source: str | list | dict) -> str | bytes:
-        """读取并返回原始内容，可以是文本、字节流等。
+        """Read and return raw content, which can be text, byte stream, etc.
 
         Args:
-            source (Union[str, bytes]): 数据源，可以是文件路径、URL、字节流等。
+            source (Union[str, bytes]): Data source, can be file path, URL, byte stream, etc.
 
         Returns:
-            Union[str, bytes]: 读取的原始内容。
+            Union[str, bytes]: The raw content read.
 
         """
         pass
 
     @abstractmethod
     def parse_content(self, raw_content: str | bytes) -> dict[str, Any]:
-        """对原始内容进行解析，可根据具体文档类型做结构化处理。
+        """Parse raw content and perform structured processing based on specific document types.
 
         Args:
-            raw_content (Union[str, bytes]): 原始内容，可以是文本或字节流。
+            raw_content (Union[str, bytes]): Raw content, which can be text or byte stream.
 
         Returns:
-            dict[str, Any]: 返回的中间数据结构。
+            dict[str, Any]: Intermediate data structure after parsing.
 
         """
         pass
 
     @abstractmethod
     def to_markdown(self, parsed_data: dict[str, Any]) -> str:
-        """将解析后的数据转为 Markdown 格式并返回。
+        """Convert parsed data to Markdown format and return.
 
         Args:
-            parsed_data (dict[str, Any]): 解析后的中间数据结构。
+            parsed_data (dict[str, Any]): Intermediate data structure after parsing.
 
         Returns:
-            str: 转换后的 Markdown 文本。
+            str: Converted Markdown text.
 
         """
         pass
 
     def process(self, source: str | bytes) -> str:
-        """主流程：从读取到转换。对外只需调用此方法即可获取最终 Markdown。
+        """Main process: from reading to conversion. Only need to call this method to get the final Markdown.
 
         Args:
-            source (Union[str, bytes]): 数据源，可以是文件路径、URL、字节流等。
+            source (Union[str, bytes]): Data source, can be file path, URL, byte stream, etc.
 
         Returns:
-            str: 转换后的 Markdown 文本。
+            str: Converted Markdown text.
 
         """
         raw_content = self.read_data(source)

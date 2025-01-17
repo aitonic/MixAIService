@@ -6,7 +6,7 @@ from .constants import DEFAULT_EMBED_MODEL, DEFAULT_MAX_RETRIES
 
 
 class BaseMessage(BaseModel):
-    role: str = Field("user", pattern="user|assistant|system", description="角色")
+    role: str = Field("user", pattern="user|assistant|system", description="content role")
     content: str | None = Field(default="")
 
 
@@ -23,11 +23,20 @@ class AIMessage(BaseMessage):
 
 
 class CompletionsChoice(BaseModel):
-    message: AIMessage | None = Field(default=None, description="非流式响应时候的消息")
-    delta: AIMessage | None = Field(default=None, description="流式响应时候的消息")
-    index: int = Field(default=0, description="索引")
-    logprobs: float | None = Field(default=None, description="对数概率")
-    finish_reason: str | None = Field(default=None, description="结束原因")
+    """Represents a choice in the completions response.
+
+    Attributes:
+        message: The message for non-streaming responses
+        delta: The message for streaming responses
+        index: The index of the choice
+        logprobs: The log probabilities of the tokens
+        finish_reason: The reason why the response finished
+    """
+    message: AIMessage | None = Field(default=None, description="Message for non-streaming responses")
+    delta: AIMessage | None = Field(default=None, description="Message for streaming responses")
+    index: int = Field(default=0, description="Index of the choice")
+    logprobs: float | None = Field(default=None, description="Log probabilities of the tokens")
+    finish_reason: str | None = Field(default=None, description="Reason for finishing the response")
 
 
 class ModelResponse(BaseModel):
@@ -63,11 +72,10 @@ class EmbedParameter(BaseModel):
     encoding_format: str = Field(default="float")
 
     def __init__(self, **data: dict[str, Any]) -> None:
-        """初始化方法，接收动态的键值对数据。
+        """Initialize the instance with dynamic key-value pairs.
 
         Args:
-            **data (dict[str, Any]): 动态传入的键值对数据。
-
+            **data (dict[str, Any]): Dynamic key-value pairs data.
         """
         super().__init__(**data)
         # 检查并赋值参数

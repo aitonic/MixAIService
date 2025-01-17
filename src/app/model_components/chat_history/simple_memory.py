@@ -9,10 +9,10 @@ memories: dict[str, dict[str:MessageInfo]] = {}
 
 
 class DbMemory(AbsMemory):
-    """存储在DB中的记忆
+    """Memory stored in database
     
-    关系型数据库
-    redis等非关系型数据库
+    Relational database
+    Non-relational database like Redis
     """
 
     def __init__(self) -> None:
@@ -20,18 +20,18 @@ class DbMemory(AbsMemory):
         raise Exception("Unimplemented memory: DB Memory")
 
     def save_message(self, message: MessageInfo) -> str:
-        """保存或者更新消息
+        """Save or update message
         
-        message: 要保存的消息
-        return: 该消息对应的id
+        message: The message to be saved
+        return: The corresponding id of the message
         """
         pass
 
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
-        """查询消息列表
+        """Query message list
         
-        parameter: 查询参数
-        return: 根据条件查询到的消息记录
+        parameter: Query parameters
+        return: Message records queried based on conditions
         """
         pass
 
@@ -42,9 +42,9 @@ memories: dict[str, dict[str, MessageInfo]] = {}
 
 
 class LocalMemory(AbsMemory):
-    """基础记忆
+    """Basic memory
     
-    使用本地内存实现
+    Implemented using local memory
     """
 
     def __init__(self) -> None:
@@ -52,10 +52,10 @@ class LocalMemory(AbsMemory):
         self.memories = memories
 
     def save_message(self, message: MessageInfo) -> str:
-        """保存或者更新消息
+        """Save or update message
         
-        message: 要保存的消息
-        return: 该消息对应的id
+        message: The message to be saved
+        return: The corresponding id of the message
         """
         if not message.id:
             # 新增保存
@@ -88,10 +88,10 @@ class LocalMemory(AbsMemory):
         return message.id
 
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
-        """查询消息列表
+        """Query message list
         
-        parameter: 查询参数
-        return: 根据条件查询到的消息记录
+        parameter: Query parameters
+        return: Message records queried based on conditions
         """
         user_memory = self.memories.get(parameter.api_key, {})
         if not user_memory:

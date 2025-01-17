@@ -1,7 +1,6 @@
 # main.py
 import os
 import sys
-import threading
 
 import uvicorn
 from dotenv import load_dotenv
@@ -15,13 +14,12 @@ env_path = os.path.join(project_root, "config", ".env")
 
 load_dotenv(dotenv_path=env_path)
 
-# app = FastAPI(title='simple-ai', description='简易ai的组件服务')
 app = create_app()
 
 
 if __name__ == "__main__":
     try:
-        logger.info("开始启动服务======")
+        logger.info("Starting Server======")
         
         host = os.getenv("SERVER_HOST", "127.0.0.1")
         port = int(os.getenv("SERVER_PORT", "8899"))

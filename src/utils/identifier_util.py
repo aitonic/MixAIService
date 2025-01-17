@@ -3,23 +3,37 @@ import uuid
 from datetime import datetime
 
 """
-    唯一id生成器
+    Unique ID generator
 """
 
 
 def generate_by_sha256(seed_string: str = None) -> str:
-    """使用SHA256哈希算法，生成结果64位"""
+    """Generate 64-bit result using SHA256 hash algorithm
+    
+    Args:
+        seed_string (str, optional): Seed string for hash generation. Defaults to None.
+    
+    Returns:
+        str: 64-character hexadecimal hash string
+    """
     if not seed_string or len(seed_string) == 0:
-        # 如果种子是空，则使用当前时间作为种子
+        # Use current timestamp as seed if seed is empty
         seed_string = str(datetime.now().timestamp())
     sha_signature = hashlib.sha256(seed_string.encode()).hexdigest()
     return sha_signature
 
 
-# 使用uuid生成唯一id
 def generate_by_uuid(name: str = None) -> str:
+    """Generate unique ID using UUID
+    
+    Args:
+        name (str, optional): Name for UUID generation. Defaults to None.
+    
+    Returns:
+        str: UUID string without hyphens
+    """
     if not name or len(name) == 0:
-        # 如果种子是空，则使用当前时间作为种子
+        # Use random UUID if name is empty
         return uuid.uuid4().__str__().replace("-", "")
-    # 生成uuid5
+    # Generate UUID5
     return uuid.uuid5(uuid.NAMESPACE_X500, name).__str__().replace("-", "")

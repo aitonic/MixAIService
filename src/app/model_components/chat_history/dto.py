@@ -4,25 +4,25 @@ from pydantic import BaseModel, Field
 class MessageInfo(BaseModel):
     """保存的消息"""
 
-    # 消息id
+    # Message ID
     id: str | None = Field(None)
-    # 用户身份识别,比如api_key
+    # User identification, e.g. api_key
     user_id: str
     system_message: str | None = Field(None)
     user_message: str | None = Field(None)
     assistant_message: str | None = Field(None)
-    # 创建时间
+    # start timestamp
     created: float | None = Field(0)
 
 
 class MessageListParameter(BaseModel):
     """查询消息列表的参数"""
 
-    # 用户身份识别
+    # User identification
     api_key: str
-    # 取出的条数
+    # Number of records to fetch
     limit: int = 3
-    # 倒序，取最近的数据
+    # Descending order, get latest data
     desc: bool = True
-    # 开始时间
+    # Start timestamp
     created: float = 0

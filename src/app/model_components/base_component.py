@@ -18,10 +18,11 @@ class BaseComponent:
 
 
 class BaseFactory(ABC):
-    """基础的工厂类。
-    所有工厂的基类，所有组件的工厂都*必须*实现这个组件。
-    get_bean是唯一的获取对应组件的入口
-    未实现该基类的工厂，将不被服务容器管理！
+    """Base factory class.
+    
+    The base class for all factories. All component factories *must* implement this class.
+    get_bean is the only entry point to get corresponding components.
+    Factories that do not implement this base class will not be managed by the service container!
     """
 
     def check(self, param:dict) -> None:
@@ -29,13 +30,30 @@ class BaseFactory(ABC):
             raise Exception(f"component_type must be specified")
         
     def get_component(self, param:dict) -> BaseComponent:
+        """Get component instance through factory.
+        
+        This method will first check the parameters and then call get_bean to create the component.
+        
+        Args:
+            param (dict): Parameters for creating the component, must contain 'component_type'
+            
+        Returns:
+            BaseComponent: The created component instance
+        """
         self.check(param)
         return self.get_bean(param)
 
     @abstractmethod
     def get_bean(self, param:dict) -> BaseComponent:
-        """获取bean实例。
-        这个是使用工厂获取bean的唯一方式。
-        至于是单例还是多态，或者是否有其他特殊属性，均可自行定义。
+        """Get bean instance.
+        
+        This is the only way to get bean through factory.
+        You can define whether it's singleton or polymorphic, or any other special attributes.
+        
+        Args:
+            param (dict): Parameters for creating the bean
+            
+        Returns:
+            BaseComponent: The created bean instance
         """
         pass

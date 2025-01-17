@@ -11,40 +11,40 @@ from src.utils.logger import logger
 
 
 class DocReaderFactory(BaseFactory):
-    """工厂类，用于根据文件类型或其他逻辑自动选择合适的 Reader。
+    """Factory class for automatically selecting appropriate Reader based on file type or other logic.
     """
 
     def check(self, param:dict) -> None:
-        # 这个不需要component_type，直接使用query就可以
-        logger.info(f"重写check方法，reader_factory无需校验component_type")
+        
+        logger.info(f"rewrite check func，reader_factoryno need param: component_type")
 
         
     def get_bean(self, param:dict) -> BaseComponent:
-        """根据输入数据类型获取适当的文档读取器。
+        """Get appropriate document reader based on input data type.
 
         Args:
-            source (Union[str, dict, list]): 数据源，可能是文件路径字符串、字典或列表。
+            source (Union[str, dict, list]): Data source, could be file path string, dict or list.
 
         Returns:
-            Union[StructuredDocReader, UnstructuredDocReader]: 返回适当的文档读取器实例。
+            Union[StructuredDocReader, UnstructuredDocReader]: Appropriate document reader instance.
 
         Raises:
-            ValueError: 如果输入的 `source` 类型不受支持，将抛出异常。
+            ValueError: If input `source` type is not supported.
 
         """
 
         source = param.get("query")
         if isinstance(source, str) and os.path.isfile(source):
-            # 根据文件后缀做简单判定
+            # Determine reader based on file extension
             if source.endswith(".csv") or source.endswith(".json"):
                 return StructuredDocReader()
             else:
-                # 假设其他都当做非结构化
+                # Treat other formats as unstructured data
                 return UnstructuredDocReader()
         else:
-            # 可能是纯文本、网络链接、或者字典/列表数据
-            # 做更精细的判定
-            if isinstance(source, dict | list):   # 合并 isinstance 调用
+            # Could be plain text, URL, or dict/list data
+            # Perform more detailed determination
+            if isinstance(source, dict | list):
                 return StructuredDocReader()
             elif isinstance(source, str):
                 return UnstructuredDocReader()

@@ -14,10 +14,10 @@ exclude_name = ["datetime", "Undefined", "Path"]
 
 
 def load_classes_from_components() -> dict[str, str]:
-    """加载 components 目录中的所有类并返回类路径字典。
+    """Load all classes from components directory and return a dictionary of class paths.
 
     Returns:
-        Dict[str, str]: 一个字典，键是类名的小写形式，值是完整的模块路径。
+        Dict[str, str]: A dictionary where keys are lowercase class names and values are full module paths.
 
     """
     # components_path = os.path.join(os.path.dirname(__file__), "../model_components")
@@ -26,12 +26,12 @@ def load_classes_from_components() -> dict[str, str]:
     )
     logger.info(f"components_path: {components_path}")
 
-    # 将 components 目录添加到模块搜索路径
+    # Add components directory to module search path
     sys.path.append(os.path.dirname(components_path))
 
     classes_dict = {}
 
-    # 遍历 components 目录及其子目录
+    # Traverse the components directory and its subdirectories
     for root, _, files in os.walk(components_path):
         for file in files:
             if not file.endswith(".py") or file == "__init__.py":
@@ -69,55 +69,47 @@ def load_classes_from_components() -> dict[str, str]:
     return classes_dict
 
 
-# 加载app配置文件
 def load_app_config() -> dict | list | None:
-    """加载 app 配置文件。
+    """Load app configuration file.
 
     Returns:
-        Union[dict, list, None]: 解析后的 YAML 数据。
+        Union[dict, list, None]: Parsed YAML data.
 
     """
     with open("config/app_config.yaml", encoding="utf-8") as file:
         return yaml.safe_load(file)
 
 
-
 def load_agent_config() -> dict | list | None:
-    """加载 agent 配置文件。
+    """Load agent configuration file.
 
     Returns:
-        Union[dict, list, None]: 解析后的 YAML 数据。
+        Union[dict, list, None]: Parsed YAML data.
 
     """
     with open("config/agent_config.yaml", encoding="utf-8") as file:
         return yaml.safe_load(file)
 
 
-
 def load_factories() -> dict[str, str]:
-    """加载 model_components 目录中的所有实现了 BaseFactory 的类，并返回类路径字典。
+    """Load all classes that implement BaseFactory from the model_components directory and return a dictionary of class paths.
 
     Returns:
-        Dict[str, str]: 一个字典，键是类名的小写形式，值是完整的模块路径。
-
+        Dict[str, str]: A dictionary where keys are lowercase class names and values are full module paths.
     """
-    # from src.app.model_components.doc_reader.doc_reader_factory import DocReaderFactory
-    # from src.app.model_components.base_component import BaseFactory
-
-    # print(issubclass(DocReaderFactory, BaseFactory))
 
     components_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "../model_components")
     )
     logger.info(f"components_path: {components_path}")
 
-    # 将 components 目录添加到模块搜索路径
+    # Add components directory to module search path
     sys.path.append(os.path.dirname(components_path))
 
-    # 存储类名和模块路径的字典
+    # Dictionary to store class names and module paths
     classes_dict = {}
 
-    # 遍历 components 目录及其子目录
+    # Traverse components directory and its subdirectories
     for root, _, files in os.walk(components_path):
         for file in files:
             if not file.endswith(".py") or file == "__init__.py":
@@ -132,74 +124,76 @@ def load_factories() -> dict[str, str]:
                     else f"src.app.model_components.{module_name}"
                 )
 
-                # 忽略 base_component 模块
+                # Skip base_component modules
                 if "base_component" in full_module_name:
                     continue
 
-                # 动态导入模块
+                # Dynamically import the module
                 module = importlib.import_module(full_module_name)
 
-                # 获取模块中的类并筛选实现了 BaseFactory 的类
+                # Get classes from module and filter those implementing BaseFactory
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if (
-                        isinstance(attr, type)  # 仅处理类
-                        and issubclass(attr, BaseFactory)  # 检查是否是 BaseFactory 的子类
-                        and attr is not BaseFactory  # 排除 BaseFactory 本身
+                        isinstance(attr, type)  # Only process classes
+                        and issubclass(attr, BaseFactory)  # Check if subclass of BaseFactory
+                        and attr is not BaseFactory  # Exclude BaseFactory itself
                     ):
                         classes_dict[attr_name.lower()] = f"{full_module_name}.{attr_name}"
 
             except Exception:
-                logger.warning(f"加载组件时出错：{traceback.format_exc()}")
+                logger.warning(f"Error loading component: {traceback.format_exc()}")
 
     return classes_dict
 
 
-
-
-
 def get_classes_from_file(file_path: str) -> list[type]:
-    """从指定文件中加载所有类。
+    """Load all classes from a specified file.
     
-    :param file_path: 文件路径
-    :return: 文件中定义的所有类
+    Args:
+        file_path (str): Path to the Python file to load classes from.
+        
+    Returns:
+        list[type]: List of all classes defined in the file.
     """
-    # 动态加载模块
+    # Dynamically load the module
     module_name = file_path.replace("/", ".").replace("\\", ".").rsplit(".", 1)[0]
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    # 获取文件中的所有类
+    # Get all classes from the file
     classes = []
     for _, obj in inspect.getmembers(module, inspect.isclass):
-        if obj.__module__ == module_name:  # 过滤掉导入的类，仅保留本文件定义的类
+        if obj.__module__ == module_name:  # Filter out imported classes, keep only locally defined ones
             classes.append(obj)
     return classes
 
 
 def filter_subclasses(base_class: type, classes: list[type]) -> list[type]:
-    """筛选指定类的子类。
+    """Filter subclasses of a specified base class.
     
-    :param base_class: 基类
-    :param classes: 所有类列表
-    :return: 是指定基类的子类的类列表
+    Args:
+        base_class: The base class to filter subclasses from
+        classes: List of all classes to filter from
+    Returns:
+        List of classes that are subclasses of the specified base class
     """
     return [cls for cls in classes if issubclass(cls, base_class) and cls != base_class]
 
 
-# 示例用法
+# Example usage
 if __name__ == "__main__":
-    # 替换为您的文件路径
+    # Replace with your file path
     file_path = "path/to/your/file.py"
 
-    # 获取所有类
+    # Get all classes
     classes = get_classes_from_file(file_path)
 
-    # 筛选 BaseFactory 的子类
+    # Filter subclasses of BaseFactory
     subclasses = filter_subclasses(BaseFactory, classes)
 
-    # 打印结果
-    print("BaseFactory 的子类有：")
+    # Print results
+    print("Subclasses of BaseFactory:")
     for subclass in subclasses:
         print(f"- {subclass.__name__}")

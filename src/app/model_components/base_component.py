@@ -43,6 +43,7 @@ class BaseFactory(ABC):
             
         Returns:
             BaseComponent: The created component instance
+
         """
         self.check(param)
         return self.get_bean(param)
@@ -59,5 +60,6 @@ class BaseFactory(ABC):
             
         Returns:
             BaseComponent: The created bean instance
+
         """
         pass

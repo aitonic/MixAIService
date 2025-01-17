@@ -5,15 +5,11 @@ from typing import TypeVar
 
 from fastapi import APIRouter
 
-from ..vo.request import RunParameter
-from .dto.agent_dto import (
-    AgentConfig, 
-    ComponentConfig, 
-    PathConverterConfig
-)
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
+from ..vo.request import RunParameter
+from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
 
 agent_crtl = APIRouter()
 
@@ -40,6 +36,7 @@ def run_agent_with_config(req: RunParameter) -> str:
 
     Raises:
         Exception: If no configuration exists for the specified app_no
+
     """
     datas = req.data
     req.data.text = datas.query
@@ -158,6 +155,7 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
 
     Returns:
         dict: Run parameters.
+
     """
     run_params = {}
     if len(path) > 1:

@@ -15,6 +15,7 @@ def generate_by_sha256(seed_string: str = None) -> str:
     
     Returns:
         str: 64-character hexadecimal hash string
+
     """
     if not seed_string or len(seed_string) == 0:
         # Use current timestamp as seed if seed is empty
@@ -31,6 +32,7 @@ def generate_by_uuid(name: str = None) -> str:
     
     Returns:
         str: UUID string without hyphens
+
     """
     if not name or len(name) == 0:
         # Use random UUID if name is empty

@@ -19,6 +19,7 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
 
         Returns:
             str: Generated filename with timestamp suffix.
+
         """
         current_time = int(time.time())
        
@@ -151,6 +152,7 @@ class LoggerFormatter(logging.Formatter):
 
         Returns:
             str: Formatted log string.
+
         """
         # 示例逻辑，可以自定义格式化操作
         # record.traceId = thread_local.getTraceId()
@@ -168,6 +170,7 @@ class MessageFormatter(logging.Formatter):
 
         Returns:
             str: Formatted log string.
+
         """
         # Add timestamp
         record.timestamp = get_current_iso()
@@ -181,6 +184,7 @@ class MessageFormatter(logging.Formatter):
 
         Returns:
             str: Formatted message string.
+
         """
         # Replace special characters
         record.message = record.message.replace('{', '【').replace('}', '】').replace('"', '``').replace("'", '`')
@@ -191,6 +195,7 @@ def get_current_iso() -> str:
 
     Returns:
         str: Current time in ISO 8601 format.
+
     """
     # Get current time
     current_time = datetime.now(timezone(timedelta(hours=8)))
@@ -271,6 +276,7 @@ class Logger:
 
         Returns:
             logging.Logger: Configured logger instance.
+
         """
         if Logger.log_instance is not None:
             return Logger.log_instance

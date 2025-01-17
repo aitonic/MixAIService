@@ -54,6 +54,7 @@ class StructuredDocReader(BaseDocReader):
 
         Raises:
             ValueError: If the format of `raw_content` is not supported, an exception will be raised.
+
         """
         if isinstance(raw_content, dict):
             # 例如 JSON 对象
@@ -77,6 +78,7 @@ class StructuredDocReader(BaseDocReader):
 
         Returns:
             str: Markdown formatted string based on the data type.
+
         """
         data_type = parsed_data.get("type")
         data = parsed_data.get("data")

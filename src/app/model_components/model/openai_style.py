@@ -8,9 +8,7 @@ from src.utils.logger import logger
 
 from .base import AbsLLMModel
 from .constants import (
-    DEFAULT_EMBED_MODEL,
     DEFAULT_MAX_NEW_TOKENS,
-    DEFAULT_MODEL,
     DEFAULT_REPETITION_PENALTY,
     DEFAULT_TEMPERATURE,
     DEFAULT_TOP_N,
@@ -37,19 +35,18 @@ class RequestModel(BaseModel):
         stop: list[str] | None = None,
         stream: bool = False,
     ) -> "RequestModel":  # 返回值类型为当前类
-        """根据消息创建 RequestModel 的实例。
+        """Create a RequestModel instance from messages.
 
         Args:
-            model (str): 模型名称。
-            messages (List[BaseMessage]): 消息列表。
-            max_new_tokens (int): 最大生成的 token 数量。
-            temperature (float): 生成温度。
-            stop (Optional[List[str]]): 停止词。
-            stream (bool): 是否启用流式生成。
+            model (str): Model name.
+            messages (List[BaseMessage]): List of messages.
+            max_new_tokens (int): Maximum number of tokens to generate.
+            temperature (float): Generation temperature.
+            stop (Optional[List[str]]): Stop words.
+            stream (bool): Whether to enable streaming generation.
 
         Returns:
-            RequestModel: 当前类的实例。
-
+            RequestModel: Instance of current class.
         """
         messages_dict = [message.model_dump() for message in messages]
         return cls(
@@ -87,8 +84,6 @@ class OpenAiStyleModel(AbsLLMModel):
 
         This method validates custom rules, where api_key is allowed to be empty.
         """
-        # 实现自定义校验逻辑
-        # api_key允许为空
         pass
 
     def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
@@ -97,11 +92,18 @@ class OpenAiStyleModel(AbsLLMModel):
 
     
     async def async_generate(self, parameter: BaseCompletionParameter) -> AsyncGenerator[ModelResponse, None]:
-        # 发送 POST 请求，获取响应，支持流式输出
+        """Send POST request and get response, supports streaming output.
+        
+        Args:
+            parameter (BaseCompletionParameter): The completion parameters containing messages and settings
+        
+        Returns:
+            AsyncGenerator[ModelResponse, None]: An async generator yielding ModelResponse objects
+        """
         count = 0
         for count, response in enumerate(self.completions.create(parameter), start=1):
             yield response
-            if count >= parameter.max_new_tokens:  # 根据需要限制输出数量
+            if count >= parameter.max_new_tokens:
                 break
 
 
@@ -123,29 +125,6 @@ class OpenAiStyleModel(AbsLLMModel):
                     if line:
                         yield line  # 逐行输出结果
 
-        # async with httpx.AsyncClient() as client:
-        #     response = await client.post(
-        #         self.completion_url,
-        #         json=request_model.model_dump(),
-        #         headers={"Authorization": f"Bearer {self.api_key}"},
-        #     )
-        #     response.raise_for_status()
-
-        #     if not parameter.stream:
-        #         # 如果不使用流式返回
-        #         data = response.json()  # 获取响应的 JSON 数据
-        #         result = ModelResponse(**data)  # 将响应数据映射到模型
-        #         yield result.choices[0].message.content
-        #     else:
-        #         # 使用流式返回
-        #         async for line in response.aiter_lines():
-        #             if line:
-        #                 if "DONE" in line.decode("utf-8"):
-        #                     return
-        #                 # 去掉 'data:' 前缀并解析 JSON 数据
-        #                 data = json.loads(line.decode("utf-8").replace("data:", ""))
-        #                 result = ModelResponse(**data)
-        #                 yield result.choices[0].delta.content
 
     def __build_request_model(
         self,
@@ -165,8 +144,3 @@ class OpenAiStyleModel(AbsLLMModel):
 
         logger.info(f"Built model request parameters: {request_model.model_dump()}")
         return request_model
-
-    # def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
-
-    #     param = args[0]
-    #     return self.generate(BaseCompletionParameter(**param))

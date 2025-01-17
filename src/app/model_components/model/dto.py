@@ -57,8 +57,8 @@ class ModelResponse(BaseModel):
 
 
 class BaseLLMParameter(BaseModel):
-    api_key: str = os.getenv("MODEL_API_KEY")
-    base_url: str = os.getenv("MODEL_BASE_URL")
+    api_key: str | None  = os.getenv("MODEL_API_KEY")
+    base_url: str | None  = os.getenv("MODEL_BASE_URL")
     full_url: str | None = Field(default=None)
     max_retry: int = DEFAULT_MAX_RETRIES
 

@@ -51,13 +51,13 @@ def run_agent_with_config(req: RunParameter) -> str:
 
 
 def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
-    """根据 app_no 获取 app 配置并解析执行结果。
+    """Get app configuration based on app_no and parse execution result.
 
     Args:
-        req (RunParameter): 运行参数对象。
+        req (RunParameter): Run parameter object.
 
     Returns:
-        Union[str, dict, list, None]: 执行结果，可能是字符串、字典、列表或 None。
+        Union[str, dict, list, None]: Execution result, which could be string, dictionary, list or None.
 
     """
     agent_config = _get_agent_config(req)
@@ -74,13 +74,13 @@ def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
 
 
 def _get_agent_config(req: RunParameter) -> AgentConfig:
-    """获取并验证 agent 配置。
+    """Get and validate agent configuration.
 
     Args:
-        req (RunParameter): 运行参数对象。
+        req (RunParameter): Run parameter object.
 
     Returns:
-        AgentConfig: 验证后的 agent 配置。
+        AgentConfig: Validated agent configuration.
 
     """
     from src.main import app

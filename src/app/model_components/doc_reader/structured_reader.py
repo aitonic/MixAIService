@@ -8,23 +8,23 @@ from .markdown_formatter import MarkdownFormatter
 
 
 class StructuredDocReader(BaseDocReader):
-    """用于读取结构化文件的示例 Reader，如 CSV、JSON 等。
+    """Example Reader for structured files such as CSV, JSON, etc.
     """
 
     def __init__(self, name: str = "StructuredDocReader") -> None:
         super().__init__(name=name)
 
     def read_data(self, source: str | list | dict) -> list | dict:
-        """根据文件后缀或外部标志，自动识别读取 CSV、JSON 等格式的数据。
+        """Automatically identify and read data in formats like CSV, JSON based on file extension or external flags.
 
         Args:
-            source (Union[str, list, dict]): 数据源，可以是文件路径字符串、Python 列表或字典。
+            source (str | list | dict): Data source, can be a file path string, Python list or dictionary.
 
         Returns:
-            Union[list, dict]: 解析后的数据，可能是列表或字典。
+            list | dict: Parsed data, could be a list or dictionary.
 
         Raises:
-            ValueError: 如果文件格式不支持或 `source` 格式无法识别，将抛出异常。
+            ValueError: Will raise an exception if the file format is not supported or the `source` format is unrecognized.
 
         """
         if isinstance(source, str) and os.path.isfile(source):
@@ -44,17 +44,16 @@ class StructuredDocReader(BaseDocReader):
             raise ValueError("Unrecognized source format for structured data.")
 
     def parse_content(self, raw_content: dict | list) -> dict[str, Any]:
-        """对原始内容进行解析，封装为中间数据结构。
+        """Parse raw content and encapsulate it into an intermediate data structure.
 
         Args:
-            raw_content (dict | list): 原始内容，可能是字典或列表（如 CSV 或 JSON 数据）。
+            raw_content (dict | list): Raw content, which could be a dictionary or list (e.g., CSV or JSON data).
 
         Returns:
-            dict[str, Any]: 包含内容类型和数据的封装字典。
+            dict[str, Any]: Encapsulated dictionary containing content type and data.
 
         Raises:
-            ValueError: 如果 `raw_content` 格式不受支持，将抛出异常。
-
+            ValueError: If the format of `raw_content` is not supported, an exception will be raised.
         """
         if isinstance(raw_content, dict):
             # 例如 JSON 对象
@@ -71,7 +70,13 @@ class StructuredDocReader(BaseDocReader):
 
     
     def to_markdown(self, parsed_data: dict[str, Any]) -> str:
-        """根据解析结果的 type 使用不同的 MarkdownFormatter 转换逻辑。
+        """Convert parsed data to markdown format using different MarkdownFormatter logic based on the type.
+
+        Args:
+            parsed_data (dict[str, Any]): Parsed data containing type and data fields.
+
+        Returns:
+            str: Markdown formatted string based on the data type.
         """
         data_type = parsed_data.get("type")
         data = parsed_data.get("data")
@@ -89,7 +94,7 @@ class StructuredDocReader(BaseDocReader):
             raise ValueError("Unsupported data type for markdown conversion.")
 
     def _read_csv_file(self, filepath: str) -> list[dict[str, Any]]:
-        """CSV 文件解析
+        """CSV resolve
         """
         rows = []
         with open(filepath, encoding="utf-8") as f:
@@ -99,13 +104,13 @@ class StructuredDocReader(BaseDocReader):
         return rows
 
     def _read_json_file(self, filepath: str) -> dict | list:
-        """解析 JSON 文件。
+        """Parse JSON file.
 
         Args:
-            filepath (str): JSON 文件的路径。
+            filepath (str): Path to the JSON file.
 
         Returns:
-            Union[dict, list]: 解析后的 JSON 数据，可以是字典或列表。
+            Union[dict, list]: Parsed JSON data, which can be either a dictionary or a list.
 
         """
         with open(filepath, encoding="utf-8") as f:

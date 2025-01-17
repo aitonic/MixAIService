@@ -33,7 +33,17 @@ class BaseFactory(ABC):
         if "component_type" not in param:
             raise Exception("component_type must be specified")
         
-    def get_component(self, param: dict) -> BaseComponent:
+    def get_component(self, param:dict) -> BaseComponent:
+        """Get component instance through factory.
+        
+        This method will first check the parameters and then call get_bean to create the component.
+        
+        Args:
+            param (dict): Parameters for creating the component, must contain 'component_type'
+            
+        Returns:
+            BaseComponent: The created component instance
+        """
         self.check(param)
         return self.get_bean(param)
 
@@ -42,7 +52,12 @@ class BaseFactory(ABC):
         """Get the bean instance.
         
         This is the only way to get a bean using the factory.
-        Whether it is a singleton, polymorphic, or has other special attributes, 
-        it can be defined as needed.
+        You can define whether it's singleton or polymorphic, or any other special attributes.
+        
+        Args:
+            param (dict): Parameters for creating the bean
+            
+        Returns:
+            BaseComponent: The created bean instance
         """
         pass

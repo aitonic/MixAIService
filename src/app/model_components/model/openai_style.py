@@ -62,9 +62,9 @@ class RequestModel(BaseModel):
 
 
 class OpenAiStyleLLMParameter(BaseLLMParameter):
-    model: str = Field(default=DEFAULT_MODEL)
-    max_new_tokens: int = Field(default=DEFAULT_MAX_NEW_TOKENS)
-    temperature: float = Field(default=DEFAULT_TEMPERATURE)
+    # model: str = Field(default=DEFAULT_MODEL)
+    # max_new_tokens: int = Field(default=DEFAULT_MAX_NEW_TOKENS)
+    # temperature: float = Field(default=DEFAULT_TEMPERATURE)
     top_p: float = Field(default=DEFAULT_TOP_P)
     top_n: int = Field(default=DEFAULT_TOP_N)
     repetition_penalty: float = Field(default=DEFAULT_REPETITION_PENALTY)
@@ -75,22 +75,22 @@ class OpenAiStyleLLMParameter(BaseLLMParameter):
 class OpenAiStyleModel(AbsLLMModel):
     def __init__(self, parameter: OpenAiStyleLLMParameter) -> None:
         super().__init__(parameter)
-        self.temperature = parameter.temperature
+        # self.temperature = parameter.temperature
         self.top_p = parameter.top_p
         self.top_n = parameter.top_n
         self.repetition_penalty = parameter.repetition_penalty
-        self.max_new_tokens = parameter.max_new_tokens
+        # self.max_new_tokens = parameter.max_new_tokens
         self.full_url = parameter.full_url
         self.base_url = parameter.base_url
-        self.model = parameter.model
+        # self.model = parameter.model
         self.embed_model = parameter.embed_model
 
         self.validate_custom_rules()
 
     def validate_custom_rules(self) -> None:
-        """实现自定义校验逻辑。
+        """Implement custom validation logic.
 
-        当前方法会校验自定义规则，其中 api_key 允许为空。
+        This method validates custom rules, where api_key is allowed to be empty.
         """
         # 实现自定义校验逻辑
         # api_key允许为空
@@ -168,7 +168,7 @@ class OpenAiStyleModel(AbsLLMModel):
             stream=stream,
         )
 
-        logger.info(f"构建的模型请求参数：{request_model.model_dump()}")
+        logger.info(f"Built model request parameters: {request_model.model_dump()}")
         return request_model
 
     # def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:

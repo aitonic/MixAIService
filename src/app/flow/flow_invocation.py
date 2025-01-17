@@ -5,38 +5,41 @@ from typing import TypeVar
 
 from fastapi import APIRouter
 
+from ..vo.request import RunParameter
+from .dto.agent_dto import (
+    AgentConfig, 
+    ComponentConfig, 
+    PathConverterConfig
+)
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
-from ..vo.request import RunParameter
-from .dto.agent_dto import AgentConfig, ComponentConfig, PathConverterConfig
 
-run_crtl = APIRouter()
+agent_crtl = APIRouter()
 
 T = TypeVar("T")
 
 
-@run_crtl.post("/simple-ai/run")
+@agent_crtl.post("/simple-ai/run")
 def run_agent_with_config(req: RunParameter) -> str:
-    """运行指定配置的AI代理。
+    """Run AI agent with specified configuration.
 
-    该接口接收一个RunParameter请求对象，包含运行所需的所有参数。
-    主要功能包括：
-    1. 处理输入数据，将查询文本赋值到多个字段
-    2. 解析并执行代理配置
-    3. 返回执行结果
+    This interface receives a RunParameter request object containing all necessary parameters.
+    Main functionalities include:
+    1. Process input data and assign query text to multiple fields
+    2. Parse and execute agent configuration
+    3. Return execution result
 
     Args:
-        req (RunParameter): 包含运行参数的对象，主要字段包括：
-            - app_no: 应用编号
-            - data: 输入数据，包含查询文本等信息
+        req (RunParameter): Object containing runtime parameters, main fields include:
+            - app_no: Application ID
+            - data: Input data containing query text and other information
 
     Returns:
-        str: 执行结果的JSON字符串表示，包含状态码和结果数据
+        str: JSON string representation of execution result, including status code and result data
 
     Raises:
-        Exception: 如果指定的app_no不存在对应的配置
-
+        Exception: If no configuration exists for the specified app_no
     """
     datas = req.data
     req.data.text = datas.query
@@ -146,16 +149,15 @@ def _resolve_path_values(path: list[str], converter: dict[str, PathConverterConf
 
 
 def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) -> dict:
-    """构建运行参数。
+    """Build run parameters.
 
     Args:
-        path (list[str]): 路径列表。
-        path_2_value (dict): 路径到值的映射。
-        req (RunParameter): 运行参数对象。
+        path (list[str]): Path list.
+        path_2_value (dict): Mapping from path to value.
+        req (RunParameter): Run parameter object.
 
     Returns:
-        dict: 运行参数。
-
+        dict: Run parameters.
     """
     run_params = {}
     if len(path) > 1:
@@ -172,13 +174,13 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
   # 泛型，用于匹配输入和输出类型
 
 def _process_result(result: Iterator[T] | T) -> T | None:
-    """处理执行结果。
+    """Process execution result.
 
     Args:
-        result (Union[Iterator[T], T]): 执行结果，可以是迭代器或其他任意类型。
+        result (Union[Iterator[T], T]): Execution result, can be an iterator or any other type.
 
     Returns:
-        Optional[T]: 处理后的结果，如果是迭代器则返回其第一个元素，否则返回结果本身。
+        Optional[T]: Processed result, returns the first element if it's an iterator, otherwise returns the result itself.
 
     """
     if isinstance(result, Iterator):
@@ -227,16 +229,18 @@ def get_converter_config(
 def get_bean(
     component_config: ComponentConfig, components_data: dict, all_params:dict, return_instance:bool = False
 ) -> object|None:
-    """获取指定的factory，之后调用get_bean方法，获取bean。
+    """Get the specified factory, then call the get_bean method to obtain the bean.
 
     Args:
-        component_config (ComponentConfig): 组件的配置。
-        components_data (dict): 可用组件的路径字典。
-        all_params (dict): 组件参数的映射表，用于初始化组件时的参数解析。
-        return_instance (bool): 是否直接返回组件实例。如果为 True，返回组件实例；否则返回执行结果。
+        component_config (ComponentConfig): Configuration of the component.
+        components_data (dict): Dictionary of available component paths.
+        all_params (dict): Mapping table of component parameters for parameter resolution during component initialization.
+        return_instance (bool): Whether to directly return the component instance. 
+                            - If True, returns the component instance; 
+                            - otherwise returns the execution result.
 
     Returns:
-        Union[object, None]: 解析得到的组件实例或执行结果。
+        Union[object, None]: The parsed component instance or execution result.
 
     """
     # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
@@ -267,16 +271,17 @@ def get_bean(
 def resolve_component(
     component_config: ComponentConfig, components_data: dict, all_params:dict, return_instance:bool = False
 ) -> object | None:
-    """根据组件配置、组件数据和请求参数解析组件。
+    """Parse components based on component configuration, component data and request parameters.
 
     Args:
-        component_config (ComponentConfig): 组件的配置。
-        components_data (dict): 可用组件的路径字典。
-        all_params (dict): 组件参数的映射表，用于初始化组件时的参数解析。
-        return_instance (bool): 是否直接返回组件实例。如果为 True，返回组件实例；否则返回执行结果。
+        component_config (ComponentConfig): Configuration of the component.
+        components_data (dict): Dictionary of available component paths.
+        all_params (dict): Mapping table of component parameters for parameter resolution during component initialization.
+        return_instance (bool): Whether to directly return the component instance. 
+                                If True, returns the component instance; otherwise returns the execution result.
 
     Returns:
-        Union[object, None]: 解析得到的组件实例或执行结果。
+        Union[object, None]: The parsed component instance or execution result.
 
     """
     # 进行实例化，目前的涉及是，每个类的实例化，只支持一个对象入参
@@ -326,12 +331,14 @@ def resolve_component(
         return instance(all_params)
 
 
-@run_crtl.post("/simple-ai/test")
+@agent_crtl.post("/simple-ai/test")
 def test() -> None:
-    """测试接口，用于验证模型的功能。
+    """Test interface for verifying model functionality.
 
-    该接口创建一个 OpenAiStyleModel 实例，并调用其 embeddings.create 方法进行测试。
-    返回的结果将根据其类型进行处理，如果是迭代器，则逐个返回结果；否则直接返回结果。
+    This interface creates an OpenAiStyleModel instance and calls its embeddings.create method for testing.
+    The returned result will be processed based on its type: 
+        - if it's an iterator, results will be returned one by one; 
+        - otherwise, the result will be returned directly.
     """
     # from src.app.model_components.model.openai_style import (
     #     OpenAiStyleLLMParameter,

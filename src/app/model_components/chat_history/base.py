@@ -7,18 +7,18 @@ from .dto import MessageInfo, MessageListParameter
 class AbsMemory(ABC, BaseComponent):
     @abstractmethod
     def save_message(self, message: MessageInfo) -> str:
-        """保存或者更新消息
+        """Save or update message
         
-        message: 要保存的消息
-        return: 该消息对应的id
+        message: The message to be saved
+        return: The corresponding id of the message
         """
         pass
 
     @abstractmethod
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
-        """查询消息列表
+        """Query message list
         
-        parameter: 查询参数
-        return: 根据条件查询到的消息记录
+        parameter: Query parameters
+        return: Message records queried based on conditions
         """
         pass

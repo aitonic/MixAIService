@@ -34,37 +34,37 @@ from src.utils.logger import logger
 def convert_value(
     obj: BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | Decimal | str | int | float | None
 ) -> dict[str, "ValueType"] | list["ValueType"] | str | int | float | None:
-    """递归转换对象的值。
+    """Recursively convert object values.
 
     Args:
-        obj: 输入对象，可以是 Pydantic 模型、字典、列表、datetime、Decimal 或其他类型。
+        obj: Input object, which can be Pydantic model, dict, list, datetime, Decimal or other types.
 
     Returns:
-        Union[Dict, List, str, int, float, None]: 转换后的对象。
+        Union[Dict, List, str, int, float, None]: Converted object.
 
     """
     if isinstance(obj, BaseModel):
-        # 对于 Pydantic 模型，递归处理其字段
+        # For Pydantic model, recursively process its fields
         return obj.model_copy(
             update={k: convert_value(v) for k, v in obj.model_dump().items()}
         )
     elif isinstance(obj, dict):
-        # 对于字典，递归处理值
+        # For dictionary, recursively process values
         return {k: convert_value(v) for k, v in obj.items()}
     elif isinstance(obj, list):
-        # 对于列表，递归处理每个元素
+        # For list, recursively process each element
         return [convert_value(item) for item in obj]
     elif isinstance(obj, datetime):
-        # 对于 datetime 对象，直接转换为 ISO 格式
+        # For datetime object, convert to ISO format
         return obj.strftime("%Y-%m-%d %H:%M:%S")
     elif isinstance(obj, Decimal):
-        # 对于 Decimal 对象，转换为字符串
+        # For Decimal object, convert to string
         return str(obj)
     else:
-        # 对于其他类型，直接返回对象本身
+        # For other types, return the object itself
         return obj
 
-# 类型别名，用于递归引用
+# Type alias for recursive reference
 ValueType = BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | Decimal | str | int | float | None
 
 # def convert_obj(obj: Any) -> Any:
@@ -94,14 +94,13 @@ ValueType = BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | 
 def convert_obj(
     obj: BaseModel | list[BaseModel | dict | str | int | float] | datetime | str | int | float | None
 ) -> dict | list[dict | str | int | float] | str | int | float | None:
-    """转换对象为指定格式。
+    """Convert object to specified format.
 
     Args:
-        obj (Union[BaseModel, List, datetime, str, int, float, None]): 输入的对象，支持 Pydantic 模型、列表、datetime 或其他类型。
+        obj (Union[BaseModel, List, datetime, str, int, float, None]): Input object, supports Pydantic model, list, datetime or other types.
 
     Returns:
-        Union[Dict, List, str, int, float, None]: 转换后的对象。
-
+        Union[Dict, List, str, int, float, None]: Converted object.
     """
     obi = (
         convert_value(obj)

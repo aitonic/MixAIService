@@ -2,10 +2,9 @@ from datetime import datetime
 
 
 def get_current_timestamp() -> float:
-    """获取当前时间的毫秒级时间戳。
+    """Get the current timestamp in milliseconds.
 
     Returns:
-        float: 当前时间的毫秒级时间戳。
-
+        float: The current timestamp in milliseconds.
     """
     return datetime.now().timestamp() * 1000

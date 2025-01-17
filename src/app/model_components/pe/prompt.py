@@ -7,55 +7,70 @@ from .base import AbsPrompt
 
 
 class BasePrompt(AbsPrompt):
-    """基础的prompt类.
+    """Base prompt class.
     
-    使用jinja2作为模板处理
+    Uses Jinja2 as template processor.
     """
 
     def __init__(self, role: str, prompt_str: str) -> None:
+        """Initialize the prompt.
+
+        Args:
+            role (str): Role of the prompt (system/user).
+            prompt_str (str): Prompt template string.
+        """
         super().__init__(role, prompt_str)
 
     def generate_prompt(self, params: dict) -> str:
-        """根据参数处理prompt."""
-        # 创建 Jinja2 环境
+        """Generate prompt by processing template with given parameters.
+
+        Args:
+            params (dict): Parameters to replace in the template.
+
+        Returns:
+            str: The processed prompt string.
+
+        Raises:
+            ValueError: If any required parameter is missing.
+        """
+        # Create Jinja2 environment
         env = Environment(autoescape=True)
 
-        # 解析模板源代码，生成抽象语法树（AST）
+        # Parse template source code to generate AST
         parsed_content = env.parse(self.content)
 
-        # 提取未声明的变量名
+        # Extract undeclared variables
         undeclared_variables = meta.find_undeclared_variables(parsed_content)
 
         if not undeclared_variables:
-            # 没有需要替换的变量，直接返回
+            # No variables to replace, return as is
             return self
 
-        # 校验是否所有参数都已提供
+        # Validate all required parameters are provided
         for var in undeclared_variables:
             if var not in params:
                 raise ValueError(f"Missing parameter: {var}")
+                
         self.content = Template(self.content).render(params)
         return self
 
     def __call__(self, *args: tuple[object, ...], **kwds: Mapping[str, Any]) -> str: # noqa: N807
-        """调用对象，生成 prompt。
+        """Call the object to generate prompt.
 
         Args:
-            *args: 任意类型的参数元组。
-            **kwds: 键为字符串的参数映射。
+            *args: Tuple of arguments of any type.
+            **kwds: Mapping of parameters with string keys.
 
         Returns:
-            str: 生成的 prompt。
-
+            str: The generated prompt.
         """
         return self.generate_prompt(args[0])
 
     def as_parameter(self) -> dict:
-        """返回对象的属性字典。
+        """Return the attribute dictionary of the object.
 
         Returns:
-            dict: 当前对象的属性字典。
-
+            dict: The attribute dictionary of the current object.
         """
         return self.__dict__
 

@@ -15,14 +15,13 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
 
     @property
     def dfn(self) -> str:
-        """获取当前时间序列的文件名。
+        """Get the filename with current time sequence.
 
         Returns:
-            str: 生成的文件名，包含时间戳后缀。
-
+            str: Generated filename with timestamp suffix.
         """
         current_time = int(time.time())
-        # 获取当前时间，并将其转换为 TimeTuple
+       
         dst_now = time.localtime(current_time)[-1]
         t = self.rolloverAt - self.interval
 
@@ -42,25 +41,25 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
         return dfn
 
     def compute_rollover(self, current_time: float) -> int:
-        """计算滚动时间。
+        """Calculate rollover time.
 
         Args:
-            current_time (float): 当前时间戳。
+            current_time (float): Current timestamp.
 
         Returns:
-            int: 计算得到的滚动时间点（时间戳）。
+            int: Calculated rollover timestamp.
 
         """
-        # 将时间取整
+        # Round the time
         t_str = time.strftime(self.suffix, time.localtime(current_time))
         t = time.mktime(time.strptime(t_str, self.suffix))
         return TimedRotatingFileHandler.computeRollover(self, t)
 
     def do_gzip(self, old_log: str) -> None:
-        """将指定日志文件进行 gzip 压缩。
+        """Compress specified log file using gzip.
 
         Args:
-            old_log (str): 要压缩的日志文件路径。
+            old_log (str): Path to the log file to be compressed.
 
         Returns:
             None
@@ -71,14 +70,14 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
                 comp_log.writelines(old)
             os.remove(old_log)
         except Exception as e:
-            print(f"压缩日志文件失败: {e}")
+            print(f"Failed to compress log file: {e}")
             pass
 
     def should_rollover(self) -> int:
-        """是否应该执行日志滚动操作：
+        """Determine whether to perform log rollover:
         
-        1、存档文件已存在时，执行滚动操作
-        2、当前时间 >= 滚动时间点时，执行滚动操作
+        1. Perform rollover when archive file already exists
+        2. Perform rollover when current time >= rollover time point
         """
         dfn = self.dfn
         t = int(time.time())
@@ -87,12 +86,12 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
         return 0
 
     def do_rollover(self) -> None:
-        """执行滚动操作。
+        """Perform rollover operation.
         
-        1、文件句柄更新
-        2、存在文件处理
-        3、备份数处理
-        4、下次滚动时间点更新
+        1. Update file handle
+        2. Handle existing files
+        3. Process backup count
+        4. Update next rollover time point
         """
         if self.stream:
             self.stream.close()
@@ -101,21 +100,21 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
 
         dfn = self.dfn
 
-        # 存档log 已存在处理
+        # Handle existing archived log files
         if not os.path.exists(dfn) and not os.path.exists(dfn + ".gz"):
             self.rotate(self.baseFilename, dfn)
             self.do_gzip(dfn)
 
-        # 备份数控制
+        # Control backup count
         if self.backupCount > 0:
             for s in self.getFilesToDelete():
                 os.remove(s)
 
-        # 延迟处理
+        # Handle delay
         if not self.delay:
             self.stream = self._open()
 
-        # 更新滚动时间点
+        # Update rollover time point
         current_time = int(time.time())
         new_rollover_at = self.computeRollover(current_time)
         while new_rollover_at <= current_time:
@@ -142,17 +141,16 @@ server_name = os.getenv('SERVER.NAME', 'common-log')
 server_logging_path = os.getenv('SERVER.LOGGING.PATH', default_logs_path)
 
 class LoggerFormatter(logging.Formatter):
-    """自定义日志格式化器，支持附加上下文信息。"""
+    """Custom log formatter that supports adding context information."""
 
     def format(self, record: logging.LogRecord) -> str:
-        """格式化日志记录。
+        """Format the log record.
 
         Args:
-            record (logging.LogRecord): 日志记录对象。
+            record (logging.LogRecord): Log record object.
 
         Returns:
-            str: 格式化后的日志字符串。
-
+            str: Formatted log string.
         """
         # 示例逻辑，可以自定义格式化操作
         # record.traceId = thread_local.getTraceId()
@@ -160,47 +158,44 @@ class LoggerFormatter(logging.Formatter):
         return ss
 
 class MessageFormatter(logging.Formatter):
-    """自定义消息格式化器，支持附加时间戳和消息处理。"""
+    """Custom message formatter that supports adding timestamps and message processing."""
 
     def format(self, record: logging.LogRecord) -> str:
-        """格式化日志记录，添加时间戳。
+        """Format log record with timestamp.
 
         Args:
-            record (logging.LogRecord): 日志记录对象。
+            record (logging.LogRecord): Log record object.
 
         Returns:
-            str: 格式化后的日志字符串。
-
+            str: Formatted log string.
         """
-        # 添加时间戳
+        # Add timestamp
         record.timestamp = get_current_iso()
         return super().format(record)
 
     def format_message(self, record: logging.LogRecord) -> str:
-        """格式化日志消息内容。
+        """Format log message content.
 
         Args:
-            record (logging.LogRecord): 日志记录对象。
+            record (logging.LogRecord): Log record object.
 
         Returns:
-            str: 格式化后的消息字符串。
-
+            str: Formatted message string.
         """
-        # 替换特殊字符
+        # Replace special characters
         record.message = record.message.replace('{', '【').replace('}', '】').replace('"', '``').replace("'", '`')
         return super().formatMessage(record)
 
 def get_current_iso() -> str:
-    """获取当前时间的 ISO 8601 格式字符串。
+    """Get current time in ISO 8601 format.
 
     Returns:
-        str: 当前时间的 ISO 8601 格式字符串。
-
+        str: Current time in ISO 8601 format.
     """
-    # 获取当前时间
+    # Get current time
     current_time = datetime.now(timezone(timedelta(hours=8)))
 
-    # 格式化时间为ISO 8601格式
+    # Format time to ISO 8601
     formatted_time = current_time.isoformat()
     return formatted_time
 
@@ -272,11 +267,10 @@ class Logger:
 
     @staticmethod
     def _get_logger() -> logging.Logger:
-        """获取日志记录器实例。
+        """Get logger instance.
 
         Returns:
-            logging.Logger: 配置完成的日志记录器实例。
-
+            logging.Logger: Configured logger instance.
         """
         if Logger.log_instance is not None:
             return Logger.log_instance

@@ -12,7 +12,7 @@ from chromadb.errors import InvalidCollectionException
 from src.utils.logger import logger
 
 from .dto import (
-    # DEFAULT_COLECCTION, 
+    # DEFAULT_COLECCTION,
     VectorAddParameter,
     VectorBacthQueryParameter,
     VectorQueryParameter,
@@ -23,9 +23,9 @@ from .vector_base import AbsVectorStore
 
 class ChromaVectorStore(AbsVectorStore):
 
-    __client:ClientAPI
+    __client: ClientAPI
 
-    def __init__(self, embedding_func:object = None) -> None:
+    def __init__(self, embedding_func: object = None) -> None:
         super().__init__()
         chromadb_client = chromadb.Client(
             Settings(
@@ -33,60 +33,56 @@ class ChromaVectorStore(AbsVectorStore):
                 chroma_server_host=os.getenv("CHROMA_HOST", "localhost").strip(),
                 chroma_server_http_port=int(os.getenv("CHROMA_PORT", "8000").strip()),
                 persist_directory=os.getenv("CHROMA_PERSIST_DIRECTORY", "/chromadb/persist/").strip(),
-                is_persistent = True,
-                allow_reset  =True
+                is_persistent=True,
+                allow_reset=True
             )
         )
 
-        self.__client = chromadb_client  # 设置实例的 __client 属性
+        self.__client = chromadb_client  # Set instance's __client attribute
         if embedding_func:
             self.embedding_func = embedding_func
     
     @classmethod
     def create_client(cls, embedding_func: Callable | None = None) -> "ChromaVectorStore":
-        """创建 ChromaVectorStore 实例并返回客户端。
+        """Create ChromaVectorStore instance and return client.
 
         Args:
-            embedding_func (Callable, optional): 可选的嵌入函数。如果提供，将用于生成嵌入。
+            embedding_func (Callable, optional): Optional embedding function. If provided, will be used to generate embeddings.
 
         Returns:
-            ChromaVectorStore: 返回创建的 ChromaVectorStore 实例。
-
+            ChromaVectorStore: Returns created ChromaVectorStore instance.
         """
         return ChromaVectorStore(embedding_func=embedding_func)
     
     def __embedding(self, text: str, embed_function: Callable[[str], list[float]] | None = None) -> list[float]:
-        """生成文本的嵌入向量。
+        """Generate embedding vector for text.
 
         Args:
-            text (str): 输入文本。
-            embed_function (Callable[[str], list[float]], optional): 可选的嵌入函数，用于生成嵌入向量。如果未提供，将使用默认逻辑。
+            text (str): Input text.
+            embed_function (Callable[[str], list[float]], optional): Optional embedding function to generate embeddings. If not provided, default logic will be used.
 
         Returns:
-            list[float]: 生成的嵌入向量。
-
+            list[float]: Generated embedding vector.
         """
-        # 使用提供的嵌入函数生成嵌入向量
+        # Use provided embedding function to generate embeddings
         if embed_function:
             embeddings = embed_function({"query": text})
-        # 使用类的嵌入函数生成嵌入向量
+        # Use class embedding function to generate embeddings
         elif self.embedding_func:
             embeddings = self.embedding_func({"query": text})
         else:
-            return []  # 如果没有提供嵌入函数，返回空列表
+            return []  # Return empty list if no embedding function provided
 
-        return embeddings[0]["embedding"] if embeddings else []  # 返回生成的嵌入向量
+        return embeddings[0]["embedding"] if embeddings else []  # Return generated embedding vector
 
-    # 创建集合的方法，返回布尔值表示是否成功
-    def create_collection(self, collection_name:str) -> bool:
-        """创建集合的方法，返回布尔值表示是否成功。
+    def create_collection(self, collection_name: str) -> bool:
+        """Create collection and return boolean indicating success.
 
         Args:
-            collection_name (str): 要创建的集合名称。
+            collection_name (str): Name of collection to create.
 
         Returns:
-            bool: 如果集合创建成功返回 True，否则返回 False。
-
+            bool: Returns True if collection created successfully, False otherwise.
         """
         try:
             self.__client.get_or_create_collection(name=collection_name)
@@ -94,19 +90,17 @@ class ChromaVectorStore(AbsVectorStore):
             return False
         return True
 
-    # 添加文本到指定集合的方法，返回布尔值表示是否成功
-    def add_text(self, parameter:VectorAddParameter) -> str:
-        """添加文本到指定集合的方法，返回布尔值表示是否成功。
+    def add_text(self, parameter: VectorAddParameter) -> str:
+        """Add text to specified collection and return boolean indicating success.
 
         Args:
-            parameter (VectorAddParameter): 包含要添加的文本、集合名称和嵌入函数的参数。
+            parameter (VectorAddParameter): Parameter containing text to add, collection name and embedding function.
 
         Returns:
-            str: 如果成功，返回添加文本的 ID；否则返回 None。
+            str: Returns added text ID if successful, None otherwise.
 
         Raises:
-            如果集合不存在，将抛出异常。
-
+            Exception: If collection does not exist.
         """
         collection = self.__client.get_or_create_collection(name=parameter.collection_name)
 
@@ -116,90 +110,84 @@ class ChromaVectorStore(AbsVectorStore):
         embed_result = self.__embedding(parameter.text, parameter.embed_function)
         
         id = self.get_id(prefix=parameter.collection_name)
-        # 添加文本到集合
+        # Add text to collection
         collection.add(
             ids=id,
             embeddings=embed_result,
             metadatas=[{"source": parameter.text}]
         )
-        return id  # 返回成功
+        return id  # Return success
 
-    # 删除指定集合的方法，返回布尔值表示是否成功
     def delete_collection(self, collection_name: str) -> bool:
-        """删除指定集合的方法，返回布尔值表示是否成功。
+        """Delete specified collection and return boolean indicating success.
 
         Args:
-            collection_name (str): 要删除的集合名称。
+            collection_name (str): Name of collection to delete.
 
         Returns:
-            bool: 如果集合删除成功返回 True，否则返回 False。
-
+            bool: Returns True if collection deleted successfully, False otherwise.
         """
         try:
             self.__client.delete_collection(name=collection_name)
         except Exception:
             return False
-        return True  # 返回成功
+        return True  # Return success
 
-    # 查询指定集合的方法，返回查询结果
-    def query(self, parameter:VectorQueryParameter) -> VectorRetriverResult:
-        """查询指定集合的方法，返回查询结果。
+    def query(self, parameter: VectorQueryParameter) -> VectorRetriverResult:
+        """Query specified collection and return query results.
 
         Args:
-            parameter (VectorQueryParameter): 包含查询文本、集合名称和嵌入函数的参数对象。
+            parameter (VectorQueryParameter): Parameter object containing query text, collection name and embedding function.
 
         Returns:
-            VectorRetriverResult: 查询结果，包含与查询文本相关的前5个结果。
-
-        """        
+            VectorRetriverResult: Query results containing top 5 results related to query text.
+        """
         try:
             collection = self.__client.get_collection(name=parameter.collection_name)
             
             embed_result = self.__embedding(parameter.query_text, parameter.embed_function)
 
-            # 执行查询
+            # Execute query
             results = collection.query(
                 query_embeddings=embed_result,
-                n_results=parameter.result_count  # 返回前5个结果
+                n_results=parameter.result_count  # Return top 5 results
             )
             results["collection_name"] = parameter.collection_name
             
-            return VectorRetriverResult(**results)  # 返回查询结果
-        except InvalidCollectionException:
+            return VectorRetriverResult(**results)  # Return query results
+        except InvalidCollectionException as ice:
             # raise Exception(f"collection is not exsit : {parameter.collection_name}")
             logger.warn(f"collection is not exsit : {parameter.collection_name}")
-            return VectorRetriverResult.empty(collection_name = parameter.collection_name)
+            return VectorRetriverResult.empty(collection_name=parameter.collection_name)
 
     
 class ChromaUpsertStore(ChromaVectorStore):
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> str:
-        """添加文本向量的调用方法。
+        """Call method for adding text vectors.
 
         Args:
-            *args (tuple[dict[str, Any], ...]): 包含向量添加参数的字典元组。
-            **kwds (dict[str, Any]): 其他可选关键字参数（当前未使用）。
+            *args (tuple[dict[str, Any], ...]): Tuple of dictionaries containing vector add parameters.
+            **kwds (dict[str, Any]): Other optional keyword arguments (currently unused).
 
         Returns:
-            str: 添加文本后的结果。
-
+            str: Result after adding text.
         """
-        params = args[0]  # 获取第一个参数字典
+        params = args[0]  # Get first parameter dictionary
         return self.add_text(VectorAddParameter(**params))
     
 
 class ChromaRetriverStore(ChromaVectorStore):
 
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> list[VectorRetriverResult]:
-        """添加文本向量的调用方法。
+        """Call method for adding text vectors.
 
         Args:
-            *args (tuple[dict[str, Any], ...]): 包含向量添加参数的字典元组。
-            **kwds (dict[str, Any]): 其他可选关键字参数（当前未使用）。
+            *args (tuple[dict[str, Any], ...]): Tuple of dictionaries containing vector add parameters.
+            **kwds (dict[str, Any]): Other optional keyword arguments (currently unused).
 
         Returns:
-            str: 添加文本后的结果。
-
+            str: Result after adding text.
         """
-        params = args[0]  # 获取第一个参数字典
+        params = args[0]  # Get first parameter dictionary
         parameter = VectorBacthQueryParameter(**params)
         return self.batch_query(parameter)

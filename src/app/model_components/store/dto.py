@@ -26,11 +26,11 @@ class VectorBacthQueryParameter(BaseModel):
 
 
 class VectorRetriverResult(BaseModel):
-    collection_name:str = Field(description="查询的库名")
-    ids:list[list[str]] = Field(description="查询结果的id列表")
+    collection_name: str = Field(description="Name of the queried collection")
+    ids: list[list[str]] = Field(description="List of IDs for query results")
     # embeddings = Field(default=None)
-    metadatas:list[list[dict]] = Field(description="元素据，根据id排序")
-    distances:list[list[float]] = Field(description="分数，根据id排序")
+    metadatas: list[list[dict]] = Field(description="Metadata sorted by ID")
+    distances: list[list[float]] = Field(description="Scores sorted by ID")
 
     @classmethod
     def empty(cls, collection_name:str = DEFAULT_COLECCTION) -> "VectorRetriverResult":
@@ -38,6 +38,6 @@ class VectorRetriverResult(BaseModel):
 
 
 class VectorParameter(BaseModel):
-    embedding_func:Callable | None = Field(default=None, description="embedding的实例")
-    collection_name:str = Field(default=DEFAULT_COLECCTION, description="添加数据时候使用的集合名")
-    search_collections:list[str] = Field(default=[DEFAULT_COLECCTION], description="检索时，使用的集合")
+    embedding_func:Callable | None = Field(default=None, description="Instance of embedding function")
+    collection_name:str = Field(default=DEFAULT_COLECCTION, description="Collection name used when adding data")
+    search_collections:list[str] = Field(default=[DEFAULT_COLECCTION], description="Collections used during retrieval")

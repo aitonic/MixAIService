@@ -36,10 +36,10 @@ class Completions:
 
     @property
     def completion_url(self) -> str:
-        """获取完成请求的 URL。
+        """Get the URL for completion request.
 
         Returns:
-            str: 完整的 URL。
+            str: The complete URL.
 
         """
         if self.full_url:
@@ -58,7 +58,7 @@ class Completions:
                             "max_new_tokens":parameter.max_new_tokens,
                             "model":parameter.model
                         }
-                    logger.info(f"调用模型，请求参数：{request_json}")
+                    logger.info(f"LLM invoke parameters：{request_json}")
                     response = client.post(
                         self.completion_url,
                         json=request_json,
@@ -145,42 +145,51 @@ class AbsLLMModel(ABC, BaseComponent):
 
     @abstractmethod
     def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
-        """抽象方法，用于定义具体的生成逻辑。
+        """Abstract method to define specific generation logic.
 
-        参数:
-            parameter (BaseCompletionParameter): 生成所需的参数对象。
+        Args:
+            parameter (BaseCompletionParameter): Parameter object required for generation.
 
-        异常:
-            Exception: 如果子类未实现该方法，将引发此异常。
+        Raises:
+            Exception: If the subclass does not implement this method, this exception will be raised.
 
         """
-        raise Exception("未实现的生成方法")
+        raise Exception("Unimplemented generation method")
     
     @abstractmethod
     async def async_generate(self, parameter: BaseCompletionParameter) -> AsyncGenerator[ModelResponse, None]:
-        """抽象方法，用于定义具体的生成逻辑。
+        """Abstract method to define specific generation logic.
 
-        参数:
-            parameter (BaseCompletionParameter): 生成所需的参数对象。
+        Args:
+            parameter (BaseCompletionParameter): Parameter object required for generation.
 
-        异常:
-            Exception: 如果子类未实现该方法，将引发此异常。
+        Raises:
+            Exception: If the subclass does not implement this method, this exception will be raised.
 
         """
-        raise Exception("未实现的生成方法")
+        raise Exception("Unimplemented generation method")
 
     # @abstractmethod
     def after_response(self, response: ModelResponse) -> None:
-        """在模型响应后执行的操作。
+        """Operations to perform after model response.
 
         Args:
-            response (ModelResponse): 模型的响应对象。
+            response (ModelResponse): model response object
 
         """
         logger.info(f"Processing response: {response}")
         
 
     def __call__(self, *args: tuple[dict[str, Any], ...], **kwds: dict[str, Any]) -> Iterator[ModelResponse]:
+        """Call method for model generation.
+
+        Args:
+            *args (tuple[dict[str, Any], ...]): Positional arguments containing parameters
+            **kwds (dict[str, Any]): Keyword arguments containing parameters
+
+        Returns:
+            Iterator[ModelResponse]: Iterator yielding model response content
+        """
 
         param = args[0]
         parameter = BaseCompletionParameter(**param)

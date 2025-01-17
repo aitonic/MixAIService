@@ -91,3 +91,6 @@ chromadb
 # logs/*.log.*
 logs/*/*.json.*
 logs/*/*.log.*
+
+# exclude sample data
+data/sample_data

@@ -17,6 +17,7 @@ from .dto import (
     VectorBacthQueryParameter,
     VectorQueryParameter,
     VectorRetriverResult,
+    DEFAULT_COLECCTION,
 )
 from .vector_base import AbsVectorStore
 
@@ -180,7 +181,21 @@ class ChromaUpsertStore(ChromaVectorStore):
 
         """
         params = args[0]  # Get first parameter dictionary
-        return self.add_text(VectorAddParameter(**params))
+        if "text" not in params:
+            raise ValueError(f"text field not supplied in chroma upsert")
+        text = params["text"]
+        ids = []
+        if isinstance(text, list):
+            for t in text:
+                ids.append(self.add_text(VectorAddParameter(text=t, 
+                                                 collection_name=params["collection_name"] 
+                                                    if "collection_name" in params
+                                                    else DEFAULT_COLECCTION,
+                                                    embed_function = params["embed_function"])
+                                                  ))
+        else:
+            ids.append(self.add_text(VectorAddParameter(**params)))
+        return ids
     
 
 class ChromaRetriverStore(ChromaVectorStore):

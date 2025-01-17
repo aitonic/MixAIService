@@ -24,11 +24,6 @@ chat_model:
       param:
         component_type: openai
         parameter:
-            # model: "llama3pro"
-            # api_key: '123'
-            # base_url: http://127.0.0.1:1234
-            # base_url: http://192.168.11.11:8070
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
 
 embedding:
@@ -43,11 +38,6 @@ embedding:
       param:
         component_type: openai_embedding
         parameter:
-            model: "jina-embeddings-v3"
-            api_key: '123'
-            # base_url: http://192.168.11.11:8070
-            base_url: http://127.0.0.1:1234
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
 
 add_text_vector:
@@ -65,11 +55,6 @@ add_text_vector:
       param:
         component_type: openai_embedding
         parameter:
-            model: "jina-embeddings-v3"
-            api_key: '123'
-            # base_url: http://192.168.11.11:8070
-            base_url: http://127.0.0.1:1234
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
     - name: VectorFactory
       param:
@@ -91,11 +76,6 @@ query_text_vector:
       param:
         component_type: openai_embedding
         parameter:
-            model: "jina-embeddings-v3"
-            api_key: '123'
-            # base_url: http://192.168.11.11:8070
-            base_url: http://127.0.0.1:1234
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
     - name: VectorFactory
       param:
@@ -133,11 +113,6 @@ html_reader:
       param:
         component_type: openai
         parameter:
-            # model: "llama3pro"
-            # api_key: '123'
-            # base_url: http://127.0.0.1:1234
-            # base_url: http://192.168.11.11:8070
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
 
 
@@ -171,11 +146,6 @@ semantic_split:
       param:
         component_type: openai_embedding
         parameter:
-            # model: "jina-embeddings-v3"
-            # api_key: '123'
-            # # base_url: http://192.168.11.11:8070
-            # base_url: http://127.0.0.1:1234
-            # full_url: http://192.168.11.11:8070/v1/chat/completions
             max_retry: 2
     - name: DocSplitterFactory
       param:

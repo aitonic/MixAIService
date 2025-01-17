@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from src.app.flow.flow_invocation import resolve_agent_config
 from src.utils.response import ResponseUtil
 
-from ..vo.request import RunParameter
+from ..vo.request import RunParameter,RunData
 from .dto.app_dto import AgentInfo, AppConfig
 
 app_crtl = APIRouter()
@@ -38,6 +38,9 @@ def run_app(req: RunParameter) -> str:
         value = agents.get(order)
         for v in value:
             new_req = req.model_copy(update={"app_no":v.agent_name})
+            data_dict = new_req.data.model_dump()
+            data_dict.update(params)
+            new_req.data = RunData(**data_dict)
             result = resolve_agent_config(new_req)
             if order == final_order:
                 return result

@@ -85,7 +85,8 @@ class HTMLDocReader(BaseDocReader):
 
         """
         cleaned_content = HTMLConverter.clean_html(raw_content)
-        return {"content": cleaned_content}
+        # return {"content": cleaned_content}
+        return cleaned_content
 
     def to_markdown(self, parsed_data: str, prompt: str = "") -> str:
         """Convert HTML to Markdown using LLM.

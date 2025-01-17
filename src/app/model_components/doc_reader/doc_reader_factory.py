@@ -1,11 +1,23 @@
 import os
+import re
 
-from src.utils.logger import logger
-
-from ..base_component import BaseComponent, BaseFactory
+from ..base_component import (
+    BaseComponent, 
+    BaseFactory
+)
+from .html_reader import HTMLDocReader
 from .structured_reader import StructuredDocReader
 from .unstructured_reader import UnstructuredDocReader
+from src.utils.logger import logger
 
+def is_web_url(url):
+    # 正则表达式匹配常见的 URL 格式
+    pattern = re.compile(
+        r'^(https?:\/\/)?'  # http:// 或 https://
+        r'([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}'  # 域名
+        r'(\/[^\s]*)?$'  # 路径
+    )
+    return bool(pattern.match(url))
 
 class DocReaderFactory(BaseFactory):
     """Factory class to automatically select the appropriate Readerbased on file type or other logic."""
@@ -41,10 +53,22 @@ class DocReaderFactory(BaseFactory):
 
         """
         source = param.get("query")
-        if isinstance(source, str) and os.path.isfile(source):
+        if is_web_url(source):
+            # html
+            return HTMLDocReader(llm_model = param["llm_model"], 
+                          max_tokens = int(param["max_tokens"]) if "max_tokens" in param else 8192, 
+                          temperature = float(param["temperature"]) if "temperature" in param else 0.95, 
+                          )
+        elif isinstance(source, str) and os.path.isfile(source):
             # Determine reader type based on file extension
             if source.endswith(".csv") or source.endswith(".json"):
                 return StructuredDocReader()
+            elif source.endswith(".html"):
+                # html
+                return HTMLDocReader(llm_model = param["llm_model"], 
+                            max_tokens = int(param["max_tokens"]) if "max_tokens" in param else 8192, 
+                            temperature = float(param["temperature"]) if "temperature" in param else 0.95, 
+                            )
             else:
                 # Default to unstructured for other file types
                 return UnstructuredDocReader()
@@ -56,3 +80,7 @@ class DocReaderFactory(BaseFactory):
                 return UnstructuredDocReader()
             else:
                 raise ValueError("Unsupported data source type.")
+
+
+    import re
+

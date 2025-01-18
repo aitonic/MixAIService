@@ -17,7 +17,9 @@ class RunData(BaseModel):
         Attributes:
             extra (str): Specifies whether the model allows extra fields. 
                          Value "allow" means extra fields are allowed.
+
         """
+
         extra = "allow"
 
 

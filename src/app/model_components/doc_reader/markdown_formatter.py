@@ -26,7 +26,7 @@ class MarkdownFormatter:
         self.max_tokens = parameter.max_new_tokens
         self.temperature = parameter. temperature
 
-    def convert_by_llm(self, content: str, prompt: str) -> str:
+    def convert_html_by_llm(self, content: str, prompt: str) -> str:
         """Convert HTML to Markdown using LLM.
 
         Args:

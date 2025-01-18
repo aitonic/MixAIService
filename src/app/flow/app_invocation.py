@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from src.app.flow.flow_invocation import resolve_agent_config
 from src.utils.response import ResponseUtil
 
-from ..vo.request import RunParameter,RunData
+from ..vo.request import RunData, RunParameter
 from .dto.app_dto import AgentInfo, AppConfig
 
 app_crtl = APIRouter()

@@ -99,7 +99,7 @@ class HTMLDocReader(BaseDocReader):
             str: Markdown formatted content
 
         """
-        return self.markdown_formatter.convert_by_llm(
+        return self.markdown_formatter.convert_html_by_llm(
             content=parsed_data,
             prompt=prompt or "Convert the following HTML to well-formatted Markdown:"
         )

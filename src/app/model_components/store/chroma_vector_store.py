@@ -12,12 +12,12 @@ from chromadb.errors import InvalidCollectionException
 from src.utils.logger import logger
 
 from .dto import (
+    DEFAULT_COLECCTION,
     # DEFAULT_COLECCTION,
     VectorAddParameter,
     VectorBacthQueryParameter,
     VectorQueryParameter,
     VectorRetriverResult,
-    DEFAULT_COLECCTION,
 )
 from .vector_base import AbsVectorStore
 
@@ -182,17 +182,16 @@ class ChromaUpsertStore(ChromaVectorStore):
         """
         params = args[0]  # Get first parameter dictionary
         if "text" not in params:
-            raise ValueError(f"text field not supplied in chroma upsert")
+            raise ValueError("text field not supplied in chroma upsert")
         text = params["text"]
         ids = []
         if isinstance(text, list):
             for t in text:
-                ids.append(self.add_text(VectorAddParameter(text=t, 
-                                                 collection_name=params["collection_name"] 
-                                                    if "collection_name" in params
-                                                    else DEFAULT_COLECCTION,
-                                                    embed_function = params["embed_function"])
-                                                  ))
+                ids.append(self.add_text(VectorAddParameter(
+                    text=t,
+                    collection_name=params.get("collection_name", DEFAULT_COLECCTION),  # Simplify with `.get`
+                    embed_function=params["embed_function"]
+                )))
         else:
             ids.append(self.add_text(VectorAddParameter(**params)))
         return ids

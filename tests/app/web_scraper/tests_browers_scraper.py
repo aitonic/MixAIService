@@ -34,8 +34,8 @@ class TestBrowserScraper(unittest.IsolatedAsyncioTestCase):
             created_by="josangmi",
             created_at=datetime(2025, 1, 19, 2, 20, 49)
         )
-        self.test_url = "https://www.meditrusthealth.com"
-        # self.test_url = "https://www.sina.com.cn"
+        # self.test_url = "https://www.meditrusthealth.com"
+        self.test_url = "https://medicine.lvwzhen.com/"
 
         self.scraper = None
         
@@ -101,10 +101,11 @@ class TestBrowserScraper(unittest.IsolatedAsyncioTestCase):
 
     async def test_call_with_large_page(self):
         """Test scraper performance with large page"""
-        large_page_url = "https://www.meditrusthealth.com"  # Replace with actual large page URL
-        
+        # large_page_url = "https://www.meditrusthealth.com"  # Replace with actual large page URL
+        large_page_url = "https://medicine.lvwzhen.com/"
         # Record start time
         start_time = datetime.utcnow()
+        
         
         # Perform scraping
         result = await self.scraper(large_page_url)

@@ -1,6 +1,6 @@
 # html_reader.py
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from src.app.model_components.model.dto import BaseCompletionParameter
 from src.app.model_components.model.openai_style import OpenAiStyleModel
@@ -8,6 +8,7 @@ from src.utils.html_converter import HTMLConverter
 
 from .base import BaseDocReader
 from .markdown_formatter import MarkdownFormatter
+from src.app.model_components.web_scraper.dto import ScraperResult
 
 
 class HTMLDocReader(BaseDocReader):
@@ -49,31 +50,38 @@ class HTMLDocReader(BaseDocReader):
             parameter=parameter  # The configuration parameters for the formatter.
         )
 
-    def read_data(self, file_path: str) -> str:
-        """Read HTML content from the specified file path.
+    def read_data(self, source: Union[str, ScraperResult]) -> str:
+            """Read HTML content from the specified file path or ScraperResult.
 
-        Args:
-            file_path (str): Path to the HTML file
+            Args:
+                source (str | ScraperResult): Path to the HTML file or ScraperResult object
 
-        Returns:
-            str: Raw HTML content
+            Returns:
+                str: Raw HTML content
 
-        Raises:
-            FileNotFoundError: If the HTML file does not exist
-            ValueError: If the file is not an HTML file
+            Raises:
+                FileNotFoundError: If the HTML file does not exist
+                ValueError: If the file is not an HTML file
+                ValueError: If the ScraperResult indicates a failure
+            """
+            if isinstance(source, ScraperResult):
+                if not source.success:
+                    raise ValueError(f"Scraping failed: {source.error_message}")
+                if source.content is None:
+                    raise ValueError("ScraperResult content is None")
+                return source.content
 
-        """
-        path = Path(file_path)
-        
-        if not path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
+            path = Path(source)
             
-        if path.suffix.lower() not in ['.html', '.htm']:
-            raise ValueError(f"File must be HTML format: {file_path}")
-            
-        with open(file_path, encoding='utf-8') as file:
-            return file.read()
-            
+            if not path.exists():
+                raise FileNotFoundError(f"File not found: {source}")
+                
+            if path.suffix.lower() not in ['.html', '.htm']:
+                raise ValueError(f"File must be HTML format: {source}")
+                
+            with open(source, encoding='utf-8') as file:
+                return file.read()
+                
     def parse_content(self, raw_content: str) -> dict[str, Any]:
         """Parse HTML content into structured format.
         

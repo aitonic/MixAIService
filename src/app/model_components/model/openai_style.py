@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 import httpx
 from pydantic import BaseModel, Field
 
+from src.utils.exceptions import LLMAPIError, LLMAuthorizationError, LLMTimeoutError
 from src.utils.logger import logger
 
 from .base import AbsLLMModel
@@ -89,7 +90,17 @@ class OpenAiStyleModel(AbsLLMModel):
 
     def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
         """非流式生成。"""
-        return self.completions.create(parameter)
+        try:
+            return self.completions.create(parameter)
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error occurred during LLM call: {e}")
+            # Handle specific HTTP errors, e.g., retry for timeouts, raise custom exceptions
+            if isinstance(e, httpx.TimeoutException):
+                raise LLMTimeoutError("LLM API call timed out.") from e
+            elif e.response.status_code == 401:
+                raise LLMAuthorizationError("Unauthorized access to LLM API.") from e
+            else:
+                raise LLMAPIError(f"LLM API request failed with status code: {e.response.status_code}") from e
 
     
     async def async_generate(self, parameter: BaseCompletionParameter) -> AsyncGenerator[ModelResponse, None]:

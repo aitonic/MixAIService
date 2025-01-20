@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Union
+
+from src.app.model_components.web_scraper.dto import ScraperResult
 
 from ..base_component import BaseComponent
-from src.app.model_components.web_scraper.dto import ScraperResult
+
 
 class BaseDocReader(BaseComponent, ABC):
     """Abstract base class for DocReader components, inheriting from BaseComponent.
@@ -10,13 +11,13 @@ class BaseDocReader(BaseComponent, ABC):
     This class can read various input files/data content and convert them to Markdown format.
     """
 
-    source: str | bytes
+    source: str | bytes | ScraperResult
 
     def __init__(self, name: str = "BaseDocReader") -> None:
         super().__init__(name=name)
 
     @abstractmethod
-    def read_data(self, source: str | list | dict) -> str | bytes:
+    def read_data(self, source: str | bytes | ScraperResult) -> str | bytes:
         """Read and return the raw content, which can be text, byte streams, etc.
 
         Args:
@@ -54,7 +55,7 @@ class BaseDocReader(BaseComponent, ABC):
         """
         pass
 
-    def process(self, source: Union[str, bytes, ScraperResult]) -> str:
+    def process(self, source: str | bytes | ScraperResult) -> str:
         """Process the source by reading and converting it to Markdown.
 
         This method handles the entire workflow, from reading the input 
@@ -66,6 +67,7 @@ class BaseDocReader(BaseComponent, ABC):
 
         Returns:
             str: The converted Markdown text.
+
         """
         raw_content = self.read_data(source)
         parsed_data = self.parse_content(raw_content)

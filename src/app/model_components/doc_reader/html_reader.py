@@ -1,14 +1,15 @@
 # html_reader.py
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 from src.app.model_components.model.dto import BaseCompletionParameter
 from src.app.model_components.model.openai_style import OpenAiStyleModel
+from src.app.model_components.web_scraper.dto import ScraperResult
+from src.utils.exceptions import DocumentNotFoundError
 from src.utils.html_converter import HTMLConverter
 
 from .base import BaseDocReader
 from .markdown_formatter import MarkdownFormatter
-from src.app.model_components.web_scraper.dto import ScraperResult
 
 
 class HTMLDocReader(BaseDocReader):
@@ -50,7 +51,7 @@ class HTMLDocReader(BaseDocReader):
             parameter=parameter  # The configuration parameters for the formatter.
         )
 
-    def read_data(self, source: Union[str, ScraperResult]) -> str:
+    def read_data(self, source: str | ScraperResult) -> str:
             """Read HTML content from the specified file path or ScraperResult.
 
             Args:
@@ -63,6 +64,7 @@ class HTMLDocReader(BaseDocReader):
                 FileNotFoundError: If the HTML file does not exist
                 ValueError: If the file is not an HTML file
                 ValueError: If the ScraperResult indicates a failure
+
             """
             if isinstance(source, ScraperResult):
                 if not source.success:
@@ -74,7 +76,7 @@ class HTMLDocReader(BaseDocReader):
             path = Path(source)
             
             if not path.exists():
-                raise FileNotFoundError(f"File not found: {source}")
+                raise DocumentNotFoundError(f"File not found: {source}")
                 
             if path.suffix.lower() not in ['.html', '.htm']:
                 raise ValueError(f"File must be HTML format: {source}")

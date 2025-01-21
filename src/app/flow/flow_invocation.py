@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from typing import TypeVar
 
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
@@ -45,6 +46,7 @@ def run_agent_with_config(req: RunParameter) -> str:
     # req.data.source = datas.query
     result = resolve_agent_config(req)
     return ResponseUtil.success(result)
+    # return StreamingResponse(resolve_agent_config(req), media_type="text/event-stream")
 
 
 def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
@@ -181,9 +183,15 @@ def _process_result(result: Iterator[T] | T) -> T | None:
         Optional[T]: Processed result, returns the first element if it's an iterator, otherwise returns the result itself.
 
     """
+    result_text = result
     if isinstance(result, Iterator):
-        return next(result, None)  # 返回迭代器的第一个元素或 None
-    return result
+        result_text = ""
+        for  response in result:
+            if "DONE" == response:
+                break
+            result_text = result_text+response
+            
+    return result_text
 
 
 def resolve_path(agent_config: AgentConfig) -> list[str]:

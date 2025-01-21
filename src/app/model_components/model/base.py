@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator, Iterator
 from typing import Any
 
 import httpx
+import tiktoken
 
 from src.utils.logger import logger
 
@@ -21,6 +22,8 @@ from .dto import (
 )
 from .embedding import OpenAiStyleEmbeddings
 
+# 初始化 tiktoken 编码器
+encoding = tiktoken.encoding_for_model("gpt-4")
 
 class Completions:
     suffix = DEFAULT_COMPLETION_PATH
@@ -90,17 +93,23 @@ class Completions:
             Iterator[ModelResponse]: Parsed model responses from the stream.
 
         """
-        for line in response.iter_lines():
+        # 逐块读取流式响应
+        for line in response.iter_text():
             if not line:
                 continue
             if "DONE" in line:
+                yield "DONE"
                 break
             try:
                 json_data = json.loads(line.replace("data:", ""))
                 if "choices" in json_data and len(json_data["choices"]) > 0:
-                    yield ModelResponse(**json_data)
+                    result = ModelResponse(**json_data)
+                    yield result
+                    if result.choices[0].finish_reason == "stop":
+                        yield "DONE"
+                        break
             except json.JSONDecodeError:
-                logger.warning(f"Failed to parse stream data: {line}")
+                print(f"Failed to parse stream data: {line}")
                 continue
                 
     def create(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
@@ -119,16 +128,14 @@ class Completions:
                 try:
                     request_json = self._prepare_request(parameter)
                     logger.info(f"LLM invoke parameters: {request_json}")
-                    response = client.post(
+                    with client.stream(
+                        "POST",
                         self.completion_url,
                         json=request_json,
                         headers={"Authorization": f"Bearer {self.api_key}"},
-                    )
-                    response.raise_for_status()
+                    ) as response:
+                        response.raise_for_status()
 
-                    if not parameter.stream:
-                        yield from self._handle_non_stream_response(response)
-                    else:
                         yield from self._handle_stream_response(response)
 
                 except Exception as e:
@@ -187,7 +194,7 @@ class AbsLLMModel(ABC, BaseComponent):
         )
 
     @abstractmethod
-    def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
+    def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
         """Abstract method to define specific generation logic.
 
         Args:
@@ -236,15 +243,28 @@ class AbsLLMModel(ABC, BaseComponent):
         """
         param = args[0]
         parameter = BaseCompletionParameter(**param)
-        if parameter.stream:
-            # 流式
-            result = self.generate(parameter)
-            for r in result:
-                yield r.choices[0].message.content
-        else:
-            # 同步调用
-            result = self.generate(parameter)
-            for r in result:
-                self.after_response(r)
-                yield r.choices[0].message.content
-
+        # result = self.generate(parameter)
+        
+        token_count = 0  # 初始化 token 计数器
+        for chunk in self.generate(parameter):
+            if isinstance(chunk, str) and "DONE" in chunk:
+                print(f"消耗token总数：{str(token_count)}")
+                yield "DONE"
+                break
+            if chunk.choices[0].delta:
+                text = chunk.choices[0].delta.content
+                token_count += len(encoding.encode(text))  # 实时计算 token 数量
+                yield text
+                # yield f"data: {text}"  # 以 SSE（Server-Sent Events）格式返回数据
+            else:
+                token_count += chunk.usage.total_tokens
+                print(f"返回信息：{chunk.choices[0].message.content}")
+                messages = chunk.choices[0].message.content.split("\n")
+                for message in messages:
+                  # 将消息按行拆分，并用多个 data: 行发送
+                  lines = message.split("\n\n")
+                  for line in lines:
+                      if not line:
+                          continue
+                    #   yield f"data: {line}\n\n"
+                      yield line

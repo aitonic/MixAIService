@@ -42,6 +42,11 @@ class CompletionsChoice(BaseModel):
     finish_reason: str | None = Field(default=None, description="Reason for finishing the response")
 
 
+class TokenUsage(BaseModel):
+    prompt_tokens: int | None
+    completion_tokens: int | None
+    total_tokens: int | None
+
 class ModelResponse(BaseModel):
     id: str = Field(default=None, description="id")
     object: str = Field(
@@ -50,7 +55,7 @@ class ModelResponse(BaseModel):
     )
     created: int = Field(default=None, description="创建时间")
     choices: list[CompletionsChoice] = Field(default=[], description="消息列表")
-    usage: dict | None = Field(default=None, description="usage")
+    usage: TokenUsage | None = Field(default=None, description="usage")
     model: str = Field(default="MIX", description="模型")
     system_fingerprint: str = Field(default="MIX", description="系统指纹")
 

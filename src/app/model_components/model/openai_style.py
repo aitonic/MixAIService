@@ -1,5 +1,5 @@
 import os
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Iterator
 
 import httpx
 from pydantic import BaseModel, Field
@@ -88,10 +88,10 @@ class OpenAiStyleModel(AbsLLMModel):
         """
         pass
 
-    def generate(self, parameter: BaseCompletionParameter) -> ModelResponse:
+    def generate(self, parameter: BaseCompletionParameter) -> Iterator[ModelResponse]:
         """非流式生成。"""
         try:
-            return self.completions.create(parameter)
+            yield from self.completions.create(parameter)
         except httpx.HTTPError as e:
             logger.error(f"HTTP error occurred during LLM call: {e}")
             # Handle specific HTTP errors, e.g., retry for timeouts, raise custom exceptions

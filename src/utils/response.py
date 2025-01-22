@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from src.utils.logger import logger
 
+
 def convert_value(
     obj: BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | Decimal | str | int | float | None
 ) -> dict[str, "ValueType"] | list["ValueType"] | str | int | float | None:
@@ -85,6 +86,7 @@ class ResponseUtil:
 
         Returns:
             Dict: Response dictionary containing success information.
+
         """
         result = convert_obj(result)
         logger.info(f"正常响应信息：{result}")
@@ -103,6 +105,7 @@ class ResponseUtil:
 
         Returns:
             Dict: Response dictionary containing error information.
+
         """
         result = result.model_dump() if isinstance(result, BaseModel) else result
         logger.info(f"异常响应信息：{result}")

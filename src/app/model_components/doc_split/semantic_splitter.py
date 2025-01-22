@@ -169,7 +169,7 @@ class SemanticSplitterWithEmbedding(DocSplitBase):
         }
 
         return SplitResult(
-            segments=final_segments,
+            chunks=final_segments,
             metadata=metadata,
             strategy=SplitStrategy.SEMANTIC
         )
@@ -195,4 +195,4 @@ class SemanticSplitterWithEmbedding(DocSplitBase):
         }
         
         result = self.split(SplitParameter(**params))
-        return result.segments
+        return result.chunks

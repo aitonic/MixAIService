@@ -10,12 +10,12 @@ chat_model:
       value: ModelFactory
 
   components:  # 添加一个新的键来包含列表
-    - name: PromtFactory
+    - name: PromptFactory
       alias: humanprompt
       param:
         component_type: human
         human_message: "{{query}}"
-    - name: PromtFactory
+    - name: PromptFactory
       alias: systemprompt
       param:
         component_type: system
@@ -165,6 +165,6 @@ web_scraper:
   components:  
     - name: ScraperFactory
       param:
-        component_type: browers
+        component_type: browser
         config:
           name: chrome

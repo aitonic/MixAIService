@@ -27,6 +27,7 @@ from .base import BaseScraper, ScraperConfig
 from ..base_component import BaseFactory
 from .browsers_scraper import BrowserScraper
 from .dto import ScraperType
+from src.utils import enum_util
 
 
 class ScraperFactory(BaseFactory):
@@ -62,7 +63,6 @@ class ScraperFactory(BaseFactory):
 
         """
         # Get the scraper class from the mapping
-        # type = ScraperType.__getitem__(scraper_type)
         scraper_class = cls._scrapers.get(scraper_type)
         if not scraper_class:
             # Raise an error if the scraper type is not supported
@@ -70,7 +70,8 @@ class ScraperFactory(BaseFactory):
         return scraper_class
 
     def get_bean(self, param: dict) -> BaseComponent:
-        scraper_clz = ScraperFactory.get_scraper(param["component_type"])
+        scraper_type = enum_util.get_enum_by_value(ScraperType, param["component_type"])
+        scraper_clz = ScraperFactory.get_scraper(scraper_type)
         return scraper_clz(ScraperConfig(
                     proxy=param.get("proxy"),
                     user_agent=param.get("user_agent"),

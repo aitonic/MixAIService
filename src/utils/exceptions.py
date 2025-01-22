@@ -12,14 +12,15 @@ Created: 2025-01-19
 class AIBaseError(Exception):
     """Base exception class for all AI-related errors."""
     
-    def __init__(self, message:str="An AI-related error occurred.") -> None:
+    def __init__(self, message:str="An AI-related error occurred.", status_code:int=500) -> None:
         """Initialize the base exception class.
 
         Args:
             message (str): A description of the error. Defaults to a generic message.
-
+            status_code (int): HTTP status code. Defaults to 500 (Internal Server Error).
         """
         self.message = message
+        self.status_code = status_code
         super().__init__(self.message)
 
 class DocumentNotFoundError(AIBaseError):
@@ -30,9 +31,8 @@ class DocumentNotFoundError(AIBaseError):
 
         Args:
             message (str): A description of document not found error. Defaults to a generic error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 404)
         
 class LLMTimeoutError(AIBaseError):
     """Exception for LLM timeout errors."""
@@ -42,9 +42,8 @@ class LLMTimeoutError(AIBaseError):
 
         Args:
             message (str): A description of the timeout error. Defaults to a generic timeout message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 504)
 
 
 class LLMAuthorizationError(AIBaseError):
@@ -55,9 +54,8 @@ class LLMAuthorizationError(AIBaseError):
 
         Args:
             message (str): A description of the authorization error. Defaults to a generic unauthorized access message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 401)
 
 
 class LLMAPIError(AIBaseError):
@@ -68,9 +66,8 @@ class LLMAPIError(AIBaseError):
 
         Args:
             message (str): A description of the API error. Defaults to a generic API error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 502)
 
 
 class ModelLoadError(AIBaseError):
@@ -81,9 +78,8 @@ class ModelLoadError(AIBaseError):
 
         Args:
             message (str): A description of the model loading error. Defaults to a generic loading error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 503)
 
 
 class InvalidInputError(AIBaseError):
@@ -94,9 +90,8 @@ class InvalidInputError(AIBaseError):
 
         Args:
             message (str): A description of the invalid input error. Defaults to a generic invalid input message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 400)
 
 
 class TokenLimitError(AIBaseError):
@@ -107,9 +102,8 @@ class TokenLimitError(AIBaseError):
 
         Args:
             message (str): A description of the token limit exceeded error. Defaults to a generic limit exceeded message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 429)
 
 
 class InferenceError(AIBaseError):
@@ -120,9 +114,8 @@ class InferenceError(AIBaseError):
 
         Args:
             message (str): A description of the inference error. Defaults to a generic inference error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 500)
 
 
 class ResourceExhaustionError(AIBaseError):
@@ -133,9 +126,8 @@ class ResourceExhaustionError(AIBaseError):
 
         Args:
             message (str): A description of the resource exhaustion error. Defaults to a generic exhaustion message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 507)
 
 
 class DataPreprocessingError(AIBaseError):
@@ -146,9 +138,8 @@ class DataPreprocessingError(AIBaseError):
 
         Args:
             message (str): A description of the preprocessing error. Defaults to a generic preprocessing error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 500)
 
 
 class ModelConfigError(AIBaseError):
@@ -159,9 +150,8 @@ class ModelConfigError(AIBaseError):
 
         Args:
             message (str): A description of the configuration error. Defaults to a generic configuration error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 500)
 
 
 class CacheError(AIBaseError):
@@ -172,6 +162,17 @@ class CacheError(AIBaseError):
 
         Args:
             message (str): A description of the caching error. Defaults to a generic caching error message.
-
         """
-        super().__init__(message)
+        super().__init__(message, 500)
+
+
+class TooManyRequestError(AIBaseError):
+    """Exception for too many requests error."""
+    
+    def __init__(self, message:str="Too many requests to the server.") -> None:
+        """Initialize the TooManyRequestError exception.
+
+        Args:
+            message (str): A description of the too many requests error. Defaults to a generic too many requests message.
+        """
+        super().__init__(message, 429)

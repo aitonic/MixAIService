@@ -185,17 +185,17 @@ def filter_subclasses(base_class: type, classes: list[type]) -> list[type]:
 
 
 # Example usage
-if __name__ == "__main__":
-    # Replace with your file path
-    file_path = "path/to/your/file.py"
+# if __name__ == "__main__":
+#     # Replace with your file path
+#     file_path = "path/to/your/file.py"
 
-    # Get all classes
-    classes = get_classes_from_file(file_path)
+#     # Get all classes
+#     classes = get_classes_from_file(file_path)
 
-    # Filter subclasses of BaseFactory
-    subclasses = filter_subclasses(BaseFactory, classes)
+#     # Filter subclasses of BaseFactory
+#     subclasses = filter_subclasses(BaseFactory, classes)
 
-    # Print results
-    print("Subclasses of BaseFactory:")
-    for subclass in subclasses:
-        print(f"- {subclass.__name__}")
+#     # Print results
+#     print("Subclasses of BaseFactory:")
+#     for subclass in subclasses:
+#         print(f"- {subclass.__name__}")

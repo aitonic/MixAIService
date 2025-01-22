@@ -1,5 +1,11 @@
-from ..base_component import BaseComponent, BaseFactory
-from .chroma_vector_store import ChromaRetriverStore, ChromaUpsertStore
+from ..base_component import (
+    BaseComponent, 
+    BaseFactory
+)
+from .chroma_vector_store import (
+    ChromaRetriverStore, 
+    ChromaUpsertStore
+)
 
 
 class VectorFactory(BaseFactory):

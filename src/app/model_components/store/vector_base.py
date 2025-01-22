@@ -95,7 +95,8 @@ class AbsVectorStore(ABC, BaseComponent):
                 result.append(self.query(VectorQueryParameter(query_text=parameter.query_text, 
                                                           collection_name=col, 
                                                           embed_function=parameter.embed_function,
-                                                          result_count=parameter.result_count)))
+                                                          result_count=parameter.result_count,
+                                                          meta_data=parameter.meta_data)))
             except Exception:
                 logger.error(f"Error retrieving data from collection:{col}: error info{traceback.format_exc()}")
         

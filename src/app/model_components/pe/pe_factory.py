@@ -12,8 +12,14 @@ Created: 2025-01-19
 """
 
 from typing import Dict, Type
-from ..base_component import BaseComponent, BaseFactory
-from .prompt import HumanPrompt, SystemPrompt
+from ..base_component import (
+    BaseComponent, 
+    BaseFactory
+)
+from .prompt import (
+    HumanPrompt, 
+    SystemPrompt
+)
 
 
 class PromptFactory(BaseFactory):

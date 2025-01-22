@@ -20,13 +20,16 @@ Usage:
 Use the `ScraperFactory.get_scraper` method to retrieve a scraper class based on the 
 desired scraper type.
 """
+from datetime import datetime
 
-from .base import BaseScraper
+from src.app.model_components.base_component import BaseComponent
+from .base import BaseScraper, ScraperConfig
+from ..base_component import BaseFactory
 from .browsers_scraper import BrowserScraper
 from .dto import ScraperType
 
 
-class ScraperFactory:
+class ScraperFactory(BaseFactory):
     """Factory class for creating scrapers.
 
     This class manages the registration and retrieval of different scraper 
@@ -35,7 +38,7 @@ class ScraperFactory:
 
     # Mapping of scraper types to scraper implementations
     _scrapers = {
-        ScraperType.BROWER: BrowserScraper,
+        ScraperType.BROWER.value: BrowserScraper,
     }
 
     @classmethod
@@ -59,8 +62,19 @@ class ScraperFactory:
 
         """
         # Get the scraper class from the mapping
+        # type = ScraperType.__getitem__(scraper_type)
         scraper_class = cls._scrapers.get(scraper_type)
         if not scraper_class:
             # Raise an error if the scraper type is not supported
             raise ValueError(f"Unsupported scraper type: {scraper_type}")
         return scraper_class
+
+    def get_bean(self, param: dict) -> BaseComponent:
+        scraper_clz = ScraperFactory.get_scraper(param["component_type"])
+        return scraper_clz(ScraperConfig(
+                    proxy=param.get("proxy"),
+                    user_agent=param.get("user_agent"),
+                    created_at=param.get("created_at", datetime.now()),
+                    created_by=param.get("created_by", "ai"),
+                    name=param.get("name", "brower_scraper")
+                ))

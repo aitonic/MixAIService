@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
+from pydantic import BaseModel, Field
+
 
 class ScraperType(Enum):
     """Enum defining different types of scrapers"""

@@ -1,6 +1,8 @@
 # Response
+from dataclasses import dataclass, is_dataclass
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -41,6 +43,15 @@ def convert_value(
         # For other types, return the object itself
         return obj
 
+def convert_dataclass(obj:Any):
+    data_dict = obj.__dict__
+    for key, val in data_dict.items():
+        if is_dataclass(val):
+            data_dict[key] = convert_dataclass(val)
+        else:
+            data_dict[key] = convert_value(val)
+
+    return data_dict
 # Type alias for recursive reference
 ValueType = BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | Decimal | str | int | float | None
 
@@ -57,6 +68,8 @@ def convert_obj(
         Union[Dict, List, str, int, float, None]: Converted object.
 
     """
+    if is_dataclass(obj):
+        return convert_dataclass(obj)
     obi = (
         convert_value(obj)
         if isinstance(obj, BaseModel)
@@ -72,7 +85,9 @@ def convert_obj(
             obi[key] = convert_obj(value)
         
         return obi
+
     return obi.model_dump() if isinstance(obi, BaseModel) else obi
+
 
 
 class ResponseUtil:

@@ -22,6 +22,7 @@ from typing import Generic, TypeVar
 
 from playwright.async_api import Browser, BrowserContext, Page
 
+from ..base_component import BaseComponent
 from .dto import ScraperResult
 
 T = TypeVar('T', bound=ScraperResult)
@@ -49,7 +50,7 @@ class ScraperConfig:
     created_at: datetime = datetime.now()
     created_by: str = "ai"
 
-class BaseScraper(ABC, Generic[T]):
+class BaseScraper(ABC, Generic[T], BaseComponent):
     """Base class for all scraper implementations.
 
     This abstract class defines the interface and common functionality 
@@ -119,8 +120,9 @@ class BaseScraper(ABC, Generic[T]):
             self.initialized = False
         except Exception as e:
             print(f"Error during cleanup: {str(e)}")
-
-    async def __call__(self, url: str) -> T:
+    
+    # async def __call__(self, url: str) -> T:
+    async def __call__(self, param: dict) -> T:
         """Execute the scraping operation in sequence.
 
         This method ensures the scraper is initialized before scraping and cleans up resources afterward.
@@ -143,7 +145,7 @@ class BaseScraper(ABC, Generic[T]):
                     raise RuntimeError("Failed to initialize scraper")
 
             # Perform scraping
-            result = await self.read(url)
+            result = await self.read(param["url"])
             return result
 
         except Exception as e:

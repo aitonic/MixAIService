@@ -18,7 +18,7 @@ T = TypeVar("T")
 
 
 @agent_crtl.post("/simple-ai/run")
-def run_agent_with_config(req: RunParameter) -> str:
+async def run_agent_with_config(req: RunParameter) -> str:
     """Run AI agent with specified configuration.
 
     This interface receives a RunParameter request object containing all necessary parameters.
@@ -44,12 +44,12 @@ def run_agent_with_config(req: RunParameter) -> str:
     req.data.input = datas.query
     req.data.query_text = datas.query
     # req.data.source = datas.query
-    result = resolve_agent_config(req)
+    result = await resolve_agent_config(req)
     return ResponseUtil.success(result)
     # return StreamingResponse(resolve_agent_config(req), media_type="text/event-stream")
 
 
-def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
+async def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
     """Get app configuration based on app_no and parse execution result.
 
     Args:
@@ -68,6 +68,8 @@ def resolve_agent_config(req: RunParameter) -> str | dict | list | None:
 
     run_params = _build_run_params(path, path_2_value, req)
     result = llm(run_params)
+    if inspect.iscoroutine(result):
+        result = await result
 
     return _process_result(result)
 
@@ -172,7 +174,6 @@ def _build_run_params(path: list[str], path_2_value: dict, req: RunParameter) ->
 
 
   # 泛型，用于匹配输入和输出类型
-
 def _process_result(result: Iterator[T] | T) -> T | None:
     """Process execution result.
 

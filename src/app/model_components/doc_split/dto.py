@@ -25,7 +25,7 @@ class SplitParameter:
 class SplitResult:
     """Results from document splitting operation."""
 
-    segments: list[str]
+    chunks: list[str]
     metadata: dict
     strategy: SplitStrategy
     

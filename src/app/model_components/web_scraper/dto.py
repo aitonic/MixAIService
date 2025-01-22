@@ -18,7 +18,7 @@ from enum import Enum
 class ScraperType(Enum):
     """Enum defining different types of scrapers"""
 
-    BROWER = "browers"
+    BROWSER = "browers"
 
 @dataclass
 class PageMetadata:

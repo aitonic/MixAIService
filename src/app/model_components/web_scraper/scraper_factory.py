@@ -35,11 +35,11 @@ class ScraperFactory:
 
     # Mapping of scraper types to scraper implementations
     _scrapers = {
-        ScraperType.BROWER: BrowserScraper,
+        ScraperType.BROWSER: BrowserScraper,
     }
 
     @classmethod
-    def get_scraper(cls, scraper_type: ScraperType.BROWER) -> type[BaseScraper]:
+    def get_scraper(cls, scraper_type: ScraperType = ScraperType.BROWSER) -> type[BaseScraper]:
         """Retrieve the scraper class for the given scraper type.
 
         Args:
@@ -53,7 +53,7 @@ class ScraperFactory:
 
         Example:
             ```python
-            scraper_class = ScraperFactory.get_scraper(ScraperType.BROWER)
+            scraper_class = ScraperFactory.get_scraper(ScraperType.BROWSER)
             scraper_instance = scraper_class()
             ```
 

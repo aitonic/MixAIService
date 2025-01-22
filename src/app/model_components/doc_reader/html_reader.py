@@ -123,10 +123,9 @@ class HTMLDocReader(BaseDocReader):
 
         Returns:
             str: Processed Markdown content
-
         """
         raw_content = self.read_data(file_path)
         parsed_content = self.parse_content(raw_content)
-        return self.to_markdown(parsed_content["content"], prompt)
+        return self.to_markdown(parsed_content, prompt)
 
 

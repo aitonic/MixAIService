@@ -1,6 +1,7 @@
 # markdown_formatter.py
 from typing import Any
 
+from src.utils.logger import logger
 from src.app.model_components.model.dto import BaseCompletionParameter, BaseMessage
 from src.app.model_components.model.openai_style import OpenAiStyleModel
 
@@ -24,7 +25,7 @@ class MarkdownFormatter:
         self.llm_model = llm_model
         self.model = parameter.model
         self.max_tokens = parameter.max_new_tokens
-        self.temperature = parameter. temperature
+        self.temperature = parameter.temperature
 
     def convert_html_by_llm(self, content: str, prompt: str) -> str:
         """Convert HTML to Markdown using LLM.
@@ -50,13 +51,27 @@ class MarkdownFormatter:
             stream=False  # 确保不使用流式返回
         )
         
-        # 处理生成器返回值
-        for response in self.llm_model.generate(parameter):
-            if not response.choices or len(response.choices) == 0:
-                continue
-            return response.choices[0].message.content
+        try:
+            # Process generator responses
+            for response in self.llm_model.generate(parameter):
+                # Type and attribute checking
+                if not hasattr(response, 'choices'):
+                    continue
+                    
+                if not response.choices:
+                    continue
+                    
+                choice = response.choices[0]
+                if not hasattr(choice, 'message') or not hasattr(choice.message, 'content'):
+                    continue
+                    
+                return choice.message.content
+                
+            return ""  # Return empty string if no valid response
             
-        return ""  # 如果没有有效响应，返回空字符串
+        except Exception as e:
+            logger.error(f"Error processing LLM response: {str(e)}")
+            return ""  # Return empty string on error
     
 
     @staticmethod

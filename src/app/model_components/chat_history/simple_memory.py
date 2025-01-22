@@ -5,7 +5,7 @@ from .dto import MessageInfo, MessageListParameter
 
 # 所有使用本地内存的记忆
 # {用户：{id:消息}}
-memories: dict[str, dict[str:MessageInfo]] = {}
+memories: dict[str, dict[str, MessageInfo]] = {}
 
 
 class DbMemory(AbsMemory):
@@ -88,17 +88,23 @@ class LocalMemory(AbsMemory):
         return message.id
 
     def list_message(self, parameter: MessageListParameter) -> list[MessageInfo]:
-        """Query message list
+        """Query message list.
         
-        parameter: Query parameters
-        return: Message records queried based on conditions
+        Args:
+            parameter (MessageListParameter): Query parameters containing user_id,
+                created timestamp, limit, and sort order.
+        
+        Returns:
+            list[MessageInfo]: List of messages matching the query parameters.
         """
-        user_memory = self.memories.get(parameter.api_key, {})
+        # Get messages for user_id instead of api_key
+        user_memory = self.memories.get(parameter.user_id, {})
         if not user_memory:
             return []
 
         messages = [
-            mem for mem in list(user_memory.values()) if mem.created > parameter.created
+            mem for mem in list(user_memory.values()) 
+            if mem.created > parameter.created
         ]
         messages.sort(key=lambda x: x.created, reverse=parameter.desc)
         return messages[: parameter.limit]

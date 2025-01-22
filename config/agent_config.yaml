@@ -152,3 +152,19 @@ semantic_split:
         embedding_model: 
         similarity_threshold: 70
         component_type: semantic
+
+
+web_scraper:
+  excute_path: ScraperFactory
+  # 需要转换的参数，指定转换形式
+  converter:
+    - name: ScraperFactory
+      type: instance
+      value: ScraperFactory
+
+  components:  
+    - name: ScraperFactory
+      param:
+        component_type: browers
+        config:
+          name: chrome

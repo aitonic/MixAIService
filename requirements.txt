@@ -28,3 +28,5 @@ PyMuPDF==1.25.1
 Jinja2==3.1.5
 chromadb==0.6.2
 playwright==1.49.1   # playwright install chromium
+modin[ray]==0.32.0
+sqlglot==26.2.1

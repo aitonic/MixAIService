@@ -1,4 +1,5 @@
-from engine import _engine
+from src.utils.engine import _engine
+import pandas as pd
 
 if _engine == "modin":
     try:
@@ -13,3 +14,6 @@ else:
     from pandas import *
 
     __name__ = "pandas"
+
+# Re-export pandas as pd
+__all__ = ['pd']

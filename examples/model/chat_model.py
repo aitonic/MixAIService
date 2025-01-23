@@ -13,7 +13,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 print(project_root)
 sys.path.append(project_root)
 
-from src.app.model_components.model.openai_style import (
+from src.app.components.model.openai_style import (
     BaseCompletionParameter,
     OpenAiStyleLLMParameter,
     OpenAiStyleModel,

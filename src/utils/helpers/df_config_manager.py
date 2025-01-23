@@ -6,7 +6,7 @@ import hashlib
 import json
 import os
 
-from pandasai.helpers.path import create_directory, find_closest, find_project_root
+from src.utils.helpers.path import create_directory, find_closest, find_project_root
 
 from .df_info import df_type
 

@@ -1,6 +1,6 @@
-import pandasai.pandas as pd
+import src.utils.pandas as pd
 
-from .from_google_sheets import from_google_sheets
+# from src.utils.helpers.from_google_sheets import from_google_sheets
 
 
 class FileImporter:
@@ -26,7 +26,7 @@ class FileImporter:
             return pd.read_parquet(file_path)
         elif file_path.endswith(".xlsx"):
             return pd.read_excel(file_path)
-        elif file_path.startswith("https://docs.google.com/spreadsheets/"):
-            return from_google_sheets(file_path)[0]
+        # elif file_path.startswith("https://docs.google.com/spreadsheets/"):
+        #     return from_google_sheets(file_path)[0]
         else:
             raise ValueError("Invalid file format.")

@@ -44,7 +44,7 @@ except ImportError:
     pass
 
 
-def df_type(df: DataFrameType) -> Union[str, None]:
+def df_type(df: DataFrameType) -> Union[str, None]: # type: ignore
     """
     Returns the type of the dataframe.
 
@@ -62,3 +62,5 @@ def df_type(df: DataFrameType) -> Union[str, None]:
         return "pandas"
     else:
         return None
+    
+

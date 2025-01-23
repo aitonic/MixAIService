@@ -1,6 +1,6 @@
 import os
 
-from pandasai.exceptions import InvalidWorkspacePathError
+from src.utils.exceptions import InvalidWorkspacePathError
 
 
 def find_project_root(filename=None):

@@ -1,7 +1,7 @@
 from typing import Dict, List
 
-from pandasai.helpers.df_info import DataFrameType, df_type
-from pandasai.pydantic import BaseModel, ValidationError
+from src.utils.helpers.df_info import DataFrameType, df_type
+from pydantic import BaseModel, ValidationError
 
 
 class DfValidationResult:
@@ -59,9 +59,9 @@ class DfValidator:
         df: dataframe to be validated
     """
 
-    _df: DataFrameType
+    _df: DataFrameType # type: ignore
 
-    def __init__(self, df: DataFrameType):
+    def __init__(self, df: DataFrameType): # type: ignore
         """
         Args:
             df: dataframe to be validated
@@ -88,7 +88,7 @@ class DfValidator:
         except ValidationError as e:
             return e.errors()
 
-    def _df_to_list_of_dict(self, df: DataFrameType, dataframe_type: str) -> List[Dict]:
+    def _df_to_list_of_dict(self, df: DataFrameType, dataframe_type: str) -> List[Dict]: # type: ignore
         """
         Create list of dict of dataframe rows on basis of dataframe type
         Supports only polars and pandas dataframe

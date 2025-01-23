@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pandasai.skills import Skill
+from src.app.components.skills import Skill
 
 
 class SkillsManager:

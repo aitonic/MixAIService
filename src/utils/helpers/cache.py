@@ -4,8 +4,8 @@ from typing import Any
 
 import duckdb
 
-from ..constants import CACHE_TOKEN, DEFAULT_FILE_PERMISSIONS
-from .path import find_project_root
+from src.constants import CACHE_TOKEN, DEFAULT_FILE_PERMISSIONS
+from src.utils.helpers.path import find_project_root
 
 
 class Cache:

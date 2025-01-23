@@ -7,7 +7,7 @@ import traceback
 
 import yaml
 
-from src.app.model_components.base_component import BaseFactory
+from src.app.components.base_component import BaseFactory
 from src.utils.logger import logger
 
 exclude_name = ["datetime", "Undefined", "Path"]

@@ -1,7 +1,7 @@
 """Helper functions to save charts to a file, if plt.show() is called."""
 from pathlib import Path
 
-from .logger import Logger
+from src.utils.logger import Logger
 
 
 def add_save_chart(

@@ -1,9 +1,9 @@
 import os
 import unittest
 import tempfile
-from src.app.model_components.doc_reader.unstructured_reader import UnstructuredDocReader
-from src.app.model_components.doc_reader.structured_reader import StructuredDocReader
-from src.app.model_components.doc_reader.doc_reader_factory import DocReaderFactory
+from src.app.components.doc_reader.unstructured_reader import UnstructuredDocReader
+from src.app.components.doc_reader.structured_reader import StructuredDocReader
+from src.app.components.doc_reader.doc_reader_factory import DocReaderFactory
 
 
 class TestDocReader(unittest.TestCase):

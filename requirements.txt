@@ -30,3 +30,5 @@ chromadb==0.6.2
 playwright==1.49.1   # playwright install chromium
 modin[ray]==0.32.0
 sqlglot==26.2.1
+polars==1.20.0
+astor==0.8.1

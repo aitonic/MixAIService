@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 
-from src.app.model_components.model.openai_style import (
+from src.app.components.model.openai_style import (
     BaseCompletionParameter,
     OpenAiStyleLLMParameter,
     OpenAiStyleModel,

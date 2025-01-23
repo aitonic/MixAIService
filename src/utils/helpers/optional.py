@@ -12,13 +12,13 @@ from typing import TYPE_CHECKING, List
 
 from pandas.util.version import Version
 
-from pandasai.constants import WHITELISTED_BUILTINS
-from pandasai.safe_libs.restricted_base64 import RestrictedBase64
-from pandasai.safe_libs.restricted_datetime import RestrictedDatetime
-from pandasai.safe_libs.restricted_json import RestrictedJson
-from pandasai.safe_libs.restricted_matplotlib import RestrictedMatplotlib
-from pandasai.safe_libs.restricted_numpy import RestrictedNumpy
-from pandasai.safe_libs.restricted_pandas import RestrictedPandas
+from src.constants import WHITELISTED_BUILTINS
+from src.utils.safe_libs.restricted_base64 import RestrictedBase64
+from src.utils.safe_libs.restricted_datetime import RestrictedDatetime
+from src.utils.safe_libs.restricted_json import RestrictedJson
+# from src.utils.safe_libs.restricted_matplotlib import RestrictedMatplotlib
+from src.utils.safe_libs.restricted_numpy import RestrictedNumpy
+from src.utils.safe_libs.restricted_pandas import RestrictedPandas
 
 if TYPE_CHECKING:
     import types
@@ -75,14 +75,14 @@ def get_environment(additional_deps: List[dict], secure: bool = True) -> dict:
 
     if secure:
         env["pd"] = RestrictedPandas()
-        env["plt"] = RestrictedMatplotlib()
+        # env["plt"] = RestrictedMatplotlib()
         env["np"] = RestrictedNumpy()
 
         for lib in additional_deps:
-            if lib["name"] == "seaborn":
-                from pandasai.safe_libs.restricted_seaborn import RestrictedSeaborn
+            # if lib["name"] == "seaborn":
+            #     from pandasai.safe_libs.restricted_seaborn import RestrictedSeaborn
 
-                env["sns"] = RestrictedSeaborn()
+            #     env["sns"] = RestrictedSeaborn()
 
             if lib["name"] == "datetime":
                 env["datetime"] = RestrictedDatetime()

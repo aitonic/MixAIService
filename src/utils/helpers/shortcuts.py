@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
-from ..helpers.df_info import DataFrameType
+from src.utils.helpers.df_info import DataFrameType
 
 
 class Shortcuts(ABC):

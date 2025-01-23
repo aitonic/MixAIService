@@ -5,8 +5,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from pandasai.exceptions import PandasAIApiCallError, PandasAIApiKeyError
-from pandasai.helpers.logger import Logger
+from src.utils.exceptions import PandasAIApiCallError, PandasAIApiKeyError
+from src.utils.logger import Logger
 
 
 class Session:

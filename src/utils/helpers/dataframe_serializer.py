@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 
-import pandasai.pandas as pd
+import src.utils.pandas as pd
 
 
 class DataframeSerializerType(Enum):
@@ -126,7 +126,7 @@ class DataframeSerializer:
 
             if df.connector_relations:
                 for relation in df.connector_relations:
-                    from pandasai.ee.connectors.relations import ForeignKey, PrimaryKey
+                    from src.app.components.connectors.ee.relations import ForeignKey, PrimaryKey
 
                     if (
                         isinstance(relation, PrimaryKey) and relation.name == col_name

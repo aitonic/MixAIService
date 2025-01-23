@@ -6,8 +6,8 @@ import asyncio
 # from src.app.model_components.model.dto import ModelResponse
 # from src.app.model_components.model.dto import BaseCompletionParameter, BaseMessage
 
-from src.app.model_components.doc_reader.html_reader import HTMLDocReader
-from src.app.model_components.model.openai_style import (
+from src.app.components.doc_reader.html_reader import HTMLDocReader
+from src.app.components.model.openai_style import (
     OpenAiStyleLLMParameter,
     OpenAiStyleModel,
 )

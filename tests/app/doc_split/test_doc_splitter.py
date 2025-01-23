@@ -10,13 +10,13 @@ import unittest
 from unittest.mock import Mock, patch
 import numpy as np
 
-from src.app.model_components.doc_split.doc_split_factory import DocSplitterFactory, SplitterType
-from src.app.model_components.doc_split.dto import SplitParameter, SplitStrategy, SplitResult
-from src.app.model_components.model.dto import BaseLLMParameter, EmbedParameter
-from src.app.model_components.doc_split.base import DocSplitBase
-from src.app.model_components.doc_split.format_splitter import FormatSplitter
-from src.app.model_components.doc_split.semantic_splitter import SemanticSplitterWithEmbedding
-from src.app.model_components.model.embedding import OpenAiStyleEmbeddings
+from src.app.components.doc_split.doc_split_factory import DocSplitterFactory, SplitterType
+from src.app.components.doc_split.dto import SplitParameter, SplitStrategy, SplitResult
+from src.app.components.model.dto import BaseLLMParameter, EmbedParameter
+from src.app.components.doc_split.base import DocSplitBase
+from src.app.components.doc_split.format_splitter import FormatSplitter
+from src.app.components.doc_split.semantic_splitter import SemanticSplitterWithEmbedding
+from src.app.components.model.embedding import OpenAiStyleEmbeddings
 
 
 class TestDocSplitterFactory(unittest.TestCase):

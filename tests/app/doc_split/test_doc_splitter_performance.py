@@ -12,8 +12,8 @@ import pstats
 from io import StringIO
 from typing import Any, Callable
 
-from src.app.model_components.doc_split.doc_split_factory import DocSplitterFactory, SplitterType
-from src.app.model_components.doc_split.dto import SplitParameter, SplitStrategy
+from src.app.components.doc_split.doc_split_factory import DocSplitterFactory, SplitterType
+from src.app.components.doc_split.dto import SplitParameter, SplitStrategy
 
 
 class DocSplitterPerformanceTest(unittest.TestCase):

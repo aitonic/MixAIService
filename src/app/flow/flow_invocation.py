@@ -375,11 +375,11 @@ def test() -> None:
     #         return
     #     yield r
 
-    from ..model_components.model.embedding import (
+    from ..components.model.embedding import (
         BaseLLMParameter,
         OpenAiStyleEmbeddings,
     )
-    from ..model_components.store.chroma_vector_store import (
+    from ..components.store.chroma_vector_store import (
         ChromaVectorStore,
         VectorQueryParameter,
     )

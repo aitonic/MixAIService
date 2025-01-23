@@ -2,9 +2,9 @@ import os
 
 from pydantic import BaseModel
 
-from pandasai.constants import DEFAULT_FILE_PERMISSIONS
+from src.constants import DEFAULT_FILE_PERMISSIONS
 
-from ..helpers.path import find_project_root
+from src.utils.helpers.path import find_project_root
 
 
 class FolderConfig(BaseModel):

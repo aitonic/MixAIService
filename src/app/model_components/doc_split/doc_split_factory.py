@@ -13,7 +13,10 @@ Typical usage example:
 from enum import Enum
 from typing import Dict, Type
 
-from ..base_component import BaseComponent, BaseFactory
+from ..base_component import (
+    BaseComponent, 
+    BaseFactory
+)
 from .format_splitter import FormatSplitter
 from .semantic_splitter import SemanticSplitterWithEmbedding
 

@@ -7,8 +7,10 @@ from pydantic import ValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import StreamingResponse
 
+from src.utils.exceptions import AIBaseError
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
+
 
 
 def exception_handler(request: Request, e: Exception) -> Response:
@@ -30,6 +32,9 @@ def exception_handler(request: Request, e: Exception) -> Response:
     """
     try:
         logger.error(f"serverErr error: {traceback.format_exc()}")
+
+        if isinstance(e, AIBaseError):
+            return ResponseUtil.fail(msg=e.message, status_code=e.status_code)
 
         if isinstance(e, ValidationError):
             logger.error(f"{e.errors()}")

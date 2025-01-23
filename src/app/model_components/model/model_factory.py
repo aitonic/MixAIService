@@ -1,4 +1,7 @@
-from ..base_component import BaseComponent, BaseFactory
+from ..base_component import (
+    BaseComponent, 
+    BaseFactory
+)
 from .dto import BaseLLMParameter
 from .embedding import OpenAiStyleEmbeddings
 from .mix import Mix, MixLLMParameter

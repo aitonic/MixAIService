@@ -44,6 +44,18 @@ def convert_value(
         return obj
 
 def convert_dataclass(obj:Any):
+    """Convert dataclass object to dictionary format recursively.
+    
+    Args:
+        obj (Any): Input dataclass object to be converted.
+        
+    Returns:
+        dict: Converted dictionary containing all fields and their values.
+        
+    Note:
+        This function will recursively process nested dataclass objects.
+        Non-dataclass values will be processed by convert_value function.
+    """
     data_dict = obj.__dict__
     for key, val in data_dict.items():
         if is_dataclass(val):
@@ -52,6 +64,8 @@ def convert_dataclass(obj:Any):
             data_dict[key] = convert_value(val)
 
     return data_dict
+
+
 # Type alias for recursive reference
 ValueType = BaseModel | dict[str, "ValueType"] | list["ValueType"] | datetime | Decimal | str | int | float | None
 
@@ -92,7 +106,7 @@ def convert_obj(
 
 class ResponseUtil:
     @staticmethod
-    def success(result: dict | str | None = None, code: int = 200000) -> dict:
+    def success(result: dict | str | None = None, code: int = 200) -> dict:
         """Return a success response with the given result.
 
         Args:
@@ -104,13 +118,13 @@ class ResponseUtil:
 
         """
         result = convert_obj(result)
-        logger.info(f"正常响应信息：{result}")
+        logger.info(f"Success response info: {result}")
         return JSONResponse(
             content={"code": code, "message": "success", "result": result}
         )
 
     @staticmethod
-    def fail(result: dict | str | None = None, msg: str = "fail", code: int = 500000) -> dict:
+    def fail(result: dict | str | None = None, msg: str = "fail", code: int = 500) -> dict:
         """Return a failure response.
 
         Args:
@@ -123,5 +137,5 @@ class ResponseUtil:
 
         """
         result = result.model_dump() if isinstance(result, BaseModel) else result
-        logger.info(f"异常响应信息：{result}")
+        logger.info(f"Error response info: {result}")
         return JSONResponse(content={"code": code, "message": msg, "result": result})

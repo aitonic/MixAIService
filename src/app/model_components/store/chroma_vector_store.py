@@ -116,10 +116,13 @@ class ChromaVectorStore(AbsVectorStore):
         
         id = self.get_id(prefix=parameter.collection_name)
         # Add text to collection
+        if parameter.meta_data:
+            parameter.meta_data["source"] = parameter.text
+        # meda_datas = [{"source": parameter.text}] if not parameter.meta_data else [parameter.meta_data]
         collection.add(
             ids=id,
             embeddings=embed_result,
-            metadatas=[{"source": parameter.text}]
+            metadatas=[{"source": parameter.text}] if not parameter.meta_data else [parameter.meta_data]
         )
         return id  # Return success
 
@@ -154,10 +157,20 @@ class ChromaVectorStore(AbsVectorStore):
             
             embed_result = self.__embedding(parameter.query_text, parameter.embed_function)
 
-            # Execute query
+            # 优化后的查询条件构建
+            where_conditions = (
+                [{k: v} for k, v in parameter.meta_data.items()]
+                if parameter.meta_data
+                else None
+            )
+            
+            # 执行查询
             results = collection.query(
                 query_embeddings=embed_result,
-                n_results=parameter.result_count  # Return top 5 results
+                n_results=parameter.result_count,
+                where={"$and": where_conditions} 
+                    if where_conditions and len(where_conditions) > 1 
+                    else (None if not where_conditions else where_conditions[0])
             )
             results["collection_name"] = parameter.collection_name
             
@@ -180,7 +193,7 @@ class ChromaUpsertStore(ChromaVectorStore):
             str: Result after adding text.
 
         """
-        params = args[0]  # Get first parameter dictionary
+        params:dict = args[0]  # Get first parameter dictionary
         if "text" not in params:
             raise ValueError("text field not supplied in chroma upsert")
         text = params["text"]
@@ -190,7 +203,8 @@ class ChromaUpsertStore(ChromaVectorStore):
                 ids.append(self.add_text(VectorAddParameter(
                     text=t,
                     collection_name=params.get("collection_name", DEFAULT_COLECCTION),  # Simplify with `.get`
-                    embed_function=params["embed_function"]
+                    embed_function=params.get("embed_function", None),
+                    meta_data=params.get("meda_data", {})
                 )))
         else:
             ids.append(self.add_text(VectorAddParameter(**params)))

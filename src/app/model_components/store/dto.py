@@ -6,10 +6,15 @@ from pydantic import BaseModel, Field
 
 DEFAULT_COLECCTION = "default_collection"
 
+class MetaData(BaseModel):
+    """meta data for save & filter
+    """
+
 class VectorAddParameter(BaseModel):
     text: str = Field(description="做embedding的文本")
     collection_name: str = Field(default=DEFAULT_COLECCTION)
     embed_function:object = None
+    meta_data:dict | None = {}
 
 
 class VectorQueryParameter(BaseModel):
@@ -17,12 +22,14 @@ class VectorQueryParameter(BaseModel):
     collection_name: str = Field(default=DEFAULT_COLECCTION)
     embed_function:object = None
     result_count:int = 5
+    meta_data:dict | None = {}
 
 class VectorBacthQueryParameter(BaseModel):
     query_text: str 
     search_collections: list[str] = Field(default=[DEFAULT_COLECCTION])
     embed_function:object = None
     result_count:int = 5
+    meta_data:dict | None = {}
 
 
 class VectorRetriverResult(BaseModel):

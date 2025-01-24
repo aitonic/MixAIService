@@ -28,6 +28,9 @@ class CodeGenerator(BaseLogicUnit):
         pipeline_context: PipelineContext = kwargs.get("context")
         logger: Logger = kwargs.get("logger")
 
+        if not pipeline_context or not pipeline_context.config or not pipeline_context.config.llm:
+            raise ValueError("LLM configuration is missing. Please check your configuration.")
+
         code = pipeline_context.config.llm.generate_code(input, pipeline_context)
 
         pipeline_context.add("last_code_generated", code)

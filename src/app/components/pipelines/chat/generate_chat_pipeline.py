@@ -1,10 +1,9 @@
-# app/model_components/pipelines/chat/generate_chat_pipeline.py
 from typing import TYPE_CHECKING
 
 from src.app.agent.base_judge import BaseJudge
 
 if TYPE_CHECKING:
-    from src.utils.helpers.query_exec_tracker import QueryExecTracker
+    pass
 
 from src.app.components.pipelines.chat.cache_lookup import CacheLookup
 from src.app.components.pipelines.chat.cache_population import CachePopulation
@@ -29,18 +28,17 @@ from src.app.components.pipelines.chat.result_validation import ResultValidation
 from src.app.components.pipelines.chat.validate_pipeline_input import (
     ValidatePipelineInput,
 )
-from src.app.components.pipelines.core.pipeline import Pipeline
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
 from src.utils.logger import Logger
 
 
-class GenerateChatPipeline(Pipeline): # 继承 Pipeline
-    code_generation_pipeline = Pipeline
-    code_execution_pipeline = Pipeline
+class GenerateChatPipeline:
+    
+    code_generation_pipeline = None
+    code_execution_pipeline = None
     context: PipelineContext
     _logger: Logger
     last_error: str
-    tracker: 'QueryExecTracker'
 
     def __init__(
         self,
@@ -51,14 +49,19 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         on_code_generation=None,
         before_code_execution=None,
         on_result=None,
-        tracker: 'QueryExecTracker' = None,
     ):
-        self.tracker = tracker  # 先设置 tracker
-        super().__init__( # 调用父类 Pipeline 的 __init__ 方法
-            context=context, # 传递 context 参数
-            logger=logger, # 传递 logger 参数
-            query_exec_tracker=tracker,
-            steps=[ # 定义 steps
+        from src.app.components.pipelines.core.pipeline import Pipeline  # 延迟导入
+        from src.utils.helpers.query_exec_tracker import QueryExecTracker  # 延迟导入
+
+        self.query_exec_tracker = QueryExecTracker(
+            server_config=context.config.log_server
+        )
+
+        self.code_generation_pipeline = Pipeline(
+            context=context,
+            logger=logger,
+            query_exec_tracker=self.query_exec_tracker,
+            steps=[
                 ValidatePipelineInput(),
                 CacheLookup(),
                 PromptGeneration(
@@ -78,10 +81,10 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             ],
         )
 
-        self.code_execution_pipeline = Pipeline( # 创建 code_execution_pipeline
+        self.code_execution_pipeline = Pipeline(
             context=context,
             logger=logger,
-            query_exec_tracker=self.tracker,
+            query_exec_tracker=self.query_exec_tracker,
             steps=[
                 CodeExecution(
                     before_execution=before_code_execution,
@@ -95,10 +98,10 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             ],
         )
 
-        self.code_exec_error_pipeline = ErrorCorrectionPipeline( # 创建 code_exec_error_pipeline
+        self.code_exec_error_pipeline = ErrorCorrectionPipeline(
             context=context,
             logger=logger,
-            query_exec_tracker=self.tracker,
+            query_exec_tracker=self.query_exec_tracker,
             on_code_generation=on_code_generation,
             on_prompt_generation=on_prompt_generation,
         )
@@ -112,12 +115,11 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
                 self.judge.pipeline.pipeline.context = context
 
             self.judge.pipeline.pipeline.logger = logger
-            self.judge.pipeline.pipeline.query_exec_tracker = self.tracker
+            self.judge.pipeline.pipeline.query_exec_tracker = self.query_exec_tracker
 
         self.context = context
         self._logger = logger
         self.last_error = None
-        self.tracker = tracker
 
     def on_code_execution_failure(self, code: str, errors: Exception) -> str:
         """Executes on code execution failure
@@ -130,7 +132,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
 
         """
         # Add information about the code failure in the query tracker for debug
-        self.tracker.add_step(
+        self.query_exec_tracker.add_step(
             {
                 "type": "CodeExecution",
                 "success": False,
@@ -146,7 +148,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
 
     def on_code_cleaning_failure(self, code, errors):
         # Add information about the code failure in the query tracker for debug
-        self.tracker.add_step(
+        self.query_exec_tracker.add_step(
             {
                 "type": "CodeCleaning",
                 "success": False,
@@ -171,7 +173,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         return context.get("found_in_cache")
 
     def get_last_track_log_id(self):
-        return self.tracker.last_log_id
+        return self.query_exec_tracker.last_log_id
 
     def run_generate_code(self, input: ChatPipelineInput) -> dict:
         """Executes the code generation pipeline with user input and return the result
@@ -190,11 +192,11 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         self.context.reset_intermediate_values()
 
         # Start New Tracking for Query
-        self.tracker.start_new_track(input)
+        self.query_exec_tracker.start_new_track(input)
 
-        self.tracker.add_skills(self.context)
+        self.query_exec_tracker.add_skills(self.context)
 
-        self.tracker.add_dataframes(self.context.dfs)
+        self.query_exec_tracker.add_dataframes(self.context.dfs)
 
         # Add Query to memory
         self.context.memory.add(input.query, True)
@@ -208,9 +210,9 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         try:
             output = self.code_generation_pipeline.run(input)
 
-            self.tracker.success = True
+            self.query_exec_tracker.success = True
 
-            self.tracker.publish()
+            self.query_exec_tracker.publish()
 
             return output
 
@@ -221,8 +223,8 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             traceback.print_exc()
 
             self.last_error = str(e)
-            self.tracker.success = False
-            self.tracker.publish()
+            self.query_exec_tracker.success = False
+            self.query_exec_tracker.publish()
 
             return (
                 "Unfortunately, I was not able to answer your question, "
@@ -247,11 +249,11 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         self.context.reset_intermediate_values()
 
         # Start New Tracking for Query
-        self.tracker.start_new_track(input)
+        self.query_exec_tracker.start_new_track(input)
 
-        self.tracker.add_skills(self.context)
+        self.query_exec_tracker.add_skills(self.context)
 
-        self.tracker.add_dataframes(self.context.dfs)
+        self.query_exec_tracker.add_dataframes(self.context.dfs)
 
         # Add Query to memory
         self.context.memory.add(input.code, True)
@@ -265,9 +267,9 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         try:
             output = self.code_execution_pipeline.run(input.code)
 
-            self.tracker.success = True
+            self.query_exec_tracker.success = True
 
-            self.tracker.publish()
+            self.query_exec_tracker.publish()
 
             return output
 
@@ -278,8 +280,8 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             traceback.print_exc()
 
             self.last_error = str(e)
-            self.tracker.success = False
-            self.tracker.publish()
+            self.query_exec_tracker.success = False
+            self.query_exec_tracker.publish()
 
             return (
                 "Unfortunately, I was not able to answer your question, "
@@ -304,11 +306,11 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         self.context.reset_intermediate_values()
 
         # Start New Tracking for Query
-        self.tracker.start_new_track(input)
+        self.query_exec_tracker.start_new_track(input)
 
-        self.tracker.add_skills(self.context)
+        self.query_exec_tracker.add_skills(self.context)
 
-        self.tracker.add_dataframes(self.context.dfs)
+        self.query_exec_tracker.add_dataframes(self.context.dfs)
 
         # Add Query to memory
         self.context.memory.add(input.query, True)
@@ -339,9 +341,9 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             else:
                 output = self.code_generation_pipeline.run(input)
 
-            self.tracker.success = True
+            self.query_exec_tracker.success = True
 
-            self.tracker.publish()
+            self.query_exec_tracker.publish()
 
             return output
 
@@ -352,8 +354,8 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             traceback.print_exc()
 
             self.last_error = str(e)
-            self.tracker.success = False
-            self.tracker.publish()
+            self.query_exec_tracker.success = False
+            self.query_exec_tracker.publish()
 
             return (
                 "Unfortunately, I was not able to answer your question, "

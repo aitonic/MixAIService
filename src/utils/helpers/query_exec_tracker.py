@@ -3,20 +3,17 @@ import json
 import os
 import time
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, TypedDict, Union
+from typing import Any, TypedDict
 
 import requests
 
 from src.__version__ import __version__
-from src.app.components.connectors import BaseConnector
+from src.app.components.connectors.base import BaseConnector
+from src.app.components.pipelines.chat.chat_pipeline_input import (
+    ChatPipelineInput,
+)
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
 from src.utils.helpers.encoder import CustomEncoder
-
-if TYPE_CHECKING:
-    from src.app.components.pipelines.chat.chat_pipeline_input import (
-        ChatPipelineInput,
-        CodeExecutionPipelineInput,
-    )
 
 
 class ResponseType(TypedDict):
@@ -55,7 +52,7 @@ class QueryExecTracker:
         self._server_config = server_config
         self._query_info = {}
 
-    def start_new_track(self, input: 'ChatPipelineInput'):
+    def start_new_track(self, input: ChatPipelineInput):
         """Resets tracking variables to start new track
         """
         self._last_log_id = None
@@ -290,10 +287,3 @@ class QueryExecTracker:
     @property
     def last_log_id(self) -> int:
         return self._last_log_id
-
-    def track_execution(
-        self,
-        input_data: Union['ChatPipelineInput', 'CodeExecutionPipelineInput'],
-    ):
-        # implementation
-        pass

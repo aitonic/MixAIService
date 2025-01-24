@@ -1,7 +1,8 @@
 import json
 
 from src.utils.helpers.path import find_closest
-from src.utils.llm import LLM
+from src.utils.llm import LLM, OpenAI
+from src.utils.logger import Logger
 from src.utils.schemas.df_config import Config
 
 
@@ -21,10 +22,14 @@ def load_config_from_json(
     config = {}
 
     if override_config is None:
-        override_config = {}
+        override_config = {"llm": OpenAI()}
 
+    Logger.log(f"override_config: {override_config}")
+    
+    
     if isinstance(override_config, Config):
         override_config = override_config.model_dump()
+        
 
     try:
         with open(find_closest("pandas_ai.json")) as f:

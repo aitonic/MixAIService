@@ -1,10 +1,9 @@
 # app/model_components/pipelines/core/pipeline.py
 import logging
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from src.app.components.connectors import BaseConnector
-from src.app.components.pipelines.core.abstract_pipeline import AbstractPipeline
 from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
 from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
@@ -14,8 +13,10 @@ from src.utils.helpers.query_exec_tracker import QueryExecTracker
 from src.utils.logger import Logger
 from src.utils.schemas.df_config import Config
 
+if TYPE_CHECKING:
+    pass
 
-class Pipeline(AbstractPipeline):
+class Pipeline:
     """Base Pipeline class to be used to create custom pipelines
     """
 

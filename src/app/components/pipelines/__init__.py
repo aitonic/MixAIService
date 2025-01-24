@@ -16,11 +16,11 @@ Author: ai
 Created: 2025-01-19
 """
 
-from .core.pipeline import Pipeline
-from .core.abstract_pipeline import AbstractPipeline
-from .core.base_logic_unit import BaseLogicUnit
-from .core.pipeline_context import PipelineContext
-from .pipeline_factory import PipelineFactory  # Import PipelineFactory
+from src.app.components.pipelines.core.pipeline import Pipeline
+from src.app.components.pipelines.core.abstract_pipeline import AbstractPipeline
+from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.pipeline_factory import PipelineFactory  # Import PipelineFactory
 
 # Expose components for external usage
 __all__ = [

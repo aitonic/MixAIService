@@ -252,9 +252,9 @@ class BaseAgent:
             )
 
         try:
-            self.logger.log(f"Question: {query}")
+
             self.logger.log(
-                f"Running PandasAI with {self.context.config.llm.type} LLM..."
+                f"Running Pandas_AI with {self.context.config.llm} LLM..."
             )
 
             self.assign_prompt_id()
@@ -274,6 +274,7 @@ class BaseAgent:
                 query, output_type, self.conversation_id, self.last_prompt_id
             )
 
+            
             return self.pipeline.run(pipeline_input)
 
         except Exception as exception:

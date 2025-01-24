@@ -1,15 +1,11 @@
 # app/model_components/pipelines/core/abstract_pipeline.py
 from abc import ABC, abstractmethod
-from typing import Any
 
 
 class AbstractPipeline(ABC):
-    def __init__(self) -> None:
-        pass
-
+    """Abstract base class for all pipelines"""
+    
     @abstractmethod
-    def run(self, input: Any) -> Any:
-        """This method will return output according to
-        Implementation.
-        """
-        raise NotImplementedError("Run method must be implemented")
+    def run(self, input_data):
+        """Run the pipeline with given input"""
+        pass

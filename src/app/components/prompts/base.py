@@ -1,10 +1,9 @@
 import os
 import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
-from pydantic import Field
 
 from ..base_component import BaseComponent
 
@@ -12,16 +11,10 @@ from ..base_component import BaseComponent
 class BasePrompt(ABC, BaseComponent):
     """Abstract class for generating system and user messages."""
 
-    # system 和 user 两种
-    role: str = Field(description="content role")
-    content: str = Field(description="content")
-
     template: str | None = None
     template_path: str | None = None
 
-    def __init__(self, role: str, prompt_str: str, **kwargs) -> None:
-        self.role = role
-        self.content = prompt_str
+    def __init__(self, **kwargs) -> None:
         self.props = kwargs
 
         if self.template:
@@ -36,18 +29,6 @@ class BasePrompt(ABC, BaseComponent):
 
         self._resolved_prompt = None
 
-    @abstractmethod
-    def generate_prompt(self, params: dict) -> str:
-        """Generate prompt based on parameters.
-
-        Args:
-            params (dict): Parameters used to generate the prompt.
-
-        Returns:
-            str: The generated prompt string.
-
-        """
-        pass
 
     def render(self) -> str:
         """Render the prompt using provided properties."""

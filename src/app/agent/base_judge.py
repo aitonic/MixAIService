@@ -1,7 +1,8 @@
 ##agent/base_judge.py
-from src.utils.logger import Logger
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
 from typing import TYPE_CHECKING
+
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.utils.logger import Logger
 
 if TYPE_CHECKING:
     from src.app.components.pipelines.core.pipeline import Pipeline

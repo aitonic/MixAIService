@@ -1,18 +1,15 @@
 # app/model_components/pipelines/chat/result_parsing.py
 from typing import Any
 
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
-
-from src.utils.responses.context import Context
-from src.utils.responses.response_parser import ResponseParser
 from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
+from src.utils.responses.context import Context
+from src.utils.responses.response_parser import ResponseParser
 
 
 class ResultParsing(BaseLogicUnit):
-
-    """
-    Result Parsing Stage
+    """Result Parsing Stage
     """
 
     pass
@@ -26,8 +23,7 @@ class ResultParsing(BaseLogicUnit):
         )
 
     def execute(self, input: Any, **kwargs) -> Any:
-        """
-        This method will return output according to
+        """This method will return output according to
         Implementation.
 
         :param input: Your input data.
@@ -49,12 +45,12 @@ class ResultParsing(BaseLogicUnit):
         return LogicUnitOutput(result, True, "Results parsed successfully")
 
     def _add_result_to_memory(self, result: dict, context: PipelineContext):
-        """
-        Add the result to the memory.
+        """Add the result to the memory.
 
         Args:
             result (dict): The result to add to the memory
             context (PipelineContext) : Pipeline Context
+
         """
         if result is None:
             return

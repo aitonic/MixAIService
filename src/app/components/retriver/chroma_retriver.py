@@ -1,10 +1,8 @@
-from .base import AbsRetriver
-from .dto import (
-    RetriverQuery,
-    RetriverResult
-)
 from ..store.dto import VectorBacthQueryParameter
 from ..store.vector_base import AbsVectorStore
+from .base import AbsRetriver
+from .dto import RetriverQuery, RetriverResult
+
 
 class VectorRetriver(AbsRetriver):
 

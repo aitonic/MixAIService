@@ -1,39 +1,36 @@
 # app/model_components/connectors/pandas.py
-"""
-Pandas connector class to handle csv, parquet, xlsx files and pandas dataframes.
+"""Pandas connector class to handle csv, parquet, xlsx files and pandas dataframes.
 """
 
 import hashlib
 from functools import cache, cached_property
-from typing import Union
 
 import duckdb
 import sqlglot
-from pydantic import BaseModel # 修改 import 路径
 
 import src.utils.pandas as pd
-from src.utils.exceptions import PandasConnectorTableNotFound # 修改 import 路径
-
-from src.utils.helpers.data_sampler import DataSampler # 修改 import 路径
-from src.utils.helpers.file_importer import FileImporter # 修改 import 路径
-from src.utils.logger import Logger # 修改 import 路径
-from src.app.components.connectors.base import BaseConnector, BaseConnectorConfig # 修改 import 路径
+from src.app.components.connectors.base import (  # 修改 import 路径
+    BaseConnector,
+    BaseConnectorConfig,
+)
+from src.utils.exceptions import PandasConnectorTableNotFound  # 修改 import 路径
+from src.utils.helpers.data_sampler import DataSampler  # 修改 import 路径
+from src.utils.helpers.file_importer import FileImporter  # 修改 import 路径
+from src.utils.logger import Logger  # 修改 import 路径
 
 
 class PandasConnectorConfig(BaseConnectorConfig):
-    """
-    Pandas Connector configuration.
+    """Pandas Connector configuration.
     """
 
-    original_df: Union[pd.DataFrame, pd.Series, str, list, dict]
+    original_df: pd.DataFrame | pd.Series | str | list | dict
 
     class Config:
         arbitrary_types_allowed = True
 
 
 class PandasConnector(BaseConnector):
-    """
-    Pandas connector class to handle csv, parquet, xlsx files and pandas dataframes.
+    """Pandas connector class to handle csv, parquet, xlsx files and pandas dataframes.
     """
 
     pandas_df = pd.DataFrame
@@ -42,26 +39,26 @@ class PandasConnector(BaseConnector):
 
     def __init__(
         self,
-        config: Union[PandasConnectorConfig, dict],
+        config: PandasConnectorConfig | dict,
         **kwargs,
     ):
-        """
-        Initialize the Pandas connector with the given configuration.
+        """Initialize the Pandas connector with the given configuration.
 
         Args:
             config (PandasConnectorConfig): The configuration for the Pandas connector.
+
         """
         super().__init__(config, **kwargs)
 
         self._load_df(self.config.original_df)
         self.sql_enabled = False
 
-    def _load_df(self, df: Union[pd.DataFrame, pd.Series, str, list, dict]):
-        """
-        Load the dataframe from a file or pandas dataframe.
+    def _load_df(self, df: pd.DataFrame | pd.Series | str | list | dict):
+        """Load the dataframe from a file or pandas dataframe.
 
         Args:
             df (Union[pd.DataFrame, pd.Series, str, list, dict]): The dataframe to load.
+
         """
         if isinstance(df, pd.Series):
             self.pandas_df = df.to_frame()
@@ -80,23 +77,22 @@ class PandasConnector(BaseConnector):
             raise ValueError("Invalid input data. We cannot convert it to a dataframe.")
 
     def _load_connector_config(
-        self, config: Union[PandasConnectorConfig, dict]
+        self, config: PandasConnectorConfig | dict
     ) -> PandasConnectorConfig:
-        """
-        Loads passed Configuration to object
+        """Loads passed Configuration to object
 
         Args:
             config (PandasConnectorConfig): Construct config in structure
 
-            Returns:
+        Returns:
                 config: PandasConnectorConfig
+
         """
         return PandasConnectorConfig(**config)
 
     @cache
     def head(self, n: int = 5) -> pd.DataFrame:
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the
         data source.
         """
@@ -105,32 +101,28 @@ class PandasConnector(BaseConnector):
 
     @cache
     def execute(self) -> pd.DataFrame:
-        """
-        Execute the given query on the data source that the connector is
+        """Execute the given query on the data source that the connector is
         connected to.
         """
         return self.pandas_df
 
     @cached_property
     def rows_count(self):
-        """
-        Return the number of rows in the data source that the connector is
+        """Return the number of rows in the data source that the connector is
         connected to.
         """
         return len(self.pandas_df)
 
     @cached_property
     def columns_count(self):
-        """
-        Return the number of columns in the data source that the connector is
+        """Return the number of columns in the data source that the connector is
         connected to.
         """
         return len(self.pandas_df.columns)
 
     @property
     def column_hash(self):
-        """
-        Return the hash code that is unique to the columns of the data source
+        """Return the hash code that is unique to the columns of the data source
         that the connector is connected to.
         """
         columns_str = "".join(self.pandas_df.columns)
@@ -139,15 +131,13 @@ class PandasConnector(BaseConnector):
 
     @cached_property
     def path(self):
-        """
-        Return the path of the data source that the connector is connected to.
+        """Return the path of the data source that the connector is connected to.
         """
         pass
 
     @property
     def fallback_name(self):
-        """
-        Return the name of the table that the connector is connected to.
+        """Return the name of the table that the connector is connected to.
         """
         pass
 
@@ -156,8 +146,7 @@ class PandasConnector(BaseConnector):
         return "pd.DataFrame"
 
     def equals(self, other: BaseConnector):
-        """
-        Return whether the data source that the connector is connected to is
+        """Return whether the data source that the connector is connected to is
         equal to the other data source.
         """
         return self._original_df.equals(other._original_df)

@@ -1,4 +1,5 @@
 import gzip
+import inspect
 import logging
 import logging.handlers
 import os
@@ -6,10 +7,8 @@ import re
 import socket
 import sys
 import time
-import inspect
 from datetime import datetime, timedelta, timezone
 from logging.handlers import TimedRotatingFileHandler
-from typing import List
 
 # pydantic 基础模型，仅用于日志内容结构化存储
 try:
@@ -57,7 +56,7 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
     def do_gzip(self, old_log: str) -> None:
         """对指定日志文件进行 gzip 压缩。"""
         try:
-            with open(old_log, "r", encoding="utf-8") as old, gzip.open(old_log + '.gz', 'wt', encoding="utf-8") as comp_log:
+            with open(old_log, encoding="utf-8") as old, gzip.open(old_log + '.gz', 'wt', encoding="utf-8") as comp_log:
                 comp_log.writelines(old)
             os.remove(old_log)
         except Exception as e:
@@ -65,8 +64,7 @@ class CommonTimedRotatingFileHandler(TimedRotatingFileHandler):
             pass
 
     def should_rollover(self) -> int:
-        """
-        判断是否需要进行日志滚动：
+        """判断是否需要进行日志滚动：
         1. 如果压缩文件已存在
         2. 当前时间 >= 计划滚动时间
         """
@@ -131,8 +129,7 @@ class LoggerFormatter(logging.Formatter):
 
 
 class MessageFormatter(logging.Formatter):
-    """
-    自定义的消息格式化器：
+    """自定义的消息格式化器：
     - 在日志中插入 ISO8601 时间戳
     - 替换特殊字符
     """
@@ -190,7 +187,8 @@ class ColorFormatter(logging.Formatter):
 
 # 如果需要结构化存储单条日志内容，可以使用 pydantic，或注释掉
 class Log(BaseModel if 'BaseModel' in globals() else object):  # 避免 pydantic 未安装导致错误
-    """ 日志内容的数据模型，用于在内存中保存结构化信息 """
+    """日志内容的数据模型，用于在内存中保存结构化信息"""
+
     msg: str
     level: str 
     time: float
@@ -199,18 +197,18 @@ class Log(BaseModel if 'BaseModel' in globals() else object):  # 避免 pydantic
 
 # === 合并 Logger，保持“代码一”的主体结构，融合“代码二”的部分逻辑 ===
 class Logger:
-    """
-    统一的 Logger 类：
+    """统一的 Logger 类：
     - 保持代码一的全局 logging 配置和格式化处理。
     - 同时新增对日志的内存存储、verbose 模式切换、保存日志开关等功能。
     """
+
     log_instance: logging.Logger = None   # 全局共享的 logging.Logger
     file_handler: CommonTimedRotatingFileHandler = None
     console_handler: logging.StreamHandler = None
     json_handler: CommonTimedRotatingFileHandler = None
 
     # 新增：存储每条日志，用于后续分析或直接获取
-    _logs: List[Log] = []
+    _logs: list[Log] = []
     _last_time: float = time.time()
     _verbose: bool = True
     _save_logs: bool = True
@@ -240,8 +238,7 @@ class Logger:
 
     @staticmethod
     def _get_logger() -> logging.Logger:
-        """
-        获取全局 logger；若已存在则返回同一个实例。
+        """获取全局 logger；若已存在则返回同一个实例。
         包含控制台输出、文件输出（日志和 JSON 两种格式）。
         """
         if Logger.log_instance is not None:
@@ -295,8 +292,7 @@ class Logger:
 
     @staticmethod
     def log(message: str, level: int = logging.INFO):
-        """
-        供外部调用的统一日志接口：
+        """供外部调用的统一日志接口：
         - 使用 logging 体系打印日志
         - 同时在内存中记录日志（_logs）
         """
@@ -336,7 +332,7 @@ class Logger:
         Logger._logs.append(log_obj)
 
     @staticmethod
-    def get_logs() -> List:
+    def get_logs() -> list:
         """返回所有内存日志记录。"""
         return Logger._logs
 
@@ -348,8 +344,7 @@ class Logger:
     # === verbose 开关 ===
     @staticmethod
     def set_verbose(verbose: bool):
-        """
-        打开或关闭控制台输出，默认打开。
+        """打开或关闭控制台输出，默认打开。
         """
         Logger._verbose = verbose
         # 先确保 logger 存在
@@ -368,8 +363,7 @@ class Logger:
     # === 是否写入文件 ===
     @staticmethod
     def set_save_logs(save_logs: bool):
-        """
-        打开或关闭文件写入。若关闭，则移除文件 Handler；若开启，则添加文件 Handler。
+        """打开或关闭文件写入。若关闭，则移除文件 Handler；若开启，则添加文件 Handler。
         """
         Logger._save_logs = save_logs
         logger = Logger._get_logger()

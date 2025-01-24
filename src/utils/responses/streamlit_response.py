@@ -9,16 +9,14 @@ class StreamlitResponse(ResponseParser):
         super().__init__(context)
 
     def format_plot(self, result) -> None:
-        """
-        Display plot against a user query in Streamlit
+        """Display plot against a user query in Streamlit
         Args:
             result (dict): result contains type and value
         """
         return result["value"]
 
     def format_dataframe(self, result: dict) -> pd.DataFrame:
-        """
-        Format dataframe generate against a user query
+        """Format dataframe generate against a user query
         Args:
             result (dict): result contains type and value
         Returns:
@@ -27,8 +25,7 @@ class StreamlitResponse(ResponseParser):
         return result["value"]
 
     def format_other(self, result) -> Any:
-        """
-        Format other results
+        """Format other results
         Args:
             result (dict): result contains type and value
         Returns:

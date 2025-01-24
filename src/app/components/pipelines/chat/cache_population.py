@@ -1,22 +1,19 @@
 # app/model_components/pipelines/chat/cache_population.py
 from typing import Any
 
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
-
 from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
 
 
 class CachePopulation(BaseLogicUnit):
-    """
-    Cache Population Stage
+    """Cache Population Stage
     """
 
     pass
 
     def execute(self, input: Any, **kwargs) -> Any:
-        """
-        This method will return output according to
+        """This method will return output according to
         Implementation.
 
         :param input: Your input data.

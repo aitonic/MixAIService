@@ -9,7 +9,7 @@ class AbstractPipeline(ABC):
 
     @abstractmethod
     def run(self, input: Any) -> Any:
+        """This method will return output according to
+        Implementation.
         """
-        This method will return output according to
-        Implementation."""
         raise NotImplementedError("Run method must be implemented")

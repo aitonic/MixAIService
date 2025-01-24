@@ -1,8 +1,5 @@
 # app/model_components/pipelines/chat/error_correction_pipeline/error_correction_pipeline.py
-from typing import Optional
 
-from src.utils.logger import Logger
-from src.utils.helpers.query_exec_tracker import QueryExecTracker
 from src.app.components.pipelines.chat.code_cleaning import CodeCleaning
 from src.app.components.pipelines.chat.code_generator import CodeGenerator
 from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline_input import (
@@ -13,11 +10,12 @@ from src.app.components.pipelines.chat.error_correction_pipeline.error_prompt_ge
 )
 from src.app.components.pipelines.core.pipeline import Pipeline
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.utils.helpers.query_exec_tracker import QueryExecTracker
+from src.utils.logger import Logger
 
 
 class ErrorCorrectionPipeline:
-    """
-    Error Correction Pipeline to regenerate prompt and code
+    """Error Correction Pipeline to regenerate prompt and code
     """
 
     _context: PipelineContext
@@ -25,8 +23,8 @@ class ErrorCorrectionPipeline:
 
     def __init__(
         self,
-        context: Optional[PipelineContext] = None,
-        logger: Optional[Logger] = None,
+        context: PipelineContext | None = None,
+        logger: Logger | None = None,
         query_exec_tracker: QueryExecTracker = None,
         on_prompt_generation=None,
         on_code_generation=None,

@@ -1,5 +1,4 @@
-"""
-Logger class
+"""Logger class
 
 This class is used to log messages to the console and/or a file.
 
@@ -9,12 +8,11 @@ import inspect
 import logging
 import sys
 import time
-from typing import List
 
-from src.utils.helpers.telemetry import scarf_analytics
 from pydantic import BaseModel
 
 from src.utils.helpers.path import find_closest
+from src.utils.helpers.telemetry import scarf_analytics
 
 
 class Log(BaseModel):
@@ -27,7 +25,7 @@ class Log(BaseModel):
 class Logger:
     """Logger class"""
 
-    _logs: List[Log]
+    _logs: list[Log]
     _logger: logging.Logger
     _verbose: bool
     _last_time: float
@@ -60,7 +58,6 @@ class Logger:
 
     def log(self, message: str, level: int = logging.INFO):
         """Log a message"""
-
         if level == logging.INFO:
             self._logger.info(message)
         elif level == logging.WARNING:
@@ -100,7 +97,7 @@ class Logger:
         return time_diff
 
     @property
-    def logs(self) -> List[str]:
+    def logs(self) -> list[str]:
         """Return the logs"""
         return self._logs
 

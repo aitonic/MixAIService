@@ -1,5 +1,4 @@
-"""
-Helper class to anonymize a dataframe head by replacing the values of the columns
+"""Helper class to anonymize a dataframe head by replacing the values of the columns
 that contain personal or sensitive information with random values.
 """
 
@@ -19,8 +18,8 @@ class Anonymizer:
             email (str): email address to be checked.
 
         Returns (bool): True if the email is valid, otherwise False.
-        """
 
+        """
         email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return re.match(email_regex, email) is not None
 
@@ -32,8 +31,8 @@ class Anonymizer:
             phone_number (str): phone number to be checked.
 
         Returns (bool): True if the phone number is valid, otherwise False.
-        """
 
+        """
         pattern = r"\b(?:\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}\b"
         return re.search(pattern, phone_number) is not None
 
@@ -45,8 +44,8 @@ class Anonymizer:
             card_number (str): credit card number to be checked.
 
         Returns (str): True if the credit card number is valid, otherwise False.
-        """
 
+        """
         pattern = r"^\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}$"
         return re.search(pattern, card_number) is not None
 
@@ -56,7 +55,6 @@ class Anonymizer:
 
         Returns (str): generated random email address.
         """
-
         domains = [
             "gmail.com",
             "yahoo.com",
@@ -81,8 +79,8 @@ class Anonymizer:
             original (str): original phone number field.
 
         Returns (str): generated random phone number.
-        """
 
+        """
         country_code = original.split()[0] if original.startswith("+") else ""
         number = "".join(random.choices("0123456789", k=10))
 
@@ -94,7 +92,6 @@ class Anonymizer:
 
         Returns (str): generated random credit card number.
         """
-
         groups = []
         for _i in range(4):
             group = "".join(random.choices("0123456789", k=4))
@@ -105,8 +102,7 @@ class Anonymizer:
     # static method to anonymize a dataframe head
     @staticmethod
     def anonymize_dataframe_head(df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Anonymize a dataframe head by replacing the values of the columns
+        """Anonymize a dataframe head by replacing the values of the columns
         that contain personal or sensitive information with random values.
 
         Args:
@@ -114,8 +110,8 @@ class Anonymizer:
 
         Returns:
             pd.DataFrame: Anonymized dataframe.
-        """
 
+        """
         if len(df) == 0:
             return df
 

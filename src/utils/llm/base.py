@@ -1,10 +1,9 @@
-""" Base class to implement a new LLM
+"""Base class to implement a new LLM
 
 This module is the base class to integrate the various LLMs API. This module also
 includes the Base LLM classes for OpenAI and Google PaLM.
 
 Example:
-
     ```
     from .base import BaseOpenAI
 
@@ -12,6 +11,7 @@ Example:
 
         Custom Class Starts here!!
     ```
+
 """
 
 from __future__ import annotations
@@ -19,10 +19,14 @@ from __future__ import annotations
 import ast
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
 
+from src.app.components.prompts.base import BasePrompt
+from src.app.components.prompts.generate_system_message import (
+    GenerateSystemMessagePrompt,
+)
 from src.utils.helpers.memory import Memory
-from src.app.components.prompts.generate_system_message import GenerateSystemMessagePrompt
 
 from ..exceptions import (
     APIKeyNotFoundError,
@@ -31,7 +35,6 @@ from ..exceptions import (
 )
 from ..helpers.openai import is_openai_v1
 from ..helpers.openai_info import openai_callback_var
-from src.app.components.prompts.base import BasePrompt
 
 if TYPE_CHECKING:
     from src.app.components.pipelines.core.pipeline_context import PipelineContext
@@ -40,11 +43,10 @@ if TYPE_CHECKING:
 class LLM:
     """Base class to implement a new LLM."""
 
-    last_prompt: Optional[str] = None
+    last_prompt: str | None = None
 
     def is_pandasai_llm(self) -> bool:
-        """
-        Return True if the LLM is from pandas_AI.
+        """Return True if the LLM is from pandas_AI.
 
         Returns:
             bool: True if the LLM is from pandas_AI
@@ -54,8 +56,7 @@ class LLM:
 
     @property
     def type(self) -> str:
-        """
-        Return type of LLM.
+        """Return type of LLM.
 
         Raises:
             APIKeyNotFoundError: Type has not been implemented
@@ -67,8 +68,7 @@ class LLM:
         raise APIKeyNotFoundError("Type has not been implemented")
 
     def _polish_code(self, code: str) -> str:
-        """
-        Polish the code by removing the leading "python" or "py",  \
+        """Polish the code by removing the leading "python" or "py",  \
         removing surrounding '`' characters  and removing trailing spaces and new lines.
 
         Args:
@@ -86,8 +86,8 @@ class LLM:
         return code
 
     def _is_python_code(self, string):
-        """
-        Return True if it is valid python code.
+        """Return True if it is valid python code.
+
         Args:
             string (str):
 
@@ -101,8 +101,7 @@ class LLM:
             return False
 
     def _extract_code(self, response: str, separator: str = "```") -> str:
-        """
-        Extract the code from the response.
+        """Extract the code from the response.
 
         Args:
             response (str): Response
@@ -129,8 +128,7 @@ class LLM:
         return code
 
     def prepend_system_prompt(self, prompt: BasePrompt, memory: Memory):
-        """
-        Append system prompt to the chat prompt, useful when model doesn't have messages for chat history
+        """Append system prompt to the chat prompt, useful when model doesn't have messages for chat history
         Args:
             prompt (BasePrompt): prompt for chat method
             memory (Memory): user conversation history
@@ -138,23 +136,20 @@ class LLM:
         return self.get_system_prompt(memory) + prompt if memory else prompt
 
     def get_system_prompt(self, memory: Memory) -> Any:
-        """
-        Generate system prompt with agent info and previous conversations
+        """Generate system prompt with agent info and previous conversations
         """
         system_prompt = GenerateSystemMessagePrompt(memory=memory)
         return system_prompt.to_string()
 
     def get_messages(self, memory: Memory) -> Any:
-        """
-        Return formatted messages
+        """Return formatted messages
         Args:
             memory (Memory): Get past Conversation from memory
         """
         return memory.get_previous_conversation()
 
     def _extract_tag_text(self, response: str, tag: str) -> str:
-        """
-        Extracts the text between two tags in the response.
+        """Extracts the text between two tags in the response.
 
         Args:
             response (str): Response
@@ -162,8 +157,8 @@ class LLM:
 
         Returns:
             (str or None): Extracted text from the response
-        """
 
+        """
         if match := re.search(
             f"(<{tag}>)(.*)(</{tag}>)",
             response,
@@ -174,8 +169,7 @@ class LLM:
 
     @abstractmethod
     def call(self, instruction: BasePrompt, context: PipelineContext = None) -> str:
-        """
-        Execute the LLM with given prompt.
+        """Execute the LLM with given prompt.
 
         Args:
             instruction (BasePrompt): A prompt object with instruction for LLM.
@@ -188,8 +182,7 @@ class LLM:
         raise MethodNotImplementedError("Call method has not been implemented")
 
     def generate_code(self, instruction: BasePrompt, context: PipelineContext) -> str:
-        """
-        Generate the code based on the instruction and the given prompt.
+        """Generate the code based on the instruction and the given prompt.
 
         Args:
             instruction (BasePrompt): Prompt with instruction for LLM.
@@ -218,23 +211,22 @@ class BaseOpenAI(LLM):
     presence_penalty: float = 0.6
     best_of: int = 1
     n: int = 1
-    stop: Optional[str] = None
-    request_timeout: Union[float, Tuple[float, float], Any, None] = None
+    stop: str | None = None
+    request_timeout: float | tuple[float, float] | Any | None = None
     max_retries: int = 2
-    seed: Optional[int] = None
+    seed: int | None = None
     # support explicit proxy for OpenAI
-    openai_proxy: Optional[str] = None
-    default_headers: Union[Mapping[str, str], None] = None
-    default_query: Union[Mapping[str, object], None] = None
+    openai_proxy: str | None = None
+    default_headers: Mapping[str, str] | None = None
+    default_query: Mapping[str, object] | None = None
     # Configure a custom httpx client. See the
     # [httpx documentation](https://www.python-httpx.org/api/#client) for more details.
-    http_client: Union[Any, None] = None
+    http_client: Any | None = None
     client: Any
     _is_chat_model: bool
 
     def _set_params(self, **kwargs):
-        """
-        Set Parameters
+        """Set Parameters
         Args:
             **kwargs: ["model", "deployment_name", "temperature","max_tokens",
             "top_p", "frequency_penalty", "presence_penalty", "stop", "seed"]
@@ -243,7 +235,6 @@ class BaseOpenAI(LLM):
             None.
 
         """
-
         valid_params = [
             "model",
             "deployment_name",
@@ -260,9 +251,9 @@ class BaseOpenAI(LLM):
                 setattr(self, key, value)
 
     @property
-    def _default_params(self) -> Dict[str, Any]:
+    def _default_params(self) -> dict[str, Any]:
         """Get the default parameters for calling OpenAI API."""
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "temperature": self.temperature,
             "top_p": self.top_p,
             "frequency_penalty": self.frequency_penalty,
@@ -283,9 +274,9 @@ class BaseOpenAI(LLM):
         return params
 
     @property
-    def _invocation_params(self) -> Dict[str, Any]:
+    def _invocation_params(self) -> dict[str, Any]:
         """Get the parameters used to invoke the model."""
-        openai_creds: Dict[str, Any] = {}
+        openai_creds: dict[str, Any] = {}
         if not is_openai_v1():
             openai_creds |= {
                 "api_key": self.api_token,
@@ -295,7 +286,7 @@ class BaseOpenAI(LLM):
         return {**openai_creds, **self._default_params}
 
     @property
-    def _client_params(self) -> Dict[str, any]:
+    def _client_params(self) -> dict[str, any]:
         return {
             "api_key": self.api_token,
             "base_url": self.api_base,
@@ -307,8 +298,7 @@ class BaseOpenAI(LLM):
         }
 
     def completion(self, prompt: str, memory: Memory) -> str:
-        """
-        Query the completion API
+        """Query the completion API
 
         Args:
             prompt (str): A string representation of the prompt.
@@ -334,8 +324,7 @@ class BaseOpenAI(LLM):
         return response.choices[0].text
 
     def chat_completion(self, value: str, memory: Memory) -> str:
-        """
-        Query the chat completion API
+        """Query the chat completion API
 
         Args:
             value (str): Prompt
@@ -370,8 +359,7 @@ class BaseOpenAI(LLM):
         return response.choices[0].message.content
 
     def call(self, instruction: BasePrompt, context: PipelineContext = None):
-        """
-        Call the OpenAI LLM.
+        """Call the OpenAI LLM.
 
         Args:
             instruction (BasePrompt): A prompt object with instruction for LLM.
@@ -382,6 +370,7 @@ class BaseOpenAI(LLM):
 
         Returns:
             str: Response
+
         """
         self.last_prompt = instruction.to_string()
 
@@ -400,17 +389,16 @@ class BaseGoogle(LLM):
     LLM base class is extended to be used with
     """
 
-    temperature: Optional[float] = 0
-    top_p: Optional[float] = 0.8
-    top_k: Optional[int] = 40
-    max_output_tokens: Optional[int] = 1000
+    temperature: float | None = 0
+    top_p: float | None = 0.8
+    top_k: int | None = 40
+    max_output_tokens: int | None = 1000
 
     def _valid_params(self):
         return ["temperature", "top_p", "top_k", "max_output_tokens"]
 
     def _set_params(self, **kwargs):
-        """
-        Dynamically set Parameters for the object.
+        """Dynamically set Parameters for the object.
 
         Args:
             **kwargs:
@@ -421,7 +409,6 @@ class BaseGoogle(LLM):
             None.
 
         """
-
         valid_params = self._valid_params()
         for key, value in kwargs.items():
             if key in valid_params:
@@ -429,7 +416,6 @@ class BaseGoogle(LLM):
 
     def _validate(self):
         """Validates the parameters for Google"""
-
         if self.temperature is not None and not 0 <= self.temperature <= 1:
             raise ValueError("temperature must be in the range [0.0, 1.0]")
 
@@ -443,9 +429,8 @@ class BaseGoogle(LLM):
             raise ValueError("max_output_tokens must be greater than zero")
 
     @abstractmethod
-    def _generate_text(self, prompt: str, memory: Optional[Memory] = None) -> str:
-        """
-        Generates text for prompt, specific to implementation.
+    def _generate_text(self, prompt: str, memory: Memory | None = None) -> str:
+        """Generates text for prompt, specific to implementation.
 
         Args:
             prompt (str): A string representation of the prompt.
@@ -457,8 +442,7 @@ class BaseGoogle(LLM):
         raise MethodNotImplementedError("method has not been implemented")
 
     def call(self, instruction: BasePrompt, context: PipelineContext = None) -> str:
-        """
-        Call the Google LLM.
+        """Call the Google LLM.
 
         Args:
             instruction (BasePrompt): Instruction to pass.

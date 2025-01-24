@@ -1,41 +1,40 @@
 # app/model_components/connectors/base.py
-"""
-Base connector class to be extended by all connectors.
+"""Base connector class to be extended by all connectors.
 """
 
 import json
 import os
 from abc import ABC, abstractmethod
 from functools import cache
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
+
+from pydantic import BaseModel  # 修改 import 路径
 
 import src.utils.pandas as pd
-from src.utils.helpers.dataframe_serializer import ( # 修改 import 路径
+from src.utils.helpers.dataframe_serializer import (  # 修改 import 路径
     DataframeSerializer,
     DataframeSerializerType,
 )
-from pydantic import BaseModel # 修改 import 路径
-
-from src.utils.logger import Logger # 修改 import 路径
+from src.utils.logger import Logger  # 修改 import 路径
 
 if TYPE_CHECKING:
-    from app.components.connectors.ee.relations import AbstractRelation # 修改 import 路径
+    from app.components.connectors.ee.relations import (
+        AbstractRelation,  # 修改 import 路径
+    )
 
 
 class BaseConnectorConfig(BaseModel):
-    """
-    Base Connector configuration.
+    """Base Connector configuration.
     """
 
     database: str
     table: str
     where: list[list[str]] = None
-    connect_args: Optional[dict] = {}
+    connect_args: dict | None = {}
 
 
 class BaseConnector(ABC):
-    """
-    Base connector class to be extended by all connectors.
+    """Base connector class to be extended by all connectors.
     """
 
     _logger: Logger = None
@@ -43,18 +42,18 @@ class BaseConnector(ABC):
 
     def __init__(
         self,
-        config: Union[BaseConnectorConfig, dict],
+        config: BaseConnectorConfig | dict,
         name: str = None,
         description: str = None,
         custom_head: pd.DataFrame = None,
         field_descriptions: dict = None,
-        connector_relations: List["AbstractRelation"] = None,
+        connector_relations: list["AbstractRelation"] = None,
     ):
-        """
-        Initialize the connector with the given configuration.
+        """Initialize the connector with the given configuration.
 
         Args:
             config (dict): The configuration for the connector.
+
         """
         if isinstance(config, dict):
             config = self._load_connector_config(config)
@@ -66,7 +65,7 @@ class BaseConnector(ABC):
         self.field_descriptions = field_descriptions
         self.connector_relations = connector_relations
 
-    def _load_connector_config(self, config: Union[BaseConnectorConfig, dict]):
+    def _load_connector_config(self, config: BaseConnectorConfig | dict):
         """Loads passed Configuration to object
 
         Args:
@@ -74,12 +73,12 @@ class BaseConnector(ABC):
 
         Returns:
             config: BaseConnectorConfig
+
         """
         pass
 
     def _populate_config_from_env(self, config: dict, envs_mapping: dict):
-        """
-        Populate the configuration dictionary with values from environment variables
+        """Populate the configuration dictionary with values from environment variables
         if not exists in the config.
 
         Args:
@@ -89,8 +88,8 @@ class BaseConnector(ABC):
 
         Returns:
             dict: The populated configuration dictionary.
-        """
 
+        """
         for key, env_var in envs_mapping.items():
             if key not in config and os.getenv(env_var):
                 config[key] = os.getenv(env_var)
@@ -98,15 +97,13 @@ class BaseConnector(ABC):
         return config
 
     def _init_connection(self, config: BaseConnectorConfig):
-        """
-        make connection to database
+        """Make connection to database
         """
         pass
 
     @abstractmethod
     def head(self, n: int = 3) -> pd.DataFrame:
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the
         data source.
         """
@@ -114,49 +111,44 @@ class BaseConnector(ABC):
 
     @abstractmethod
     def execute(self) -> pd.DataFrame:
-        """
-        Execute the given query on the data source that the connector is
+        """Execute the given query on the data source that the connector is
         connected to.
         """
         pass
 
     def set_additional_filters(self, filters: dict):
-        """
-        Add additional filters to the connector.
+        """Add additional filters to the connector.
 
         Args:
             filters (dict): The additional filters to add to the connector.
+
         """
         self._additional_filters = filters or []
 
     @property
     def rows_count(self):
-        """
-        Return the number of rows in the data source that the connector is
+        """Return the number of rows in the data source that the connector is
         connected to.
         """
         raise NotImplementedError
 
     @property
     def columns_count(self):
-        """
-        Return the number of columns in the data source that the connector is
+        """Return the number of columns in the data source that the connector is
         connected to.
         """
         raise NotImplementedError
 
     @property
     def column_hash(self):
-        """
-        Return the hash code that is unique to the columns of the data source
+        """Return the hash code that is unique to the columns of the data source
         that the connector is connected to.
         """
         raise NotImplementedError
 
     @property
     def path(self):
-        """
-        Return the path of the data source that the connector is connected to.
+        """Return the path of the data source that the connector is connected to.
         """
         # JDBC string
         path = f"{self.__class__.__name__}://{self.config.host}:"
@@ -167,32 +159,29 @@ class BaseConnector(ABC):
 
     @property
     def logger(self):
-        """
-        Return the logger for the connector.
+        """Return the logger for the connector.
         """
         return self._logger
 
     @logger.setter
     def logger(self, logger: Logger):
-        """
-        Set the logger for the connector.
+        """Set the logger for the connector.
 
         Args:
             logger (Logger): The logger for the connector.
+
         """
         self._logger = logger
 
     @property
     def fallback_name(self):
-        """
-        Return the name of the table that the connector is connected to.
+        """Return the name of the table that the connector is connected to.
         """
         raise NotImplementedError
 
     @property
     def pandas_df(self):
-        """
-        Returns the pandas dataframe
+        """Returns the pandas dataframe
         """
         raise NotImplementedError
 
@@ -205,8 +194,7 @@ class BaseConnector(ABC):
 
     @cache
     def get_head(self, n: int = 3) -> pd.DataFrame:
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the
         data source.
 
@@ -216,18 +204,19 @@ class BaseConnector(ABC):
         Returns:
             pd.DataFrame: The head of the data source that the connector is
                 connected to.
+
         """
         return self.custom_head if self.custom_head is not None else self.head(n)
 
     def head_with_truncate_columns(self, max_size=25) -> pd.DataFrame:
-        """
-        Truncate the columns of the dataframe to a maximum of 20 characters.
+        """Truncate the columns of the dataframe to a maximum of 20 characters.
 
         Args:
             df (pd.DataFrame): The dataframe to truncate the columns of.
 
         Returns:
             pd.DataFrame: The dataframe with truncated columns.
+
         """
         df_trunc = self.get_head().copy()
 
@@ -241,11 +230,11 @@ class BaseConnector(ABC):
 
     @cache
     def get_schema(self) -> pd.DataFrame:
-        """
-        A sample of the dataframe.
+        """A sample of the dataframe.
 
         Returns:
             pd.DataFrame: A sample of the dataframe.
+
         """
         if self.get_head() is None:
             return None
@@ -257,11 +246,11 @@ class BaseConnector(ABC):
 
     @cache
     def to_csv(self) -> str:
-        """
-        A proxy-call to the dataframe's `.to_csv()`.
+        """A proxy-call to the dataframe's `.to_csv()`.
 
         Returns:
             str: The dataframe as a CSV string.
+
         """
         return self.get_head().to_csv(index=False)
 
@@ -273,8 +262,7 @@ class BaseConnector(ABC):
         serializer: DataframeSerializerType = None,
         enforce_privacy: bool = False,
     ) -> str:
-        """
-        Convert dataframe to string
+        """Convert dataframe to string
         Returns:
             str: dataframe string
         """

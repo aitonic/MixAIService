@@ -1,21 +1,18 @@
 # app/model_components/connectors/sql/sql_connector_config.py
-from typing import Optional
 
-from src.app.components.connectors.base import BaseConnectorConfig # 修改 import 路径
+from src.app.components.connectors.base import BaseConnectorConfig  # 修改 import 路径
 
 
 class SQLBaseConnectorConfig(BaseConnectorConfig):
-    """
-    Base Connector configuration.
+    """Base Connector configuration.
     """
 
-    driver: Optional[str] = None
-    dialect: Optional[str] = None
+    driver: str | None = None
+    dialect: str | None = None
 
 
 class SqliteConnectorConfig(SQLBaseConnectorConfig):
-    """
-    Connector configurations for sqlite db.
+    """Connector configurations for sqlite db.
     """
 
     table: str
@@ -23,8 +20,7 @@ class SqliteConnectorConfig(SQLBaseConnectorConfig):
 
 
 class SQLConnectorConfig(SQLBaseConnectorConfig):
-    """
-    Connector configuration.
+    """Connector configuration.
     """
 
     host: str

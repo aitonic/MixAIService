@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from src.utils.exceptions import TemplateFileNotFoundError
+
 from .base import AbstractPrompt
 
 
@@ -34,7 +35,7 @@ class FileBasedPrompt(AbstractPrompt):
             raise TemplateFileNotFoundError(
                 self._path_to_template, self.__class__.__name__
             ) from e
-        except IOError as exc:
+        except OSError as exc:
             raise RuntimeError(
                 f"Failed to read template file '{self._path_to_template}': {exc}"
             ) from exc

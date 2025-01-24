@@ -13,13 +13,13 @@ class ResponseSerializer:
 
     @staticmethod
     def serialize(result: ResponseType) -> ResponseType:
-        """
-        Format output response
+        """Format output response
         Args:
             result (ResponseType): response returned after execution
 
         Returns:
             ResponseType: formatted response output
+
         """
         if result["type"] == "dataframe":
             if isinstance(result["value"], pd.Series):

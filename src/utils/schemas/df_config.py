@@ -1,6 +1,7 @@
-from typing import Any, List, Literal, Optional
-from typing_extensions import TypedDict
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field, field_validator
+from typing_extensions import TypedDict
 
 from src.constants import DEFAULT_CHART_DIRECTORY
 from src.utils.helpers.dataframe_serializer import DataframeSerializerType
@@ -21,12 +22,12 @@ class Config(BaseModel):
     open_charts: bool = True
     save_charts: bool = False
     save_charts_path: str = DEFAULT_CHART_DIRECTORY
-    custom_whitelisted_dependencies: List[str] = Field(default_factory=list)
+    custom_whitelisted_dependencies: list[str] = Field(default_factory=list)
     max_retries: int = 3
     lazy_load_connector: bool = True
     response_parser: Any = None
     llm: LLM = None
-    data_viz_library: Optional[str] = ""
+    data_viz_library: str | None = ""
     log_server: LogServerConfig = None
     direct_sql: bool = False
     dataframe_serializer: DataframeSerializerType = DataframeSerializerType.CSV

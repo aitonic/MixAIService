@@ -1,17 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-import src.utils.pandas as pd
 from PIL import Image
 
+import src.utils.pandas as pd
 from src.utils.exceptions import MethodNotImplementedError
 
 
 class IResponseParser(ABC):
     @abstractmethod
     def parse(self, result: dict) -> Any:
-        """
-        Parses result from the chat input
+        """Parses result from the chat input
         Args:
             result (dict): result contains type and value
         Raises:
@@ -19,6 +18,7 @@ class IResponseParser(ABC):
 
         Returns:
             Any: Returns depending on the user input
+
         """
         raise MethodNotImplementedError
 
@@ -27,16 +27,14 @@ class ResponseParser(IResponseParser):
     _context = None
 
     def __init__(self, context) -> None:
-        """
-        Initialize the ResponseParser with Context from Agent
+        """Initialize the ResponseParser with Context from Agent
         Args:
             context (Context): context contains the config and logger
         """
         self._context = context
 
     def parse(self, result: dict) -> Any:
-        """
-        Parses result from the chat input
+        """Parses result from the chat input
         Args:
             result (dict): result contains type and value
         Raises:
@@ -44,6 +42,7 @@ class ResponseParser(IResponseParser):
 
         Returns:
             Any: Returns depending on the user input
+
         """
         if not isinstance(result, dict) or any(
             key not in result for key in ["type", "value"]
@@ -67,8 +66,7 @@ class ResponseParser(IResponseParser):
         return result["value"]
 
     def format_plot(self, result: dict) -> Any:
-        """
-        Display matplotlib plot against a user query.
+        """Display matplotlib plot against a user query.
 
         If `open_charts` option set to `False`, the chart won't be displayed.
 
@@ -76,6 +74,7 @@ class ResponseParser(IResponseParser):
             result (dict): result contains type and value
         Returns:
             Any: Returns depending on the user input
+
         """
         if (
             self._context._config.open_charts

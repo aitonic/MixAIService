@@ -1,13 +1,13 @@
-from abc import ABC, abstractmethod
 import os
 import re
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 from jinja2 import Environment, FileSystemLoader
 from pydantic import Field
 
 from ..base_component import BaseComponent
+
 
 class BasePrompt(ABC, BaseComponent):
     """Abstract class for generating system and user messages."""
@@ -16,8 +16,8 @@ class BasePrompt(ABC, BaseComponent):
     role: str = Field(description="content role")
     content: str = Field(description="content")
 
-    template: Optional[str] = None
-    template_path: Optional[str] = None
+    template: str | None = None
+    template_path: str | None = None
 
     def __init__(self, role: str, prompt_str: str, **kwargs) -> None:
         self.role = role

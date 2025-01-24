@@ -35,6 +35,7 @@ def run_app(req: RunParameter) -> str:
 
     Raises:
         ValueError: If no agents are configured or if execution fails.
+
     """
     # Group agents
     agents: dict[int, list[AgentInfo]] = arrange_agent(req)

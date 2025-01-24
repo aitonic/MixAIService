@@ -4,18 +4,16 @@ import copy
 import re
 import traceback
 import uuid
-from typing import Any, List, Union
+from typing import Any
 
 import astor
 
-from src.app.components.connectors.pandas import PandasConnector
-from src.utils.helpers.optional import get_environment
-from src.utils.helpers.path import find_project_root
-from src.utils.helpers.skills_manager import SkillsManager
-from src.utils.helpers.sql import extract_table_names
-
 from src.app.components.connectors import BaseConnector
+from src.app.components.connectors.pandas import PandasConnector
 from src.app.components.connectors.sql import SQLConnector
+from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
 from src.constants import RESTRICTED_LIBS, WHITELISTED_LIBRARIES
 from src.utils.exceptions import (
     BadImportError,
@@ -23,12 +21,13 @@ from src.utils.exceptions import (
     InvalidConfigError,
     MaliciousQueryError,
 )
-from src.utils.logger import Logger
+from src.utils.helpers.optional import get_environment
+from src.utils.helpers.path import find_project_root
 from src.utils.helpers.save_chart import add_save_chart
+from src.utils.helpers.skills_manager import SkillsManager
+from src.utils.helpers.sql import extract_table_names
+from src.utils.logger import Logger
 from src.utils.schemas.df_config import Config
-from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
 
 
 class CodeExecutionContext:
@@ -37,8 +36,7 @@ class CodeExecutionContext:
         prompt_id: uuid.UUID,
         skills_manager: SkillsManager,
     ):
-        """
-        Code Execution Context
+        """Code Execution Context
         Args:
             prompt_id (uuid.UUID): Prompt ID
             skills_manager (SkillsManager): Skills Manager
@@ -48,8 +46,7 @@ class CodeExecutionContext:
 
 
 class FunctionCallVisitor(ast.NodeVisitor):
-    """
-    Iterate over the code to find function calls
+    """Iterate over the code to find function calls
     """
 
     def __init__(self):
@@ -66,14 +63,13 @@ class FunctionCallVisitor(ast.NodeVisitor):
 
 
 class CodeCleaning(BaseLogicUnit):
-    """
-    Code Cleaning Stage
+    """Code Cleaning Stage
     """
 
-    _dfs: List
-    _config: Union[Config, dict]
+    _dfs: list
+    _config: Config | dict
     _logger: Logger = None
-    _additional_dependencies: List[dict] = []
+    _additional_dependencies: list[dict] = []
     _current_code_executed: str = None
 
     def __init__(self, on_failure=None, on_retry=None, **kwargs):
@@ -112,8 +108,7 @@ class CodeCleaning(BaseLogicUnit):
         )
 
     def _replace_plot_png(self, code):
-        """
-        Replace plot.png with temp_chart.png
+        """Replace plot.png with temp_chart.png
         Args:
             code (str): Python code to execute
         Returns:
@@ -240,13 +235,13 @@ class CodeCleaning(BaseLogicUnit):
         )
 
     def _is_jailbreak(self, node: ast.stmt) -> bool:
-        """
-        Remove jailbreaks from the code to prevent malicious code execution.
+        """Remove jailbreaks from the code to prevent malicious code execution.
+
         Args:
             node (ast.stmt): A code node to be checked.
         Returns (bool):
-        """
 
+        """
         DANGEROUS_BUILTINS = ["__subclasses__", "__builtins__", "__import__"]
 
         node_str = ast.dump(node)
@@ -254,18 +249,17 @@ class CodeCleaning(BaseLogicUnit):
         return any(builtin in node_str for builtin in DANGEROUS_BUILTINS)
 
     def _is_unsafe(self, node: ast.stmt) -> bool:
-        """
-        Remove unsafe code from the code to prevent malicious code execution.
+        """Remove unsafe code from the code to prevent malicious code execution.
 
         Args:
             node (ast.stmt): A code node to be checked.
 
         Returns (bool):
-        """
 
+        """
         code = astor.to_source(node)
         return any(
-            (
+            
                 method in code
                 for method in [
                     ".to_csv",
@@ -284,7 +278,7 @@ class CodeCleaning(BaseLogicUnit):
                     ".to_markdown",
                     ".to_clipboard",
                 ]
-            )
+            
         )
 
     def find_function_calls(self, node: ast.AST, context: CodeExecutionContext):
@@ -314,16 +308,15 @@ class CodeCleaning(BaseLogicUnit):
             node, ast.FunctionDef
         ) and context.skills_manager.skill_exists(node.name)
 
-    def _validate_direct_sql(self, dfs: List[BaseConnector]) -> bool:
-        """
-        Raises error if they don't belong sqlconnector or have different credentials
+    def _validate_direct_sql(self, dfs: list[BaseConnector]) -> bool:
+        """Raises error if they don't belong sqlconnector or have different credentials
         Args:
             dfs (List[BaseConnector]): list of BaseConnectors
 
         Raises:
             InvalidConfigError: Raise Error in case of config is set but criteria is not met
-        """
 
+        """
         if self._config.direct_sql:
             if all(
                 (isinstance(df, SQLConnector) and df.equals(dfs[0])) for df in dfs
@@ -357,13 +350,13 @@ class CodeCleaning(BaseLogicUnit):
         return sql_query
 
     def _clean_sql_query(self, sql_query: str) -> str:
-        """
-        Clean sql query trim colon and make case-sensitive
+        """Clean sql query trim colon and make case-sensitive
         Args:
             sql_query (str): sql query
 
         Returns:
             str: updated sql query
+
         """
         sql_query = sql_query.rstrip(";")
         table_names = extract_table_names(sql_query)
@@ -373,13 +366,13 @@ class CodeCleaning(BaseLogicUnit):
         return self._replace_table_names(sql_query, table_names, allowed_table_names)
 
     def _validate_and_make_table_name_case_sensitive(self, node: ast.Assign):
-        """
-        Validates whether table exists in specified dataset and convert name to case-sensitive
+        """Validates whether table exists in specified dataset and convert name to case-sensitive
         Args:
             node (ast.Assign): code tree node
 
         Returns:
             node: return updated or same node
+
         """
         if isinstance(node, ast.Assign):
             # Check if the assigned value is a string constant and the target is 'sql_query'
@@ -446,14 +439,14 @@ class CodeCleaning(BaseLogicUnit):
         )
 
     def _get_originals(self, dfs):
-        """
-        Get original dfs
+        """Get original dfs
 
         Args:
             dfs (list): List of dfs
 
         Returns:
             list: List of dfs
+
         """
         original_dfs = []
         for df in dfs:
@@ -521,8 +514,7 @@ class CodeCleaning(BaseLogicUnit):
         return None
 
     def _clean_code(self, code: str, context: CodeExecutionContext) -> str:
-        """
-        A method to clean the code to prevent malicious code execution.
+        """A method to clean the code to prevent malicious code execution.
 
         Args:
             code(str): A python code.
@@ -531,7 +523,6 @@ class CodeCleaning(BaseLogicUnit):
             str: A clean code string.
 
         """
-
         # Clear recent optional dependencies
         self._additional_dependencies = []
 
@@ -598,8 +589,7 @@ class CodeCleaning(BaseLogicUnit):
         return astor.to_source(new_tree, pretty_source=lambda x: "".join(x)).strip()
 
     def _is_df_overwrite(self, node: ast.stmt) -> bool:
-        """
-        Remove df declarations from the code to prevent malicious code execution.
+        """Remove df declarations from the code to prevent malicious code execution.
 
         Args:
             node (ast.stmt): A code node to be checked.
@@ -607,16 +597,14 @@ class CodeCleaning(BaseLogicUnit):
         Returns (bool):
 
         """
-
         return (
             isinstance(node, ast.Assign)
             and isinstance(node.targets[0], ast.Name)
             and node.targets[0].id == "dfs"
         )
 
-    def _check_imports(self, node: Union[ast.Import, ast.ImportFrom]):
-        """
-        Add whitelisted imports to _additional_dependencies.
+    def _check_imports(self, node: ast.Import | ast.ImportFrom):
+        """Add whitelisted imports to _additional_dependencies.
 
         Args:
             node (object): ast.Import or ast.ImportFrom

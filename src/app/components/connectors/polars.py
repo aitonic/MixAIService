@@ -1,10 +1,9 @@
 # connectors/polars.py
-"""
-Polars connector class to handle csv, parquet, xlsx files and polars dataframes.
+"""Polars connector class to handle csv, parquet, xlsx files and polars dataframes.
 """
 
 from functools import cache, cached_property
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 import src.utils.pandas as pd
 
@@ -27,12 +26,12 @@ from pydantic import BaseModel
 from src.utils.helpers.data_sampler import DataSampler
 from src.utils.helpers.file_importer import FileImporter
 from src.utils.logger import Logger
+
 from .base import BaseConnector
 
 
 class PolarsConnectorConfig(BaseModel):
-    """
-    Polars Connector configuration.
+    """Polars Connector configuration.
     """
 
     original_df: PolarsDataFrame # type: ignore
@@ -42,8 +41,7 @@ class PolarsConnectorConfig(BaseModel):
 
 
 class PolarsConnector(BaseConnector):
-    """
-    Polars connector class to handle csv, parquet, xlsx files and polars dataframes.
+    """Polars connector class to handle csv, parquet, xlsx files and polars dataframes.
     """
 
     pandas_df = pd.DataFrame
@@ -52,26 +50,25 @@ class PolarsConnector(BaseConnector):
 
     def __init__(
         self,
-        config: Union[PolarsConnectorConfig, dict],
+        config: PolarsConnectorConfig | dict,
         **kwargs,
     ):
-        """
-        Initialize the Polars connector with the given configuration.
+        """Initialize the Polars connector with the given configuration.
 
         Args:
             config (PolarsConnectorConfig): The configuration for the Polars connector.
-        """
 
+        """
         super().__init__(config, **kwargs)
 
         self._load_df(self.config.original_df)
 
-    def _load_df(self, df: Union[PolarsDataFrame, PolarsSeries, str, dict]): # type: ignore
-        """
-        Load the dataframe from a file or polars dataframe.
+    def _load_df(self, df: PolarsDataFrame | PolarsSeries | str | dict): # type: ignore
+        """Load the dataframe from a file or polars dataframe.
 
         Args:
             df (Union[pl.DataFrame, pl.Series, str, dict]): The dataframe to load.
+
         """
         polars_df = None
         if isinstance(df, pl.Series):
@@ -93,23 +90,22 @@ class PolarsConnector(BaseConnector):
         self.pandas_df = polars_df.to_pandas()
 
     def _load_connector_config(
-        self, config: Union[PolarsConnectorConfig, dict]
+        self, config: PolarsConnectorConfig | dict
     ) -> PolarsConnectorConfig:
-        """
-        Loads passed Configuration to object
+        """Loads passed Configuration to object
 
         Args:
             config (PolarsConnectorConfig): Construct config in structure
 
-            Returns:
+        Returns:
                 config: PolarsConnectorConfig
+
         """
         return PolarsConnectorConfig(**config)
 
     @cache
     def head(self, n: int = 5) -> PolarsDataFrame: # type: ignore
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the
         data source.
         """
@@ -121,32 +117,28 @@ class PolarsConnector(BaseConnector):
 
     @cache
     def execute(self) -> PolarsDataFrame: # type: ignore
-        """
-        Execute the given query on the data source that the connector is
+        """Execute the given query on the data source that the connector is
         connected to.
         """
         return self.pandas_df
 
     @cached_property
     def rows_count(self):
-        """
-        Return the number of rows in the data source that the connector is
+        """Return the number of rows in the data source that the connector is
         connected to.
         """
         return len(self.pandas_df) if self.pandas_df.index else 0
 
     @cached_property
     def columns_count(self):
-        """
-        Return the number of columns in the data source that the connector is
+        """Return the number of columns in the data source that the connector is
         connected to.
         """
         return len(self.pandas_df.columns) if self.pandas_df.columns else 0
 
     @property
     def column_hash(self):
-        """
-        Return the hash code that is unique to the columns of the data source
+        """Return the hash code that is unique to the columns of the data source
         that the connector is connected to.
         """
         import hashlib
@@ -157,14 +149,12 @@ class PolarsConnector(BaseConnector):
 
     @cached_property
     def path(self):
-        """
-        Return the path of the data source that the connector is connected to.
+        """Return the path of the data source that the connector is connected to.
         """
         pass
 
     @property
     def fallback_name(self):
-        """
-        Return the name of the table that the connector is connected to.
+        """Return the name of the table that the connector is connected to.
         """
         pass

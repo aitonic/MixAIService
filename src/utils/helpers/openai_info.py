@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import Generator, Optional
 
 MODEL_COST_PER_1K_TOKENS = {
     # GPT-4 input
@@ -72,8 +72,7 @@ def standardize_model_name(
     model_name: str,
     is_completion: bool = False,
 ) -> str:
-    """
-    Standardize the model name to a format that can be used in the OpenAI API.
+    """Standardize the model name to a format that can be used in the OpenAI API.
 
     Args:
         model_name: Model name to standardize.
@@ -107,8 +106,7 @@ def get_openai_token_cost_for_model(
     num_tokens: int,
     is_completion: bool = False,
 ) -> float:
-    """
-    Get the cost in USD for a given model and number of tokens.
+    """Get the cost in USD for a given model and number of tokens.
 
     Args:
         model_name (str): Name of the model
@@ -118,6 +116,7 @@ def get_openai_token_cost_for_model(
 
     Returns:
         float: Cost in USD.
+
     """
     model_name = standardize_model_name(model_name, is_completion=is_completion)
     if model_name not in MODEL_COST_PER_1K_TOKENS:
@@ -169,7 +168,7 @@ class OpenAICallbackHandler:
         return self
 
 
-openai_callback_var: ContextVar[Optional[OpenAICallbackHandler]] = ContextVar(
+openai_callback_var: ContextVar[OpenAICallbackHandler | None] = ContextVar(
     "openai_callback", default=None
 )
 
@@ -185,6 +184,7 @@ def get_openai_callback() -> Generator[OpenAICallbackHandler, None, None]:
     Example:
         >>> with get_openai_callback() as cb:
         ...     # Use the OpenAI callback handler
+
     """
     cb = OpenAICallbackHandler()
     openai_callback_var.set(cb)

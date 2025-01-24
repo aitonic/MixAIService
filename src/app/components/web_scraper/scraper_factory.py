@@ -22,17 +22,12 @@ desired scraper type.
 """
 from datetime import datetime
 
-from .base import (
-    BaseScraper, 
-    ScraperConfig
-)
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
+from src.utils import enum_util
+
+from ..base_component import BaseComponent, BaseFactory
+from .base import BaseScraper, ScraperConfig
 from .browsers_scraper import BrowserScraper
 from .dto import ScraperType
-from src.utils import enum_util
 
 
 class ScraperFactory(BaseFactory):

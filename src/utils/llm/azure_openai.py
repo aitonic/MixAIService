@@ -12,7 +12,8 @@ Example:
 """
 
 import os
-from typing import Any, Callable, Dict, Optional, Union
+from collections.abc import Callable
+from typing import Any
 
 import openai
 
@@ -29,17 +30,17 @@ class AzureOpenAI(BaseOpenAI):
     This class uses `BaseOpenAI` class to support Azure OpenAI features.
     """
 
-    azure_endpoint: Union[str, None] = None
+    azure_endpoint: str | None = None
     """Your Azure Active Directory token.
         Automatically inferred from env var `AZURE_OPENAI_AD_TOKEN` if not provided.
         For more: 
         https://www.microsoft.com/en-us/security/business/identity-access/microsoft-entra-id.
     """
-    azure_ad_token: Union[str, None] = None
+    azure_ad_token: str | None = None
     """A function that returns an Azure Active Directory token.
         Will be invoked on every request.
     """
-    azure_ad_token_provider: Union[Callable[[], str], None] = None
+    azure_ad_token_provider: Callable[[], str] | None = None
     deployment_name: str
     api_version: str = ""
     """Legacy, for openai<1.0.0 support."""
@@ -49,18 +50,17 @@ class AzureOpenAI(BaseOpenAI):
 
     def __init__(
         self,
-        api_token: Optional[str] = None,
-        azure_endpoint: Union[str, None] = None,
-        azure_ad_token: Union[str, None] = None,
-        azure_ad_token_provider: Union[Callable[[], str], None] = None,
-        api_base: Optional[str] = None,
-        api_version: Optional[str] = None,
+        api_token: str | None = None,
+        azure_endpoint: str | None = None,
+        azure_ad_token: str | None = None,
+        azure_ad_token_provider: Callable[[], str] | None = None,
+        api_base: str | None = None,
+        api_version: str | None = None,
         deployment_name: str = None,
         is_chat_model: bool = True,
         **kwargs,
     ):
-        """
-        __init__ method of AzureOpenAI Class.
+        """__init__ method of AzureOpenAI Class.
 
         Args:
             api_token (str): Azure OpenAI API token.
@@ -80,8 +80,8 @@ class AzureOpenAI(BaseOpenAI):
             is_chat_model (bool): Whether ``deployment_name`` corresponds to a Chat
                 or a Completion model.
             **kwargs: Inference Parameters.
-        """
 
+        """
         self.api_token = (
             api_token
             or os.getenv("AZURE_OPENAI_API_KEY")
@@ -143,9 +143,8 @@ class AzureOpenAI(BaseOpenAI):
             )
 
     @property
-    def _default_params(self) -> Dict[str, Any]:
-        """
-        Get the default parameters for calling OpenAI API.
+    def _default_params(self) -> dict[str, Any]:
+        """Get the default parameters for calling OpenAI API.
 
         Returns:
             dict: A dictionary containing Default Params.
@@ -157,7 +156,7 @@ class AzureOpenAI(BaseOpenAI):
         }
 
     @property
-    def _invocation_params(self) -> Dict[str, Any]:
+    def _invocation_params(self) -> dict[str, Any]:
         """Get the parameters used to invoke the model."""
         if is_openai_v1():
             return super()._invocation_params
@@ -169,7 +168,7 @@ class AzureOpenAI(BaseOpenAI):
             }
 
     @property
-    def _client_params(self) -> Dict[str, any]:
+    def _client_params(self) -> dict[str, any]:
         client_params = {
             "api_version": self.api_version,
             "azure_endpoint": self.azure_endpoint,

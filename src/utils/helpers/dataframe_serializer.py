@@ -31,14 +31,14 @@ class DataframeSerializer:
             return self.convert_df_to_csv(df, extras)
 
     def convert_df_to_csv(self, df: pd.DataFrame, extras: dict) -> str:
-        """
-        Convert df to csv like format where csv is wrapped inside <dataframe></dataframe>
+        """Convert df to csv like format where csv is wrapped inside <dataframe></dataframe>
         Args:
             df (pd.DataFrame): PandasAI dataframe or dataframe
             extras (dict, optional): expect index to exists
 
         Returns:
             str: dataframe stringify
+
         """
         dataframe_info = "<dataframe"
 
@@ -63,14 +63,14 @@ class DataframeSerializer:
     def convert_df_sql_connector_to_str(
         self, df: pd.DataFrame, extras: dict = None
     ) -> str:
-        """
-        Convert df to csv like format where csv is wrapped inside <table></table>
+        """Convert df to csv like format where csv is wrapped inside <table></table>
         Args:
             df (pd.DataFrame): PandasAI dataframe or dataframe
             extras (dict, optional): expect index to exists
 
         Returns:
             str: dataframe stringify
+
         """
         table_description_tag = (
             f' description="{df.description}"' if df.description is not None else ""
@@ -79,14 +79,14 @@ class DataframeSerializer:
         return f"{table_head_tag}\n{df.get_head().to_csv()}\n</table>"
 
     def convert_df_to_json(self, df: pd.DataFrame, extras: dict) -> dict:
-        """
-        Convert df to json dictionary and return json
+        """Convert df to json dictionary and return json
         Args:
             df (pd.DataFrame): PandasAI dataframe or dataframe
             extras (dict, optional): expect index to exists
 
         Returns:
             str: dataframe json
+
         """
         # Initialize the result dictionary
         df_number_key = f"dfs[{extras['index']}]"
@@ -126,7 +126,10 @@ class DataframeSerializer:
 
             if df.connector_relations:
                 for relation in df.connector_relations:
-                    from src.app.components.connectors.ee.relations import ForeignKey, PrimaryKey
+                    from src.app.components.connectors.ee.relations import (
+                        ForeignKey,
+                        PrimaryKey,
+                    )
 
                     if (
                         isinstance(relation, PrimaryKey) and relation.name == col_name
@@ -145,14 +148,14 @@ class DataframeSerializer:
         return {df_number_key: result}
 
     def convert_df_to_json_str(self, df: pd.DataFrame, extras: dict) -> str:
-        """
-        Convert df to json and return it as string
+        """Convert df to json and return it as string
         Args:
             df (pd.DataFrame): PandasAI dataframe or dataframe
             extras (dict, optional): expect index to exists
 
         Returns:
             str: dataframe stringify
+
         """
         return json.dumps(self.convert_df_to_json(df, extras))
 

@@ -203,7 +203,7 @@ class ChromaUpsertStore(ChromaVectorStore):
                 ids.append(self.add_text(VectorAddParameter(
                     text=t,
                     collection_name=params.get("collection_name", DEFAULT_COLECCTION),  # Simplify with `.get`
-                    embed_function=params.get("embed_function", None),
+                    embed_function=params.get("embed_function"),
                     meta_data=params.get("meda_data", {})
                 )))
         else:

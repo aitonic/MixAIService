@@ -1,9 +1,9 @@
 # markdown_formatter.py
 from typing import Any
 
-from src.utils.logger import logger
 from src.app.components.model.dto import BaseCompletionParameter, BaseMessage
 from src.app.components.model.openai_style import OpenAiStyleModel
+from src.utils.logger import logger
 
 
 class MarkdownFormatter:

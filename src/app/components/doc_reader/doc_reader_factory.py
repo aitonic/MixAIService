@@ -4,10 +4,7 @@ from dataclasses import dataclass
 
 from src.utils.logger import logger
 
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
+from ..base_component import BaseComponent, BaseFactory
 from .html_reader import HTMLDocReader
 from .structured_reader import StructuredDocReader
 from .unstructured_reader import UnstructuredDocReader

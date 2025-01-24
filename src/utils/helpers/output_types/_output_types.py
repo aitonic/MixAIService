@@ -1,7 +1,8 @@
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from decimal import Decimal
-from typing import Any, Iterable
+from typing import Any
 
 from ..df_info import df_type
 
@@ -25,8 +26,7 @@ class BaseOutputType(ABC):
         ...
 
     def validate(self, result: dict[str, Any]) -> tuple[bool, Iterable[str]]:
-        """
-        Validate 'type' and 'value' from the result dict.
+        """Validate 'type' and 'value' from the result dict.
 
         Args:
             result (dict[str, Any]): The result of code execution in
@@ -41,6 +41,7 @@ class BaseOutputType(ABC):
                 Boolean value whether the result matches output type
                 and collection of logs containing messages about
                 'type' or 'value' mismatches.
+
         """
         validation_logs = []
         actual_type, actual_value = result.get("type"), result.get("value")
@@ -135,11 +136,11 @@ class DefaultOutputType(BaseOutputType):
         return True
 
     def validate(self, result: dict[str, Any]) -> tuple[bool, Iterable]:
-        """
-        Validate 'type' and 'value' from the result dict.
+        """Validate 'type' and 'value' from the result dict.
 
         Returns:
              (bool): True since the `DefaultOutputType`
                 is supposed to have no validation
+
         """
         return result["type"] in self.default_types, ()

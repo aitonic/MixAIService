@@ -1,5 +1,4 @@
-"""
-Pipeline Factory Module
+"""Pipeline Factory Module
 
 This module provides a factory class for creating and configuring various pipeline instances. 
 It supports different types of pipelines such as chat, error correction, semantic chat, and agent-based pipelines.
@@ -11,17 +10,21 @@ Author: ai
 Created: 2025-01-19
 """
 
+from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline import (
+    ErrorCorrectionPipeline,
+)
+from src.app.components.pipelines.chat.generate_chat_pipeline import (
+    GenerateChatPipeline,
+)
 from src.app.components.pipelines.core.pipeline import Pipeline
-from src.app.components.pipelines.chat.generate_chat_pipeline import GenerateChatPipeline
-from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline import ErrorCorrectionPipeline
+
 # from app.model_components.pipelines.ee.semantic_agent.pipeline.semantic_chat_pipeline import SemanticChatPipeline
 # from app.model_components.pipelines.ee.agents.judge_agent.pipeline.judge_pipeline import JudgePipeline
 # from app.model_components.pipelines.ee.agents.advanced_security_agent.pipeline.advanced_security_pipeline import AdvancedSecurityPipeline
 
 
 class PipelineFactory:
-    """
-    Factory class for creating and configuring various Pipeline instances.
+    """Factory class for creating and configuring various Pipeline instances.
     """
     
     def create_pipeline(
@@ -36,8 +39,7 @@ class PipelineFactory:
         before_code_execution=None,
         on_result=None,
     ) -> Pipeline:
-        """
-        Create and return a pipeline instance based on the given pipeline type.
+        """Create and return a pipeline instance based on the given pipeline type.
 
         Args:
             pipeline_type (str): Type of the pipeline (e.g., "chat", "error_correction", "semantic_chat").
@@ -55,6 +57,7 @@ class PipelineFactory:
 
         Raises:
             ValueError: If the specified `pipeline_type` is unknown.
+
         """
         if pipeline_type == "chat":
             return GenerateChatPipeline(

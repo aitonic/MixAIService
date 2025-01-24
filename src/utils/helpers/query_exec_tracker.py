@@ -3,14 +3,14 @@ import json
 import os
 import time
 from collections import defaultdict
-from typing import Any, List, TypedDict, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypedDict, Union
 
 import requests
 
 from src.__version__ import __version__
 from src.app.components.connectors import BaseConnector
-from src.utils.helpers.encoder import CustomEncoder
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.utils.helpers.encoder import CustomEncoder
 
 if TYPE_CHECKING:
     from src.app.components.pipelines.chat.chat_pipeline_input import (
@@ -36,10 +36,10 @@ exec_steps = {
 
 class QueryExecTracker:
     _query_info: dict
-    _dataframes: List
-    _skills: List
+    _dataframes: list
+    _skills: list
     _response: ResponseType
-    _steps: List
+    _steps: list
     _func_exec_count: dict
     _success: bool
     _server_config: dict
@@ -47,7 +47,7 @@ class QueryExecTracker:
 
     def __init__(
         self,
-        server_config: Union[dict, None] = None,
+        server_config: dict | None = None,
     ) -> None:
         self._success = False
         self._start_time = None
@@ -56,15 +56,14 @@ class QueryExecTracker:
         self._query_info = {}
 
     def start_new_track(self, input: 'ChatPipelineInput'):
-        """
-        Resets tracking variables to start new track
+        """Resets tracking variables to start new track
         """
         self._last_log_id = None
         self._start_time = time.time()
-        self._dataframes: List = []
-        self._skills: List = []
+        self._dataframes: list = []
+        self._skills: list = []
         self._response: ResponseType = {}
-        self._steps: List = []
+        self._steps: list = []
         self._query_info = {}
         self._func_exec_count: dict = defaultdict(int)
 
@@ -87,9 +86,8 @@ class QueryExecTracker:
         )
         return {"headers": json_data["columns"], "rows": json_data["data"]}
 
-    def add_dataframes(self, dfs: List[BaseConnector]) -> None:
-        """
-        Add used dataframes for the query to query exec tracker
+    def add_dataframes(self, dfs: list[BaseConnector]) -> None:
+        """Add used dataframes for the query to query exec tracker
         Args:
             dfs (List[BaseConnector]): List of dataframes
         """
@@ -101,8 +99,7 @@ class QueryExecTracker:
         self._skills = context.skills_manager.to_object()
 
     def add_step(self, step: dict) -> None:
-        """
-        Add Custom Step that is performed for additional information
+        """Add Custom Step that is performed for additional information
         Args:
             step (dict): dictionary containing information
         """
@@ -115,13 +112,13 @@ class QueryExecTracker:
         self._response = response
 
     def execute_func(self, function, *args, **kwargs) -> Any:
-        """
-        Tracks function executions, calculates execution time and prepare data
+        """Tracks function executions, calculates execution time and prepare data
         Args:
             function (function): Function that is to be executed
 
         Returns:
             Any: Response return after function execution
+
         """
         start_time = time.time()
 
@@ -156,16 +153,15 @@ class QueryExecTracker:
             raise
 
     def _generate_exec_step(self, func_name: str, result: Any) -> dict:
-        """
-        Extracts and Generates result
+        """Extracts and Generates result
         Args:
             func_name (str): function name that is executed
             result (Any): function output response
 
         Returns:
             dict: dictionary with information about the function execution
-        """
 
+        """
         step = {"type": exec_steps[func_name]}
 
         if func_name == "get_prompt":
@@ -190,13 +186,13 @@ class QueryExecTracker:
         return step
 
     def _format_response(self, result: ResponseType) -> ResponseType:
-        """
-        Format output response
+        """Format output response
         Args:
             result (ResponseType): response returned after execution
 
         Returns:
             ResponseType: formatted response output
+
         """
         if result["type"] == "dataframe":
             df_dict = self.convert_dataframe_to_dict(result["value"])
@@ -217,8 +213,7 @@ class QueryExecTracker:
             return result
 
     def get_summary(self) -> dict:
-        """
-        Returns the summary in json to steps involved in execution of track
+        """Returns the summary in json to steps involved in execution of track
         Returns:
             dict: summary json
         """
@@ -240,8 +235,7 @@ class QueryExecTracker:
         return time.time() - self._start_time
 
     def publish(self) -> None:
-        """
-        Publish Query Summary to remote logging server
+        """Publish Query Summary to remote logging server
         """
         api_key = None
         server_url = None

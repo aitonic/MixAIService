@@ -4,8 +4,7 @@ from src.utils.exceptions import InvalidWorkspacePathError
 
 
 def find_project_root(filename=None):
-    """
-    Check if Custom workspace path provide use that otherwise iterate to
+    """Check if Custom workspace path provide use that otherwise iterate to
     find project root
     """
     if "PANDASAI_WORKSPACE" in os.environ:

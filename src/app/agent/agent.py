@@ -1,27 +1,27 @@
 # agent/agent.py
-from typing import List, Optional, Type, Union
 
 import pandas as pd
+
+from src.app.components.connectors.base import BaseConnector
+from src.app.components.pipelines.chat.generate_chat_pipeline import (
+    GenerateChatPipeline,
+)
+from src.app.components.vectorstores.vectorstore import VectorStore
+from src.utils.schemas.df_config import Config
 
 from .base import BaseAgent
 from .base_judge import BaseJudge
 from .base_security import BaseSecurity
-from src.app.components.connectors.base import BaseConnector
-from src.app.components.pipelines.chat.generate_chat_pipeline import GenerateChatPipeline
-from src.utils.schemas.df_config import Config
-from src.app.components.vectorstores.vectorstore import VectorStore
 
 
 class Agent(BaseAgent):
     def __init__(
         self,
-        dfs: Union[
-            pd.DataFrame, BaseConnector, List[Union[pd.DataFrame, BaseConnector]]
-        ],
-        config: Optional[Union[Config, dict]] = None,
-        memory_size: Optional[int] = 10,
-        pipeline: Optional[Type[GenerateChatPipeline]] = None,
-        vectorstore: Optional[VectorStore] = None,
+        dfs: pd.DataFrame | BaseConnector | list[pd.DataFrame | BaseConnector],
+        config: Config | dict | None = None,
+        memory_size: int | None = 10,
+        pipeline: type[GenerateChatPipeline] | None = None,
+        vectorstore: VectorStore | None = None,
         description: str = None,
         judge: BaseJudge = None,
         security: BaseSecurity = None,

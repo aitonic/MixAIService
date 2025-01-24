@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, List, Optional
+from collections.abc import Iterable
 
 
 class VectorStore(ABC):
@@ -10,11 +10,10 @@ class VectorStore(ABC):
         self,
         queries: Iterable[str],
         codes: Iterable[str],
-        ids: Optional[Iterable[str]] = None,
-        metadatas: Optional[List[dict]] = None,
-    ) -> List[str]:
-        """
-        Add question and answer(code) to the training set
+        ids: Iterable[str] | None = None,
+        metadatas: list[dict] | None = None,
+    ) -> list[str]:
+        """Add question and answer(code) to the training set
         Args:
             query: string of question
             code: str
@@ -32,11 +31,10 @@ class VectorStore(ABC):
     def add_docs(
         self,
         docs: Iterable[str],
-        ids: Optional[Iterable[str]] = None,
-        metadatas: Optional[List[dict]] = None,
-    ) -> List[str]:
-        """
-        Add docs to the training set
+        ids: Iterable[str] | None = None,
+        metadatas: list[dict] | None = None,
+    ) -> list[str]:
+        """Add docs to the training set
         Args:
             docs: Iterable of strings to add to the vectorstore.
             ids: Optional Iterable of ids associated with the texts.
@@ -45,6 +43,7 @@ class VectorStore(ABC):
 
         Returns:
             List of ids from adding the texts into the vectorstore.
+
         """
         raise NotImplementedError("add_docs method must be implemented by subclass.")
 
@@ -53,10 +52,9 @@ class VectorStore(ABC):
         ids: Iterable[str],
         queries: Iterable[str],
         codes: Iterable[str],
-        metadatas: Optional[List[dict]] = None,
-    ) -> List[str]:
-        """
-        Update question and answer(code) to the training set
+        metadatas: list[dict] | None = None,
+    ) -> list[str]:
+        """Update question and answer(code) to the training set
         Args:
             ids: Iterable of ids associated with the texts.
             queries: string of question
@@ -72,10 +70,9 @@ class VectorStore(ABC):
         self,
         ids: Iterable[str],
         docs: Iterable[str],
-        metadatas: Optional[List[dict]] = None,
-    ) -> List[str]:
-        """
-        Update docs to the training set
+        metadatas: list[dict] | None = None,
+    ) -> list[str]:
+        """Update docs to the training set
         Args:
             ids: Iterable of ids associated with the texts.
             docs: Iterable of strings to update to the vectorstore.
@@ -84,79 +81,77 @@ class VectorStore(ABC):
 
         Returns:
             List of ids from adding the texts into the vectorstore.
+
         """
         pass
 
     def delete_question_and_answers(
-        self, ids: Optional[List[str]] = None
-    ) -> Optional[bool]:
-        """
-        Delete by vector ID or other criteria.
+        self, ids: list[str] | None = None
+    ) -> bool | None:
+        """Delete by vector ID or other criteria.
+
         Args:
             ids: List of ids to delete
 
         Returns:
             Optional[bool]: True if deletion is successful,
             False otherwise
+
         """
         raise NotImplementedError(
             "delete_question_and_answers method must be implemented by subclass."
         )
 
-    def delete_docs(self, ids: Optional[List[str]] = None) -> Optional[bool]:
-        """
-        Delete by vector ID or other criteria.
+    def delete_docs(self, ids: list[str] | None = None) -> bool | None:
+        """Delete by vector ID or other criteria.
+
         Args:
             ids: List of ids to delete
 
         Returns:
             Optional[bool]: True if deletion is successful,
             False otherwise
+
         """
         raise NotImplementedError("delete_docs method must be implemented by subclass.")
 
-    def delete_collection(self, collection_name: str) -> Optional[bool]:
-        """
-        Delete the collection
+    def delete_collection(self, collection_name: str) -> bool | None:
+        """Delete the collection
         Args:
             collection_name (str): name of the collection
 
         Returns:
             Optional[bool]: _description_
+
         """
 
-    def get_relevant_question_answers(self, question: str, k: int = 1) -> List[dict]:
-        """
-        Returns relevant question answers based on search
+    def get_relevant_question_answers(self, question: str, k: int = 1) -> list[dict]:
+        """Returns relevant question answers based on search
         """
         raise NotImplementedError(
             "get_relevant_question_answers method must be implemented by subclass."
         )
 
-    def get_relevant_docs(self, question: str, k: int = 1) -> List[dict]:
-        """
-        Returns relevant documents based search
+    def get_relevant_docs(self, question: str, k: int = 1) -> list[dict]:
+        """Returns relevant documents based search
         """
         raise NotImplementedError(
             "get_relevant_docs method must be implemented by subclass."
         )
 
-    def get_relevant_question_answers_by_id(self, ids: Iterable[str]) -> List[dict]:
-        """
-        Returns relevant question answers based on ids
+    def get_relevant_question_answers_by_id(self, ids: Iterable[str]) -> list[dict]:
+        """Returns relevant question answers based on ids
         """
         pass
 
-    def get_relevant_docs_by_id(self, ids: Iterable[str]) -> List[dict]:
-        """
-        Returns relevant documents based on ids
+    def get_relevant_docs_by_id(self, ids: Iterable[str]) -> list[dict]:
+        """Returns relevant documents based on ids
         """
         pass
 
     @abstractmethod
-    def get_relevant_qa_documents(self, question: str, k: int = 1) -> List[str]:
-        """
-        Returns relevant question answers documents only
+    def get_relevant_qa_documents(self, question: str, k: int = 1) -> list[str]:
+        """Returns relevant question answers documents only
         Args:
             question (_type_): list of documents
         """
@@ -165,9 +160,8 @@ class VectorStore(ABC):
         )
 
     @abstractmethod
-    def get_relevant_docs_documents(self, question: str, k: int = 1) -> List[str]:
-        """
-        Returns relevant question answers documents only
+    def get_relevant_docs_documents(self, question: str, k: int = 1) -> list[str]:
+        """Returns relevant question answers documents only
         Args:
             question (_type_): list of documents
         """

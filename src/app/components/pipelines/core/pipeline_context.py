@@ -1,27 +1,25 @@
 # app/model_components/pipelines/core/pipeline_context.py
-from typing import Any, List, Optional, Union
+from typing import Any
 
+from src.app.components.connectors import BaseConnector
+from src.app.components.vectorstores import VectorStore
 from src.utils.helpers.cache import Cache
 from src.utils.helpers.memory import Memory
 from src.utils.helpers.skills_manager import SkillsManager
 from src.utils.schemas.df_config import Config
-from src.app.components.vectorstores import VectorStore
-
-from src.app.components.connectors import BaseConnector
 
 
 class PipelineContext:
-    """
-    Pass Context to the pipeline which is accessible to each step via kwargs
+    """Pass Context to the pipeline which is accessible to each step via kwargs
     """
 
     def __init__(
         self,
-        dfs: List[BaseConnector],
-        config: Optional[Union[Config, dict]] = None,
-        memory: Optional[Memory] = None,
-        skills_manager: Optional[SkillsManager] = None,
-        cache: Optional[Cache] = None,
+        dfs: list[BaseConnector],
+        config: Config | dict | None = None,
+        memory: Memory | None = None,
+        skills_manager: SkillsManager | None = None,
+        cache: Cache | None = None,
         vectorstore: VectorStore = None,
         initial_values: dict = None,
     ) -> None:

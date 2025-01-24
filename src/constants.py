@@ -1,5 +1,4 @@
-"""
-Constants used in the pandasai package.
+"""Constants used in the pandasai package.
 
 It includes Start & End Code tags, Whitelisted Python Packages and
 While List Builtin Methods.

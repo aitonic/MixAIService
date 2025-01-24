@@ -4,7 +4,6 @@ from collections.abc import Iterator
 from typing import TypeVar
 
 from fastapi import APIRouter
-from fastapi.responses import StreamingResponse
 
 from src.utils.logger import logger
 from src.utils.response import ResponseUtil
@@ -188,7 +187,7 @@ def _process_result(result: Iterator[T] | T) -> T | None:
     if isinstance(result, Iterator):
         result_text = ""
         for  response in result:
-            if "DONE" == response:
+            if response == "DONE":
                 break
             result_text = result_text+response
             

@@ -1,5 +1,4 @@
 import json
-from typing import List
 
 from .base import BasePrompt
 
@@ -13,6 +12,6 @@ class ClarificationQuestionPrompt(BasePrompt):
         try:
             output = output.replace("```json", "").replace("```", "")
             json_data = json.loads(output)
-            return isinstance(json_data, List)
+            return isinstance(json_data, list)
         except json.JSONDecodeError:
             return False

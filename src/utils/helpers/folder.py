@@ -3,7 +3,6 @@ import os
 from pydantic import BaseModel
 
 from src.constants import DEFAULT_FILE_PERMISSIONS
-
 from src.utils.helpers.path import find_project_root
 
 
@@ -19,6 +18,7 @@ class Folder:
 
         Args:
             path (str): Path to the folder to be created.
+
         """
         try:
             cache_dir = os.path.join((find_project_root()), path)

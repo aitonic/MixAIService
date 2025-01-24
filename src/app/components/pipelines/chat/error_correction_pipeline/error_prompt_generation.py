@@ -1,15 +1,14 @@
 # app/model_components/pipelines/chat/error_correction_pipeline/error_prompt_generation.py
 import traceback
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
-from src.utils.exceptions import ExecuteSQLQueryNotUsed, InvalidLLMOutputType
-from src.utils.logger import Logger
-from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline_input import (
     ErrorCorrectionPipelineInput,
 )
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
+from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
 from src.app.components.prompts.base import BasePrompt
 from src.app.components.prompts.correct_error_prompt import CorrectErrorPrompt
 from src.app.components.prompts.correct_execute_sql_query_usage_error_prompt import (
@@ -18,6 +17,8 @@ from src.app.components.prompts.correct_execute_sql_query_usage_error_prompt imp
 from src.app.components.prompts.correct_output_type_error_prompt import (
     CorrectOutputTypeErrorPrompt,
 )
+from src.utils.exceptions import ExecuteSQLQueryNotUsed, InvalidLLMOutputType
+from src.utils.logger import Logger
 
 
 class ErrorPromptGeneration(BaseLogicUnit):
@@ -34,8 +35,7 @@ class ErrorPromptGeneration(BaseLogicUnit):
         super().__init__(skip_if, on_execution, before_execution)
 
     def execute(self, input: ErrorCorrectionPipelineInput, **kwargs) -> Any:
-        """
-        A method to retry the code execution with error correction framework.
+        """A method to retry the code execution with error correction framework.
 
         Args:
             code (str): A python code
@@ -45,6 +45,7 @@ class ErrorPromptGeneration(BaseLogicUnit):
             dataframes
 
         Returns (str): A python code
+
         """
         self.context: PipelineContext = kwargs.get("context")
         self.logger: Logger = kwargs.get("logger")
@@ -67,14 +68,14 @@ class ErrorPromptGeneration(BaseLogicUnit):
         )
 
     def get_prompt(self, e: Exception, code: str) -> BasePrompt:
-        """
-        Return a prompt by key.
+        """Return a prompt by key.
 
         Args:
             values (dict): The values to use for the prompt
 
         Returns:
             BasePrompt: The prompt
+
         """
         traceback_errors = traceback.format_exc()
         return (

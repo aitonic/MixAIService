@@ -5,8 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class CodeExecutionPipelineInput:
-    """
-    Contain all the data needed by the Code Execution pipeline
+    """Contain all the data needed by the Code Execution pipeline
     """
 
     code: str

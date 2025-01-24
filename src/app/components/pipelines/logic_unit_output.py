@@ -5,8 +5,7 @@ from typing import Any
 
 @dataclass
 class LogicUnitOutput:
-    """
-    Pipeline step output
+    """Pipeline step output
     """
 
     output: Any

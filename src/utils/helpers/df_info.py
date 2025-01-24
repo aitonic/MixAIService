@@ -44,15 +44,15 @@ except ImportError:
     pass
 
 
-def df_type(df: DataFrameType) -> Union[str, None]: # type: ignore
-    """
-    Returns the type of the dataframe.
+def df_type(df: DataFrameType) -> str | None: # type: ignore
+    """Returns the type of the dataframe.
 
     Args:
         df (DataFrameType): Pandas, Modin or Polars dataframe
 
     Returns:
         str: Type of the dataframe
+
     """
     if polars_imported and isinstance(df, pl.DataFrame):
         return "polars"

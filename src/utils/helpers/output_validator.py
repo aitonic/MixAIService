@@ -1,5 +1,6 @@
 import re
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 
@@ -10,8 +11,7 @@ from src.utils.exceptions import InvalidOutputValueMismatch
 class OutputValidator:
     @staticmethod
     def validate(expected_type, result: dict[str, Any]) -> tuple[bool, Iterable[str]]:
-        """
-        Validate 'type' and 'value' from the result dict.
+        """Validate 'type' and 'value' from the result dict.
 
         Args:
             result (dict[str, Any]): The result of code execution in
@@ -26,6 +26,7 @@ class OutputValidator:
                 Boolean value whether the result matches output type
                 and collection of logs containing messages about
                 'type' or 'value' mismatches.
+
         """
         validation_logs = []
         result_type, result_value = result.get("type"), result.get("value")

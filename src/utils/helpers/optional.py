@@ -8,7 +8,7 @@ from __future__ import annotations
 import importlib
 import sys
 import warnings
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pandas.util.version import Version
 
@@ -16,6 +16,7 @@ from src.constants import WHITELISTED_BUILTINS
 from src.utils.safe_libs.restricted_base64 import RestrictedBase64
 from src.utils.safe_libs.restricted_datetime import RestrictedDatetime
 from src.utils.safe_libs.restricted_json import RestrictedJson
+
 # from src.utils.safe_libs.restricted_matplotlib import RestrictedMatplotlib
 from src.utils.safe_libs.restricted_numpy import RestrictedNumpy
 from src.utils.safe_libs.restricted_pandas import RestrictedPandas
@@ -51,9 +52,8 @@ def get_version(module: types.ModuleType) -> str:
     return version
 
 
-def get_environment(additional_deps: List[dict], secure: bool = True) -> dict:
-    """
-    Returns the environment for the code to be executed.
+def get_environment(additional_deps: list[dict], secure: bool = True) -> dict:
+    """Returns the environment for the code to be executed.
 
     Returns (dict): A dictionary of environment variables
     """
@@ -120,8 +120,7 @@ def import_dependency(
     errors: str = "raise",
     min_version: str | None = None,
 ):
-    """
-    Import an optional dependency.
+    """Import an optional dependency.
 
     By default, if a dependency is missing an ImportError with a nice
     message will be raised. If a dependency is present, but too old,
@@ -149,8 +148,8 @@ def import_dependency(
             None is returned when the package is not found and `errors`
             is False, or when the package's version is too old and `errors`
             is `'warn'`.
-    """
 
+    """
     assert errors in {"warn", "raise", "ignore"}
 
     package_name = INSTALL_MAPPING.get(name)

@@ -10,8 +10,7 @@ def add_save_chart(
     file_name: str,
     save_charts_path_str: str = None,
 ) -> str:
-    """
-    Add line to code that save charts to a file, if plt.show() is called.
+    """Add line to code that save charts to a file, if plt.show() is called.
 
     Args:
         code (str): Code to add line to.

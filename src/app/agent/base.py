@@ -2,20 +2,27 @@ import json
 import os
 import re
 import uuid
-from typing import List, Optional, Union
 
 import src.utils.pandas as pd
 from src.app.agent.base_security import BaseSecurity
-from src.utils.llm.bamboo_llm import BambooLLM
+from src.app.components.connectors.base import BaseConnector
+from src.app.components.connectors.pandas import PandasConnector
 from src.app.components.pipelines.chat.chat_pipeline_input import ChatPipelineInput
 from src.app.components.pipelines.chat.code_execution_pipeline_input import (
     CodeExecutionPipelineInput,
 )
-from src.app.components.vectorstores.vectorstore import VectorStore
 
+# from ..llm.langchain import LangchainLLM, is_langchain_llm
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.prompts.base import BasePrompt
+from src.app.components.prompts.clarification_questions_prompt import (
+    ClarificationQuestionPrompt,
+)
+from src.app.components.prompts.explain_prompt import ExplainPrompt
+from src.app.components.prompts.rephase_query_prompt import RephraseQueryPrompt
+from src.app.components.skills import Skill
+from src.app.components.vectorstores.vectorstore import VectorStore
 from src.config import load_config_from_json
-from src.app.components.connectors.base import BaseConnector
-from src.app.components.connectors.pandas import PandasConnector
 from src.constants import DEFAULT_CACHE_DIRECTORY, DEFAULT_CHART_DIRECTORY
 from src.utils.exceptions import (
     InvalidLLMOutputType,
@@ -24,42 +31,33 @@ from src.utils.exceptions import (
 )
 from src.utils.helpers.df_info import df_type
 from src.utils.helpers.folder import Folder
-from src.utils.logger import Logger
 from src.utils.helpers.memory import Memory
 from src.utils.llm.base import LLM
-# from ..llm.langchain import LangchainLLM, is_langchain_llm
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
-from src.app.components.prompts.base import BasePrompt
-from src.app.components.prompts.clarification_questions_prompt import ClarificationQuestionPrompt
-from src.app.components.prompts.explain_prompt import ExplainPrompt
-from src.app.components.prompts.rephase_query_prompt import RephraseQueryPrompt
+from src.utils.logger import Logger
 from src.utils.schemas.df_config import Config
-from src.app.components.skills import Skill
+
 from .callbacks import Callbacks
 
 
 class BaseAgent:
-    """
-    Base Agent class to improve the conversational experience in PandasAI
+    """Base Agent class to improve the conversational experience in PandasAI
     """
 
     def __init__(
         self,
-        dfs: Union[
-            pd.DataFrame, BaseConnector, List[Union[pd.DataFrame, BaseConnector]]
-        ],
-        config: Optional[Union[Config, dict]] = None,
-        memory_size: Optional[int] = 10,
-        vectorstore: Optional[VectorStore] = None,
+        dfs: pd.DataFrame | BaseConnector | list[pd.DataFrame | BaseConnector],
+        config: Config | dict | None = None,
+        memory_size: int | None = 10,
+        vectorstore: VectorStore | None = None,
         description: str = None,
         security: BaseSecurity = None,
     ):
-        """
-        Args:
-            df (Union[pd.DataFrame, List[pd.DataFrame]]): Pandas or Modin dataframe
-            Polars or Database connectors
-            memory_size (int, optional): Conversation history to use during chat.
-            Defaults to 1.
+        """Args:
+        df (Union[pd.DataFrame, List[pd.DataFrame]]): Pandas or Modin dataframe
+        Polars or Database connectors
+        memory_size (int, optional): Conversation history to use during chat.
+        Defaults to 1.
+
         """
         self.last_prompt = None
         self.last_prompt_id = None
@@ -89,7 +87,9 @@ class BaseAgent:
 
         if self._vectorstore is None and os.environ.get("PANDASAI_API_KEY"):
             try:
-                from src.app.components.vectorstores.bamboo_vectorstore import BambooVectorStore
+                from src.app.components.vectorstores.bamboo_vectorstore import (
+                    BambooVectorStore,
+                )
             except ImportError as e:
                 raise ImportError(
                     "Could not import BambooVectorStore. Please install the required dependencies."
@@ -115,9 +115,8 @@ class BaseAgent:
         if self.config.enable_cache:
             Folder.create(DEFAULT_CACHE_DIRECTORY)
 
-    def get_config(self, config: Union[Config, dict]):
-        """
-        Load a config to be used to run the queries.
+    def get_config(self, config: Config | dict):
+        """Load a config to be used to run the queries.
         """
         # 如果已经是 Config 实例，直接返回
         if isinstance(config, Config):
@@ -143,8 +142,7 @@ class BaseAgent:
         return Config(**config)
 
     def get_llm(self, llm: LLM) -> LLM:
-        """
-        Load a LLM to be used to run the queries.
+        """Load a LLM to be used to run the queries.
         Check if it is a PandasAI LLM or a Langchain LLM.
         If it is a Langchain LLM, wrap it in a PandasAI LLM.
 
@@ -154,6 +152,7 @@ class BaseAgent:
         Raises:
             BadImportError: If the LLM is a Langchain LLM but the langchain package
             is not installed
+
         """
         # if is_langchain_llm(llm):
         #     llm = LangchainLLM(llm)
@@ -162,15 +161,13 @@ class BaseAgent:
 
     def get_dfs(
         self,
-        dfs: Union[
-            pd.DataFrame, BaseConnector, List[Union[pd.DataFrame, BaseConnector]]
-        ],
+        dfs: pd.DataFrame | BaseConnector | list[pd.DataFrame | BaseConnector],
     ):
-        """
-        Load all the dataframes to be used in the agent.
+        """Load all the dataframes to be used in the agent.
 
         Args:
             dfs (List[Union[pd.DataFrame, Any]]): Pandas dataframe
+
         """
         # Inline import to avoid circular import
         from src.utils.smart_dataframe import SmartDataframe
@@ -183,13 +180,7 @@ class BaseAgent:
         for df in dfs:
             if isinstance(df, BaseConnector):
                 connectors.append(df)
-            elif isinstance(df, (pd.DataFrame, pd.Series, list, dict, str)):
-                connectors.append(PandasConnector({
-                    "original_df": df,
-                    "database": "pandas",  # 添加必需字段
-                    "table": "df"          # 添加必需字段
-                }))
-            elif df_type(df) == "modin":
+            elif isinstance(df, (pd.DataFrame, pd.Series, list, dict, str)) or df_type(df) == "modin":
                 connectors.append(PandasConnector({
                     "original_df": df,
                     "database": "pandas",  # 添加必需字段
@@ -219,14 +210,12 @@ class BaseAgent:
         return connectors
 
     def add_skills(self, *skills: Skill):
-        """
-        Add Skills to PandasAI
+        """Add Skills to PandasAI
         """
         self.context.skills_manager.add_skills(*skills)
 
     def call_llm_with_prompt(self, prompt: BasePrompt):
-        """
-        Call LLM with prompt using error handling to retry based on config
+        """Call LLM with prompt using error handling to retry based on config
         Args:
             prompt (BasePrompt): BasePrompt to pass to LLM's
         """
@@ -253,9 +242,8 @@ class BaseAgent:
         )
         return bool(dangerous_pattern.search(query))
 
-    def chat(self, query: str, output_type: Optional[str] = None):
-        """
-        Simulate a chat interaction with the assistant on Dataframe.
+    def chat(self, query: str, output_type: str | None = None):
+        """Simulate a chat interaction with the assistant on Dataframe.
         """
         if not self.pipeline:
             return (
@@ -295,9 +283,8 @@ class BaseAgent:
                 f"\n{exception}\n"
             )
 
-    def generate_code(self, query: str, output_type: Optional[str] = None):
-        """
-        Simulate code generation with the assistant on Dataframe.
+    def generate_code(self, query: str, output_type: str | None = None):
+        """Simulate code generation with the assistant on Dataframe.
         """
         if not self.pipeline:
             return (
@@ -325,10 +312,9 @@ class BaseAgent:
             )
 
     def execute_code(
-        self, code: Optional[str] = None, output_type: Optional[str] = None
+        self, code: str | None = None, output_type: str | None = None
     ):
-        """
-        Execute code Generated with the assistant on Dataframe.
+        """Execute code Generated with the assistant on Dataframe.
         """
         if not self.pipeline:
             return (
@@ -359,12 +345,11 @@ class BaseAgent:
 
     def train(
         self,
-        queries: Optional[List[str]] = None,
-        codes: Optional[List[str]] = None,
-        docs: Optional[List[str]] = None,
+        queries: list[str] | None = None,
+        codes: list[str] | None = None,
+        docs: list[str] | None = None,
     ) -> None:
-        """
-        Trains the context to be passed to model
+        """Trains the context to be passed to model
         Args:
             queries (Optional[str], optional): user user
             codes (Optional[str], optional): generated code
@@ -391,15 +376,13 @@ class BaseAgent:
         self.logger.log("Agent successfully trained on the data")
 
     def clear_memory(self):
-        """
-        Clears the memory
+        """Clears the memory
         """
         self.context.memory.clear()
         self.conversation_id = uuid.uuid4()
 
     def add_message(self, message, is_user=False):
-        """
-        Add message to the memory. This is useful when you want to add a message
+        """Add message to the memory. This is useful when you want to add a message
         to the memory without calling the chat function (for example, when you
         need to add a message from the agent).
         """
@@ -407,15 +390,13 @@ class BaseAgent:
 
     def assign_prompt_id(self):
         """Assign a prompt ID"""
-
         self.last_prompt_id = uuid.uuid4()
 
         if self.logger:
             self.logger.log(f"Prompt ID: {self.last_prompt_id}")
 
-    def clarification_questions(self, query: str) -> List[str]:
-        """
-        Generate clarification questions based on the data
+    def clarification_questions(self, query: str) -> list[str]:
+        """Generate clarification questions based on the data
         """
         prompt = ClarificationQuestionPrompt(
             context=self.context,
@@ -432,14 +413,12 @@ class BaseAgent:
         return questions[:3]
 
     def start_new_conversation(self):
-        """
-        Clears the previous conversation
+        """Clears the previous conversation
         """
         self.clear_memory()
 
     def explain(self) -> str:
-        """
-        Returns the explanation of the code how it reached to the solution
+        """Returns the explanation of the code how it reached to the solution
         """
         try:
             prompt = ExplainPrompt(

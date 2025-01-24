@@ -3,8 +3,7 @@ from src.utils.schemas.df_config import Config
 
 
 class Context:
-    """
-    Context class that contains context from Agent for ResponseParsers
+    """Context class that contains context from Agent for ResponseParsers
     Context contain the application config and logger.
     """
 

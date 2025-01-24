@@ -6,8 +6,7 @@ from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
 
 
 class BaseLogicUnit(ABC):
-    """
-    Logic units for pipeline each logic unit should be inherited from this Logic unit
+    """Logic units for pipeline each logic unit should be inherited from this Logic unit
     """
 
     def __init__(self, skip_if=None, on_execution=None, before_execution=None):
@@ -18,8 +17,7 @@ class BaseLogicUnit(ABC):
 
     @abstractmethod
     def execute(self, input: Any, **kwargs) -> LogicUnitOutput:
-        """
-        This method will return output according to
+        """This method will return output according to
         Implementation.
 
         :param input: Your input data.

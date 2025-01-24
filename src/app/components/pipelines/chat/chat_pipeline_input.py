@@ -5,8 +5,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ChatPipelineInput:
-    """
-    Contain all the data needed by the chat pipeline
+    """Contain all the data needed by the chat pipeline
     """
 
     query: str

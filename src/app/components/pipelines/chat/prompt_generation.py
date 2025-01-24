@@ -1,26 +1,25 @@
 # app/model_components/pipelines/chat/prompt_generation.py
-from typing import Any, Union
+from typing import Any
 
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
-
-from src.utils.logger import Logger
-from src.app.components.prompts.base import BasePrompt
-from src.app.components.prompts.generate_python_code import GeneratePythonCodePrompt
-from src.app.components.prompts.generate_python_code_with_sql import GeneratePythonCodeWithSQLPrompt
 from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
 from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
+from src.app.components.prompts.base import BasePrompt
+from src.app.components.prompts.generate_python_code import GeneratePythonCodePrompt
+from src.app.components.prompts.generate_python_code_with_sql import (
+    GeneratePythonCodeWithSQLPrompt,
+)
+from src.utils.logger import Logger
 
 
 class PromptGeneration(BaseLogicUnit):
-    """
-    Code Prompt Generation Stage
+    """Code Prompt Generation Stage
     """
 
     pass
 
     def execute(self, input: Any, **kwargs) -> Any:
-        """
-        This method will return output according to
+        """This method will return output according to
         Implementation.
 
         :param input: Your input data.
@@ -44,7 +43,7 @@ class PromptGeneration(BaseLogicUnit):
             {"content_type": "prompt", "value": prompt.to_string()},
         )
 
-    def get_chat_prompt(self, context: PipelineContext) -> Union[str, BasePrompt]:
+    def get_chat_prompt(self, context: PipelineContext) -> str | BasePrompt:
         # set matplotlib as the default library
         viz_lib = "matplotlib"
         if context.config.data_viz_library:

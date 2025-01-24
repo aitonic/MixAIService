@@ -1,5 +1,4 @@
-"""
-This module contains helper functions for anonymizing data and generating random data
+"""This module contains helper functions for anonymizing data and generating random data
  before sending it to the LLM (An External API).
 
 Only df.head() is sent to LLM API, hence the df.head() is processed
@@ -18,9 +17,9 @@ from .anonymizer import Anonymizer
 
 class DataSampler:
     def __init__(self, df: pd.DataFrame):
-        """
-        Args:
-            df (pd.DataFrame): pd.DataFrame to sample from.
+        """Args:
+        df (pd.DataFrame): pd.DataFrame to sample from.
+
         """
         self.df = df
 
@@ -32,6 +31,7 @@ class DataSampler:
 
         Returns:
             pd.DataFrame: Sampled dataframe.
+
         """
         sampled_df = pd.DataFrame()
         if len(self.df) <= n:
@@ -55,8 +55,8 @@ class DataSampler:
 
         Returns:
             list: Sampled column.
-        """
 
+        """
         col_sample = []
         col_values = self.df[col].dropna().unique()
 

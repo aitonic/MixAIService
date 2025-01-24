@@ -1,11 +1,6 @@
 from abc import ABC, abstractmethod
 
-from pydantic import Field
-
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
+from ..base_component import BaseComponent
 
 
 class AbsRetriver(ABC, BaseComponent):
@@ -13,6 +8,7 @@ class AbsRetriver(ABC, BaseComponent):
     Search for matching content lists from specified sources based on input information
     and other specified parameters (to be handled by respective implementations).
     """
+
     @abstractmethod
     async def retrieve(self, query: str, top_k: int = 5) -> list[str]:
         """根据查询内容检索相关信息
@@ -23,6 +19,7 @@ class AbsRetriver(ABC, BaseComponent):
             
         Returns:
             返回与查询最相关的top_k个结果，每个结果为字符串格式
+
         """
         pass
 
@@ -32,6 +29,7 @@ class AbsRetriver(ABC, BaseComponent):
         
         Returns:
             返回检索器类型名称
+
         """
         pass
 
@@ -41,5 +39,6 @@ class AbsRetriver(ABC, BaseComponent):
         
         Returns:
             返回检索器的配置字典
+
         """
         pass

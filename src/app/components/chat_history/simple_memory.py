@@ -96,6 +96,7 @@ class LocalMemory(AbsMemory):
         
         Returns:
             list[MessageInfo]: List of messages matching the query parameters.
+
         """
         # Get messages for user_id instead of api_key
         user_memory = self.memories.get(parameter.user_id, {})

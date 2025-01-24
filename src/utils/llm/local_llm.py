@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING
 
 from openai import OpenAI
 
-from src.utils.helpers.memory import Memory
 from src.app.components.prompts.base import BasePrompt
+from src.utils.helpers.memory import Memory
+
 from .base import LLM
 
 if TYPE_CHECKING:

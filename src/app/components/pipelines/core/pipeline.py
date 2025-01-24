@@ -1,41 +1,38 @@
 # app/model_components/pipelines/core/pipeline.py
 import logging
 import time
-from typing import Any, List, Optional, Union
-
-from src.config import load_config_from_json
-from src.utils.exceptions import PipelineConcatenationError, UnSupportedLogicUnit
-from src.utils.logger import Logger
-from src.utils.helpers.query_exec_tracker import QueryExecTracker
-from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
-from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from typing import Any
 
 from src.app.components.connectors import BaseConnector
-from src.utils.schemas.df_config import Config
 from src.app.components.pipelines.core.abstract_pipeline import AbstractPipeline
+from src.app.components.pipelines.core.base_logic_unit import BaseLogicUnit
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.app.components.pipelines.logic_unit_output import LogicUnitOutput
+from src.config import load_config_from_json
+from src.utils.exceptions import PipelineConcatenationError, UnSupportedLogicUnit
+from src.utils.helpers.query_exec_tracker import QueryExecTracker
+from src.utils.logger import Logger
+from src.utils.schemas.df_config import Config
 
 
 class Pipeline(AbstractPipeline):
-    """
-    Base Pipeline class to be used to create custom pipelines
+    """Base Pipeline class to be used to create custom pipelines
     """
 
     _context: PipelineContext
     _logger: Logger
-    _steps: List[BaseLogicUnit]
-    _query_exec_tracker: Optional[QueryExecTracker]
+    _steps: list[BaseLogicUnit]
+    _query_exec_tracker: QueryExecTracker | None
 
     def __init__(
         self,
-        context: Union[List[BaseConnector], PipelineContext],
-        config: Optional[Union[Config, dict]] = None,
-        query_exec_tracker: Optional[QueryExecTracker] = None,
-        steps: Optional[List] = None,
-        logger: Optional[Logger] = None,
+        context: list[BaseConnector] | PipelineContext,
+        config: Config | dict | None = None,
+        query_exec_tracker: QueryExecTracker | None = None,
+        steps: list | None = None,
+        logger: Logger | None = None,
     ):
-        """
-        Initialize the pipeline with given context and configuration
+        """Initialize the pipeline with given context and configuration
             parameters.
         Args :
             context (Context) : Context is required for ResponseParsers.
@@ -43,7 +40,6 @@ class Pipeline(AbstractPipeline):
             steps: (list): List of logic Units
             logger: (Logger): logger
         """
-
         if context and not isinstance(context, PipelineContext):
             config = Config(**load_config_from_json(config))
             connectors = context
@@ -62,8 +58,7 @@ class Pipeline(AbstractPipeline):
         )
 
     def add_step(self, logic: BaseLogicUnit):
-        """
-        Adds new logics in the pipeline
+        """Adds new logics in the pipeline
         Args:
             logic (BaseLogicUnit): execution unit of logic
         """
@@ -76,13 +71,13 @@ class Pipeline(AbstractPipeline):
         self._steps.append(logic)
 
     def run(self, data: Any = None) -> Any:
-        """
-        This functions is responsible to loop through logics
+        """This functions is responsible to loop through logics
         Args:
             data (Any, optional): Input Data to run the pipeline. Defaults to None.
 
         Returns:
             Any: Depends on the type can return anything
+
         """
         try:
             for index, logic in enumerate(self._steps):
@@ -140,16 +135,15 @@ class Pipeline(AbstractPipeline):
         return data
 
     def __or__(self, pipeline: "Pipeline") -> Any:
-        """
-        This functions is responsible to pipe two pipelines
+        """This functions is responsible to pipe two pipelines
         Args:
             pipeline (Pipeline): Second Pipeline which will be Piped to the self.
             data (Any, optional): Input Data to run the pipeline. Defaults to None.
 
         Returns:
             Any: Depends on the type can return anything
-        """
 
+        """
         if not isinstance(pipeline, Pipeline):
             raise PipelineConcatenationError(
                 "Pipeline can be concatenated with Pipeline class only!"

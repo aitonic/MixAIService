@@ -12,7 +12,6 @@ from src.utils.logger import logger
 from src.utils.response import ResponseUtil
 
 
-
 def exception_handler(request: Request, e: Exception) -> Response:
     """Handle exceptions that occur during request processing.
 

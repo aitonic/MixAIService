@@ -1,5 +1,4 @@
-"""
-Prompt Factory Module
+"""Prompt Factory Module
 
 This module provides a factory for creating various types of prompt components.
 It includes functionality to dynamically register new prompt types and manage prompt creation.
@@ -11,29 +10,22 @@ Author: ai
 Created: 2025-01-19
 """
 
-from typing import Dict, Type
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
-from .prompt import (
-    HumanPrompt, 
-    SystemPrompt
-)
+
+from ..base_component import BaseComponent, BaseFactory
+from .prompt import HumanPrompt, SystemPrompt
 
 
 class PromptFactory(BaseFactory):
     """Factory class for creating different types of prompts."""
     
     # Class-level dictionary to store prompt type mappings
-    _prompt_types: Dict[str, Type[BaseComponent]] = {
+    _prompt_types: dict[str, type[BaseComponent]] = {
         "system": SystemPrompt,
         "human": HumanPrompt
     }
 
     def get_bean(self, param: dict) -> BaseComponent:
-        """
-        Create and return a prompt component based on the given parameters.
+        """Create and return a prompt component based on the given parameters.
 
         Args:
             param (dict): Dictionary containing component configuration.
@@ -45,6 +37,7 @@ class PromptFactory(BaseFactory):
         Raises:
             KeyError: If `component_type` is not registered.
             ValueError: If required parameters are missing.
+
         """
         component_type = param["component_type"]
         
@@ -64,12 +57,12 @@ class PromptFactory(BaseFactory):
             raise ValueError(f"Unimplemented prompt component_type: {component_type}")
 
     @classmethod
-    def register_prompt_type(cls, type_name: str, prompt_class: Type[BaseComponent]) -> None:
-        """
-        Register a new prompt type to the factory.
+    def register_prompt_type(cls, type_name: str, prompt_class: type[BaseComponent]) -> None:
+        """Register a new prompt type to the factory.
 
         Args:
             type_name (str): The identifier for the prompt type.
             prompt_class (Type[BaseComponent]): The class to instantiate for this type.
+
         """
         cls._prompt_types[type_name] = prompt_class

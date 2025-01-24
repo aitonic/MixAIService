@@ -6,10 +6,11 @@ Example:
     Use below example to call OpenAI Model
 
     >>> from src.utils.llm.openai import OpenAI
+
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 import openai
 
@@ -58,11 +59,10 @@ class OpenAI(BaseOpenAI):
 
     def __init__(
         self,
-        api_token: Optional[str] = None,
+        api_token: str | None = None,
         **kwargs,
     ):
-        """
-        __init__ method of OpenAI Class
+        """__init__ method of OpenAI Class
 
         Args:
             api_token (str): API Token for OpenAI platform.
@@ -102,7 +102,7 @@ class OpenAI(BaseOpenAI):
             raise UnsupportedModelError(self.model)
 
     @property
-    def _default_params(self) -> Dict[str, Any]:
+    def _default_params(self) -> dict[str, Any]:
         """Get the default parameters for calling OpenAI API"""
         return {
             **super()._default_params,

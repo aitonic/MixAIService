@@ -1,38 +1,37 @@
 # app/model_components/pipelines/chat/generate_chat_pipeline.py
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from src.app.agent.base_judge import BaseJudge
 
 if TYPE_CHECKING:
     from src.utils.helpers.query_exec_tracker import QueryExecTracker
 
+from src.app.components.pipelines.chat.cache_lookup import CacheLookup
+from src.app.components.pipelines.chat.cache_population import CachePopulation
 from src.app.components.pipelines.chat.chat_pipeline_input import (
     ChatPipelineInput,
 )
+from src.app.components.pipelines.chat.code_cleaning import CodeCleaning
+from src.app.components.pipelines.chat.code_execution import CodeExecution
 from src.app.components.pipelines.chat.code_execution_pipeline_input import (
     CodeExecutionPipelineInput,
 )
+from src.app.components.pipelines.chat.code_generator import CodeGenerator
 from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline import (
     ErrorCorrectionPipeline,
 )
 from src.app.components.pipelines.chat.error_correction_pipeline.error_correction_pipeline_input import (
     ErrorCorrectionPipelineInput,
 )
-from src.app.components.pipelines.chat.validate_pipeline_input import (
-    ValidatePipelineInput,
-)
-
-from src.utils.logger import Logger
-from src.app.components.pipelines.core.pipeline import Pipeline
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
-from src.app.components.pipelines.chat.cache_lookup import CacheLookup
-from src.app.components.pipelines.chat.cache_population import CachePopulation
-from src.app.components.pipelines.chat.code_cleaning import CodeCleaning
-from src.app.components.pipelines.chat.code_execution import CodeExecution
-from src.app.components.pipelines.chat.code_generator import CodeGenerator
 from src.app.components.pipelines.chat.prompt_generation import PromptGeneration
 from src.app.components.pipelines.chat.result_parsing import ResultParsing
 from src.app.components.pipelines.chat.result_validation import ResultValidation
+from src.app.components.pipelines.chat.validate_pipeline_input import (
+    ValidatePipelineInput,
+)
+from src.app.components.pipelines.core.pipeline import Pipeline
+from src.app.components.pipelines.core.pipeline_context import PipelineContext
+from src.utils.logger import Logger
 
 
 class GenerateChatPipeline(Pipeline): # 继承 Pipeline
@@ -45,8 +44,8 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
 
     def __init__(
         self,
-        context: Optional[PipelineContext] = None,
-        logger: Optional[Logger] = None,
+        context: PipelineContext | None = None,
+        logger: Logger | None = None,
         judge: BaseJudge = None,
         on_prompt_generation=None,
         on_code_generation=None,
@@ -121,14 +120,14 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         self.tracker = tracker
 
     def on_code_execution_failure(self, code: str, errors: Exception) -> str:
-        """
-        Executes on code execution failure
+        """Executes on code execution failure
         Args:
             code (str): code that is ran
             exception (Exception): exception that is raised during code execution
 
         Returns:
             str: returns the updated code with the fixes
+
         """
         # Add information about the code failure in the query tracker for debug
         self.tracker.add_step(
@@ -175,8 +174,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
         return self.tracker.last_log_id
 
     def run_generate_code(self, input: ChatPipelineInput) -> dict:
-        """
-        Executes the code generation pipeline with user input and return the result
+        """Executes the code generation pipeline with user input and return the result
         Args:
             input (ChatPipelineInput): _description_
 
@@ -184,6 +182,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             The `output` dictionary is expected to have the following keys:
             - 'type': The type of the output.
             - 'value': The value of the output.
+
         """
         self._logger.log(f"Executing Pipeline: {self.__class__.__name__}")
 
@@ -232,8 +231,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             )
 
     def run_execute_code(self, input: CodeExecutionPipelineInput) -> dict:
-        """
-        Executes the chat pipeline with user input and return the result
+        """Executes the chat pipeline with user input and return the result
         Args:
             input (CodeExecutionPipelineInput): _description_
 
@@ -241,6 +239,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             The `output` dictionary is expected to have the following keys:
             - 'type': The type of the output.
             - 'value': The value of the output.
+
         """
         self._logger.log(f"Executing Pipeline: {self.__class__.__name__}")
 
@@ -289,8 +288,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             )
 
     def run(self, input: ChatPipelineInput) -> dict:
-        """
-        Executes the chat pipeline with user input and return the result
+        """Executes the chat pipeline with user input and return the result
         Args:
             input (ChatPipelineInput): _description_
 
@@ -298,6 +296,7 @@ class GenerateChatPipeline(Pipeline): # 继承 Pipeline
             The `output` dictionary is expected to have the following keys:
             - 'type': The type of the output.
             - 'value': The value of the output.
+
         """
         self._logger.log(f"Executing Pipeline: {self.__class__.__name__}")
 

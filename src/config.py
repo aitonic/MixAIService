@@ -1,16 +1,14 @@
 import json
-from typing import Optional, Union
 
-from src.utils.llm import LLM, BambooLLM, OpenAI, AzureOpenAI, LocalLLM
 from src.utils.helpers.path import find_closest
+from src.utils.llm import LLM
 from src.utils.schemas.df_config import Config
 
 
 def load_config_from_json(
-    override_config: Optional[Union[Config, dict]] = None,
+    override_config: Config | dict | None = None,
 ):
-    """
-    Load the configuration from the pandas_ai.json file.
+    """Load the configuration from the pandas_ai.json file.
 
     Args:
         override_config (Optional[Union[Config, dict]], optional): The configuration to
@@ -18,8 +16,8 @@ def load_config_from_json(
 
     Returns:
         dict: The configuration.
-    """
 
+    """
     config = {}
 
     if override_config is None:
@@ -29,7 +27,7 @@ def load_config_from_json(
         override_config = override_config.model_dump()
 
     try:
-        with open(find_closest("pandas_ai.json"), "r") as f:
+        with open(find_closest("pandas_ai.json")) as f:
             config = json.load(f)
 
             if not config.get("llm") and not override_config.get("llm"):

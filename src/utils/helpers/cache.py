@@ -14,6 +14,7 @@ class Cache:
 
     Args:
         filename (str): filename to store the cache.
+
     """
 
     def __init__(self, filename="cache_db_0.11", abs_path=None):
@@ -43,6 +44,7 @@ class Cache:
         Args:
             key (str): key to store the value.
             value (str): value to store in the cache.
+
         """
         self.connection.execute(
             "INSERT INTO cache VALUES (?, ?)", [self.versioned_key(key), value]
@@ -56,6 +58,7 @@ class Cache:
 
         Returns:
             str: value from the cache.
+
         """
         result = self.connection.execute(
             "SELECT value FROM cache WHERE key=?", [self.versioned_key(key)]
@@ -67,6 +70,7 @@ class Cache:
 
         Args:
             key (str): key to delete the value from the cache.
+
         """
         self.connection.execute(
             "DELETE FROM cache WHERE key=?", [self.versioned_key(key)]
@@ -87,11 +91,11 @@ class Cache:
             os.remove(cache_file)
 
     def get_cache_key(self, context: Any) -> str:
-        """
-        Return the cache key for the current conversation.
+        """Return the cache key for the current conversation.
 
         Returns:
             str: The cache key for the current conversation
+
         """
         cache_key = context.memory.get_conversation()
 

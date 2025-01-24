@@ -1,34 +1,33 @@
 # app/model_components/connectors/sql/postgresql.py
-"""
-PostgreSQL connectors are used to connect to PostgreSQL databases.
+"""PostgreSQL connectors are used to connect to PostgreSQL databases.
 """
 
 from functools import cache
 
 import sqlglot
-from src.utils.pandas import pd
 
 # from src.app.components.connectors.base import BaseConnectorConfig # 修改 import 路径
-from src.app.components.connectors.sql.sql import SQLConnector # 修改 import 路径
-from src.app.components.connectors.sql.sql_connector_config import SQLConnectorConfig # 修改 import 路径
-from typing import Union
+from src.app.components.connectors.sql.sql import SQLConnector  # 修改 import 路径
+from src.app.components.connectors.sql.sql_connector_config import (
+    SQLConnectorConfig,  # 修改 import 路径
+)
+from src.utils.pandas import pd
 
 
 class PostgreSQLConnector(SQLConnector):
-    """
-    PostgreSQL connectors are used to connect to PostgreSQL databases.
+    """PostgreSQL connectors are used to connect to PostgreSQL databases.
     """
 
     def __init__(
         self,
-        config: Union[SQLConnectorConfig, dict],
+        config: SQLConnectorConfig | dict,
         **kwargs,
     ):
-        """
-        Initialize the PostgreSQL connector with the given configuration.
+        """Initialize the PostgreSQL connector with the given configuration.
 
         Args:
             config (ConnectorConfig): The configuration for the PostgreSQL connector.
+
         """
         if "dialect" not in config:
             config["dialect"] = "postgresql"
@@ -49,14 +48,13 @@ class PostgreSQLConnector(SQLConnector):
 
     @cache
     def head(self, n: int = 5) -> pd.DataFrame:
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the data source.
 
         Returns:
             DataFrame: The head of the data source.
-        """
 
+        """
         if self.logger:
             self.logger.log(
                 f"Getting head of {self.config.table} "

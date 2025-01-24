@@ -1,5 +1,4 @@
-""" Memory class to store the conversations """
-from typing import Union
+"""Memory class to store the conversations"""
 
 
 class Memory:
@@ -9,7 +8,7 @@ class Memory:
     _memory_size: int
     _agent_info: str
 
-    def __init__(self, memory_size: int = 1, agent_info: Union[str, None] = None):
+    def __init__(self, memory_size: int = 1, agent_info: str | None = None):
         self._messages = []
         self._memory_size = memory_size
         self._agent_info = agent_info
@@ -26,17 +25,15 @@ class Memory:
     def last(self) -> dict:
         return self._messages[-1]
 
-    def _truncate(self, message: Union[str, int], max_length: int = 100) -> str:
-        """
-        Truncates the message if it is longer than max_length
+    def _truncate(self, message: str | int, max_length: int = 100) -> str:
+        """Truncates the message if it is longer than max_length
         """
         return (
             f"{message[:max_length]} ..." if len(str(message)) > max_length else message
         )
 
     def get_messages(self, limit: int = None) -> list:
-        """
-        Returns the conversation messages based on limit parameter
+        """Returns the conversation messages based on limit parameter
         or default memory size
         """
         limit = self._memory_size if limit is None else limit
@@ -47,22 +44,19 @@ class Memory:
         ]
 
     def get_conversation(self, limit: int = None) -> str:
-        """
-        Returns the conversation messages based on limit parameter
+        """Returns the conversation messages based on limit parameter
         or default memory size
         """
         return "\n".join(self.get_messages(limit))
 
     def get_previous_conversation(self) -> str:
-        """
-        Returns the previous conversation but the last message
+        """Returns the previous conversation but the last message
         """
         messages = self.get_messages(self._memory_size)
         return "" if len(messages) <= 1 else "\n".join(messages[:-1])
 
     def get_last_message(self) -> str:
-        """
-        Returns the last message in the conversation
+        """Returns the last message in the conversation
         """
         messages = self.get_messages(self._memory_size)
         return "" if len(messages) == 0 else messages[-1]
@@ -80,8 +74,7 @@ class Memory:
         return messages
 
     def to_openai_messages(self):
-        """
-        Returns the conversation messages in the format expected by the OpenAI API
+        """Returns the conversation messages in the format expected by the OpenAI API
         """
         messages = []
         if self.agent_info:

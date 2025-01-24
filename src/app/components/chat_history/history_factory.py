@@ -1,11 +1,5 @@
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
-from .simple_memory import (
-    DbMemory, 
-    LocalMemory
-)
+from ..base_component import BaseComponent, BaseFactory
+from .simple_memory import DbMemory, LocalMemory
 
 
 class MemoryFactory(BaseFactory):

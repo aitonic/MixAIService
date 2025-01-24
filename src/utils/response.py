@@ -1,5 +1,5 @@
 # Response
-from dataclasses import dataclass, is_dataclass
+from dataclasses import is_dataclass
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -55,6 +55,7 @@ def convert_dataclass(obj:Any):
     Note:
         This function will recursively process nested dataclass objects.
         Non-dataclass values will be processed by convert_value function.
+
     """
     data_dict = obj.__dict__
     for key, val in data_dict.items():

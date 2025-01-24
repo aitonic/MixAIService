@@ -1,6 +1,5 @@
 # app/model_components/connectors/sql/sql.py
-"""
-SQL connectors are used to connect to SQL databases in different dialects.
+"""SQL connectors are used to connect to SQL databases in different dialects.
 """
 
 import hashlib
@@ -8,24 +7,25 @@ import os
 import re
 import time
 from functools import cache, cached_property
-from typing import Optional, Union
 
-import sqlglot
 from sqlalchemy import asc, create_engine, select, text
 from sqlalchemy.engine import Connection
 
 import src.utils.pandas as pd
-from src.utils.exceptions import MaliciousQueryError # 修改 import 路径
-from src.utils.helpers.path import find_project_root # 修改 import 路径
-
-from src.constants import DEFAULT_FILE_PERMISSIONS # 修改 import 路径
-from src.app.components.connectors.base import BaseConnector, BaseConnectorConfig # 修改 import 路径
-from src.app.components.connectors.sql.sql_connector_config import SQLConnectorConfig # 修改 import 路径
+from src.app.components.connectors.base import (  # 修改 import 路径
+    BaseConnector,
+    BaseConnectorConfig,
+)
+from src.app.components.connectors.sql.sql_connector_config import (
+    SQLConnectorConfig,  # 修改 import 路径
+)
+from src.constants import DEFAULT_FILE_PERMISSIONS  # 修改 import 路径
+from src.utils.exceptions import MaliciousQueryError  # 修改 import 路径
+from src.utils.helpers.path import find_project_root  # 修改 import 路径
 
 
 class SQLConnector(BaseConnector):
-    """
-    SQL connectors are used to connect to SQL databases in different dialects.
+    """SQL connectors are used to connect to SQL databases in different dialects.
     """
 
     _engine = None
@@ -36,15 +36,15 @@ class SQLConnector(BaseConnector):
 
     def __init__(
         self,
-        config: Union[BaseConnectorConfig, dict],
+        config: BaseConnectorConfig | dict,
         cache_interval: int = 600,
         **kwargs,
     ):
-        """
-        Initialize the SQL connector with the given configuration.
+        """Initialize the SQL connector with the given configuration.
 
         Args:
             config (ConnectorConfig): The configuration for the SQL connector.
+
         """
         config = self._load_connector_config(config)
         super().__init__(config, **kwargs)
@@ -59,27 +59,25 @@ class SQLConnector(BaseConnector):
         # Table to equal to table name for sql connectors
         self.name = self.fallback_name
 
-    def _load_connector_config(self, config: Union[BaseConnectorConfig, dict]):
-        """
-        Loads passed Configuration to object
+    def _load_connector_config(self, config: BaseConnectorConfig | dict):
+        """Loads passed Configuration to object
 
         Args:
             config (BaseConnectorConfig): Construct config in structure
 
         Returns:
             config: BaseConenctorConfig
+
         """
         return SQLConnectorConfig(**config)
 
     def _init_connection(self, config: SQLConnectorConfig):
-        """
-        Initialize Database Connection
+        """Initialize Database Connection
 
         Args:
             config (SQLConnectorConfig): Configurations to load database
 
         """
-
         if config.driver:
             self._engine = create_engine(
                 f"{config.dialect}+{config.driver}://{config.username}:{config.password}"
@@ -96,18 +94,17 @@ class SQLConnector(BaseConnector):
         self._connection = self._engine.connect()
 
     def __del__(self):
-        """
-        Close the connection to the SQL database.
+        """Close the connection to the SQL database.
         """
         if self._connection:
             self._connection.close()
 
     def __repr__(self):
-        """
-        Return the string representation of the SQL connector.
+        """Return the string representation of the SQL connector.
 
         Returns:
             str: The string representation of the SQL connector.
+
         """
         return (
             f"<{self.__class__.__name__} dialect={self.config.dialect} "
@@ -161,14 +158,13 @@ class SQLConnector(BaseConnector):
 
     @cache
     def head(self, n: int = 5) -> pd.DataFrame:
-        """
-        Return the head of the data source that the connector is connected to.
+        """Return the head of the data source that the connector is connected to.
         This information is passed to the LLM to provide the schema of the data source.
 
         Returns:
             DataFrame: The head of the data source.
-        """
 
+        """
         if self.logger:
             self.logger.log(
                 f"Getting head of {self.config.table} "
@@ -182,8 +178,7 @@ class SQLConnector(BaseConnector):
         return pd.read_sql(query, self._connection)
 
     def _get_cache_path(self, include_additional_filters: bool = False):
-        """
-        Return the path of the cache file.
+        """Return the path of the cache file.
 
         Args:
             include_additional_filters (bool, optional): Whether to include the
@@ -192,6 +187,7 @@ class SQLConnector(BaseConnector):
 
         Returns:
             str: The path of the cache file.
+
         """
         try:
             cache_dir = os.path.join((find_project_root()), "cache")
@@ -208,9 +204,8 @@ class SQLConnector(BaseConnector):
 
         return path
 
-    def _cached(self, include_additional_filters: bool = False) -> Union[str, bool]:
-        """
-        Return the cached data if it exists and is not older than the cache interval.
+    def _cached(self, include_additional_filters: bool = False) -> str | bool:
+        """Return the cached data if it exists and is not older than the cache interval.
 
         Args:
             include_additional_filters (bool, optional): Whether to include the
@@ -220,6 +215,7 @@ class SQLConnector(BaseConnector):
         Returns:
             DataFrame|bool: The name of the file containing cached data if it exists
                 and is not older than the cache interval, False otherwise.
+
         """
         filename = self._get_cache_path(
             include_additional_filters=include_additional_filters
@@ -240,13 +236,12 @@ class SQLConnector(BaseConnector):
         return filename
 
     def _save_cache(self, df):
-        """
-        Save the given DataFrame to the cache.
+        """Save the given DataFrame to the cache.
 
         Args:
             df (DataFrame): The DataFrame to save to the cache.
-        """
 
+        """
         filename = self._get_cache_path(
             include_additional_filters=self._additional_filters is not None
             and len(self._additional_filters) > 0
@@ -255,13 +250,12 @@ class SQLConnector(BaseConnector):
         df.to_csv(filename, index=False)
 
     def execute(self):
-        """
-        Execute the SQL query and return the result.
+        """Execute the SQL query and return the result.
 
         Returns:
             DataFrame: The result of the SQL query.
-        """
 
+        """
         if cached := self._cached() or self._cached(include_additional_filters=True):
             return pd.read_csv(cached)
 
@@ -285,13 +279,12 @@ class SQLConnector(BaseConnector):
 
     @cached_property
     def rows_count(self):
-        """
-        Return the number of rows in the SQL table.
+        """Return the number of rows in the SQL table.
 
         Returns:
             int: The number of rows in the SQL table.
-        """
 
+        """
         if self._rows_count is not None:
             return self._rows_count
 
@@ -311,13 +304,12 @@ class SQLConnector(BaseConnector):
 
     @cached_property
     def columns_count(self):
-        """
-        Return the number of columns in the SQL table.
+        """Return the number of columns in the SQL table.
 
         Returns:
             int: The number of columns in the SQL table.
-        """
 
+        """
         if self._columns_count is not None:
             return self._columns_count
 
@@ -332,8 +324,7 @@ class SQLConnector(BaseConnector):
         return self._columns_count
 
     def _get_column_hash(self, include_additional_filters: bool = False):
-        """
-        Return the hash of the SQL table columns.
+        """Return the hash of the SQL table columns.
 
         Args:
             include_additional_filters (bool, optional): Whether to include the
@@ -341,8 +332,8 @@ class SQLConnector(BaseConnector):
 
         Returns:
             str: The hash of the SQL table columns.
-        """
 
+        """
         # Return the hash of the columns and the where clause
         columns_str = "".join(self.head().columns)
         if (
@@ -364,11 +355,11 @@ class SQLConnector(BaseConnector):
 
     @cached_property
     def column_hash(self):
-        """
-        Return the hash of the SQL table columns.
+        """Return the hash of the SQL table columns.
 
         Returns:
             str: The hash of the SQL table columns.
+
         """
         return self._get_column_hash()
 

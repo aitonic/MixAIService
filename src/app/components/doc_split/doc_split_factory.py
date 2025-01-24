@@ -1,5 +1,4 @@
-"""
-Document Splitter Factory Module.
+"""Document Splitter Factory Module.
 
 This module provides a factory for creating different types of document splitters.
 It uses a registry pattern to dynamically map splitter types to their implementations,
@@ -11,12 +10,8 @@ Typical usage example:
 """
 
 from enum import Enum
-from typing import Dict, Type
 
-from ..base_component import (
-    BaseComponent, 
-    BaseFactory
-)
+from ..base_component import BaseComponent, BaseFactory
 from .format_splitter import FormatSplitter
 from .semantic_splitter import SemanticSplitterWithEmbedding
 
@@ -32,7 +27,7 @@ class DocSplitterFactory(BaseFactory):
     """Factory class for creating document splitters."""
     
     # Registry mapping splitter types to their implementation classes
-    _splitter_registry: Dict[str, Type[BaseComponent]] = {
+    _splitter_registry: dict[str, type[BaseComponent]] = {
         SplitterType.FORMAT.value: FormatSplitter,
         SplitterType.SEMANTIC.value: SemanticSplitterWithEmbedding,
     }
@@ -51,6 +46,7 @@ class DocSplitterFactory(BaseFactory):
 
         Raises:
             ValueError: If component_type is not registered.
+
         """
         splitter_type = param["component_type"]
         splitter_class = self._splitter_registry.get(splitter_type)

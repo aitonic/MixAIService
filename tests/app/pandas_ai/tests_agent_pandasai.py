@@ -113,7 +113,9 @@ class TestAgent(unittest.TestCase):
         })
 
         # Initialize agent with real data
-        agent = Agent(sales_df)
+        # agent = Agent(sales_df, self.config)
+        self.agent.dsf = sales_df
+        agent = self.agent
 
         # Test different analysis queries
         top_countries = agent.chat('Which are the top 5 countries by revenue?')

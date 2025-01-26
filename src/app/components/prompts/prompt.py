@@ -3,10 +3,10 @@ from typing import Any
 
 from jinja2 import Environment, Template, meta
 
-from .base import AbsPrompt
+from .base import BasePrompt
 
 
-class BasePrompt(AbsPrompt):
+class BasePrompt(BasePrompt):
     """Base prompt class.
     
     Uses Jinja2 as template processor.

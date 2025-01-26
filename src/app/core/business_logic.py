@@ -20,9 +20,9 @@ def load_classes_from_components() -> dict[str, str]:
         Dict[str, str]: A dictionary where keys are lowercase class names and values are full module paths.
 
     """
-    # components_path = os.path.join(os.path.dirname(__file__), "../model_components")
+    # components_path = os.path.join(os.path.dirname(__file__), "../components")
     components_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../model_components")
+    os.path.join(os.path.dirname(__file__), "../components")
     )
     logger.info(f"components_path: {components_path}")
 
@@ -43,9 +43,9 @@ def load_classes_from_components() -> dict[str, str]:
                     os.sep, "."
                 )
                 full_module_name = (
-                    f"model_components.{module_path}.{module_name}"
+                    f"components.{module_path}.{module_name}"
                     if module_path
-                    else f"model_components.{module_name}"
+                    else f"components.{module_name}"
                 )
 
                 if "base_component" in full_module_name:

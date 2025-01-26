@@ -10,6 +10,9 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 sys.path.append(project_root)
 env_path = os.path.join(project_root, "config", ".env")
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=env_path)
+
 from src.app.agent.agent import Agent
 # from src.app.agent.base import BaseAgent
 # from src.app.components.pipelines.chat.generate_chat_pipeline import GenerateChatPipeline
@@ -24,11 +27,11 @@ class TestAgent(unittest.TestCase):
         })
         
         # Mock environment variable
-        self.env_patcher = patch.dict('os.environ', {
-            'OPENAI_API_KEY': 'test_key',
-            'PANDASAI_API_KEY': 'test_key'
-        })
-        self.env_patcher.start()
+        # self.env_patcher = patch.dict('os.environ', {
+        #     'OPENAI_API_KEY': 'test_key',
+        #     'PANDASAI_API_KEY': 'test_key'
+        # })
+        # self.env_patcher.start()
         
         # Create config with OpenAI LLM
         from src.utils.llm import OpenAI
@@ -113,9 +116,11 @@ class TestAgent(unittest.TestCase):
         })
 
         # Initialize agent with real data
-        # agent = Agent(sales_df, self.config)
-        self.agent.dsf = sales_df
-        agent = self.agent
+        agent = Agent(dfs = sales_df, config = self.agent.config)
+        # self.agent.dsf = sales_df
+        # from src.utils.llm import OpenAI
+        # self.agent.config.llm = OpenAI()
+        # agent = self.agent
 
         # Test different analysis queries
         top_countries = agent.chat('Which are the top 5 countries by revenue?')

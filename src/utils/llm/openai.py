@@ -52,10 +52,12 @@ class OpenAI(BaseOpenAI):
         "gpt-4o-2024-05-13",
         "gpt-4o-mini",
         "gpt-4o-mini-2024-07-18",
+        "deepseek-chat",
     ]
     _supported_completion_models = ["gpt-3.5-turbo-instruct"]
 
-    model: str = "gpt-4o-mini"
+    # model: str = "gpt-4o-mini"
+    model: str = "deepseek-chat"
 
     def __init__(
         self,

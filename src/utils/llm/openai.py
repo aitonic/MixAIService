@@ -56,8 +56,8 @@ class OpenAI(BaseOpenAI):
     ]
     _supported_completion_models = ["gpt-3.5-turbo-instruct"]
 
-    # model: str = "gpt-4o-mini"
-    model: str = "deepseek-chat"
+    model: str = "gpt-4o-mini"
+    # model: str = "deepseek-chat"
 
     def __init__(
         self,
@@ -83,6 +83,10 @@ class OpenAI(BaseOpenAI):
         )
         
         print(f"API Base: {self.api_base}")
+        
+        self.model = (
+            kwargs.get("model") or os.getenv("OPENAI_API_MODEL") or self.model
+        )
                 
         self.openai_proxy = kwargs.get("openai_proxy") or os.getenv("OPENAI_PROXY")
         if self.openai_proxy:

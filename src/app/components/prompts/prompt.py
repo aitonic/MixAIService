@@ -20,7 +20,9 @@ class BasePrompt(BasePrompt):
             prompt_str (str): Prompt template string.
 
         """
-        super().__init__(role, prompt_str)
+        # super().__init__(role, prompt_str)
+        self.role = role
+        self.content = prompt_str
 
     def generate_prompt(self, params: dict) -> str:
         """Generate prompt by processing template with given parameters.

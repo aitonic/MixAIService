@@ -99,7 +99,7 @@ def load_factories() -> dict[str, str]:
 
     """
     components_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../model_components")
+        os.path.join(os.path.dirname(__file__), "../components")
     )
     logger.info(f"components_path: {components_path}")
 
@@ -119,9 +119,9 @@ def load_factories() -> dict[str, str]:
                 module_name = os.path.splitext(file)[0]
                 module_path = os.path.relpath(root, components_path).replace(os.sep, ".")
                 full_module_name = (
-                    f"src.app.model_components.{module_path}.{module_name}"
+                    f"src.app.components.{module_path}.{module_name}"
                     if module_path
-                    else f"src.app.model_components.{module_name}"
+                    else f"src.app.components.{module_name}"
                 )
 
                 # Skip base_component modules

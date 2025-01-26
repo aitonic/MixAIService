@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from src.app.agent.base_judge import BaseJudge
+
 
 if TYPE_CHECKING:
-    pass
+    from src.app.agent.base_judge import BaseJudge
 
 from src.app.components.pipelines.chat.cache_lookup import CacheLookup
 from src.app.components.pipelines.chat.cache_population import CachePopulation
@@ -44,7 +44,7 @@ class GenerateChatPipeline:
         self,
         context: PipelineContext | None = None,
         logger: Logger | None = None,
-        judge: BaseJudge = None,
+        judge: "Optional[BaseJudge]" = None,
         on_prompt_generation=None,
         on_code_generation=None,
         before_code_execution=None,

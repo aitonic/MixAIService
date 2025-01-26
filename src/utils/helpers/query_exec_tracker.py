@@ -3,16 +3,22 @@ import json
 import os
 import time
 from collections import defaultdict
-from typing import Any, TypedDict
+from typing import Any, TypedDict, TYPE_CHECKING
 
 import requests
 
 from src.__version__ import __version__
 from src.app.components.connectors.base import BaseConnector
-from src.app.components.pipelines.chat.chat_pipeline_input import (
-    ChatPipelineInput,
-)
-from src.app.components.pipelines.core.pipeline_context import PipelineContext
+# from src.app.components.pipelines.chat.chat_pipeline_input import (
+#     ChatPipelineInput,
+# )
+# from src.app.components.pipelines.core.pipeline_context import PipelineContext
+
+
+if TYPE_CHECKING:
+    from src.app.components.pipelines.chat.chat_pipeline_input import ChatPipelineInput
+    from src.app.components.pipelines.core.pipeline_context import PipelineContext
+    
 from src.utils.helpers.encoder import CustomEncoder
 
 
@@ -52,7 +58,7 @@ class QueryExecTracker:
         self._server_config = server_config
         self._query_info = {}
 
-    def start_new_track(self, input: ChatPipelineInput):
+    def start_new_track(self, input: "ChatPipelineInput"):
         """Resets tracking variables to start new track
         """
         self._last_log_id = None
@@ -92,7 +98,7 @@ class QueryExecTracker:
             head = df.get_schema()
             self._dataframes.append(self.convert_dataframe_to_dict(head))
 
-    def add_skills(self, context: PipelineContext):
+    def add_skills(self, context: "PipelineContext"):
         self._skills = context.skills_manager.to_object()
 
     def add_step(self, step: dict) -> None:

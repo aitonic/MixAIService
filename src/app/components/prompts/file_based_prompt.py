@@ -3,10 +3,10 @@ from pathlib import Path
 
 from src.utils.exceptions import TemplateFileNotFoundError
 
-from .base import AbstractPrompt
+# from .base import AbstractPrompt
 
 
-class FileBasedPrompt(AbstractPrompt):
+class FileBasedPrompt():
     """Base class for prompts supposed to read template content from a file.
 
     `_path_to_template` attribute has to be specified.

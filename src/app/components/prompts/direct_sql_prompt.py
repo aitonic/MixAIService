@@ -6,9 +6,7 @@ from src.utils.helpers.dataframe_serializer import (
 )
 
 from .generate_python_code import (
-    CurrentCodePrompt,
     GeneratePythonCodePrompt,
-    SimpleReasoningPrompt,
 )
 
 
@@ -40,7 +38,7 @@ class DirectSQLPrompt(GeneratePythonCodePrompt):
 
         super(DirectSQLPrompt, self).setup(**kwargs)
 
-        self.set_var("current_code", kwargs.pop("current_code", CurrentCodePrompt()))
+        # self.set_var("current_code", kwargs.pop("current_code", CurrentCodePrompt()))
         self.set_var(
             "code_description",
             kwargs.pop("code_description", "Update this initial code:"),
@@ -52,4 +50,4 @@ class DirectSQLPrompt(GeneratePythonCodePrompt):
         default_import = f"import {pd.__name__} as pd"
 
         self.set_var("default_import", default_import)
-        self.set_var("reasoning", SimpleReasoningPrompt())
+        # self.set_var("reasoning", SimpleReasoningPrompt())

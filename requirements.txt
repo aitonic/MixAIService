@@ -33,3 +33,4 @@ sqlglot==26.2.1
 polars==1.20.0
 astor==0.8.1
 tiktoken
+duckdb

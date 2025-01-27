@@ -94,3 +94,7 @@ logs/*/*.log.*
 
 # exclude sample data
 data/sample_data
+
+# ignore cache data
+cache
+.wal

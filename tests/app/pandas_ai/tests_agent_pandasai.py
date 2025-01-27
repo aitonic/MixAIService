@@ -131,13 +131,13 @@ class TestAgent(unittest.TestCase):
         avg_revenue = agent.chat('What is the average revenue across all countries?')
         self.assertIsNotNone(avg_revenue)
         # Average should be around 3620
-        self.assertIn("3620", avg_revenue)
+        self.assertEqual(3620, avg_revenue)
 
         # Test revenue range analysis
         revenue_range = agent.chat('What is the difference between highest and lowest revenue?')
         self.assertIsNotNone(revenue_range)
         # Difference should be 7000 - 2100 = 4900
-        self.assertIn("4900", revenue_range)
+        self.assertEqual(4900, revenue_range)
 
     # def test_real_data_visualization(self):
     #     """Test data visualization capabilities with real data"""

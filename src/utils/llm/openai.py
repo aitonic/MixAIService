@@ -53,6 +53,9 @@ class OpenAI(BaseOpenAI):
         "gpt-4o-mini",
         "gpt-4o-mini-2024-07-18",
         "deepseek-chat",
+        "llama3pro",
+        "google/gemini-2.0-flash-exp:free",
+        "google/gemini-2.0-flash-thinking-exp:free",
     ]
     _supported_completion_models = ["gpt-3.5-turbo-instruct"]
 

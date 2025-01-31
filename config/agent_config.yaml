@@ -168,3 +168,23 @@ web_scraper:
         component_type: browser
         config:
           name: chrome
+
+retriver:
+  excute_path: vector_store-RetriverFactory
+  # 需要转换的参数，指定转换形式
+  converter:
+    - name: vector_store
+      type: instance
+      value: VectorFactory
+    - name: RetriverFactory
+      type: instance
+      value: RetriverFactory
+  components:
+    - name: VectorFactory
+      param:
+        component_type: retriver
+        embedding_func: 
+    - name: RetriverFactory
+      param:
+        vector_store: 
+        component_type: vector

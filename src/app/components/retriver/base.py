@@ -32,11 +32,11 @@ class AbsRetriver(ABC, BaseComponent):
         """Call method for retrieving information.
         
         Args:
-            query: 查询字符串
-            top_k: 返回结果的最大数量
+            query: Query string
+            top_k: Maximum number of results to return
             
         Returns:
-            返回与查询最相关的top_k个结果，每个结果为字符串格式
+            Returns the top_k most relevant results to the query, each result in string format
 
         """
         return await self.retrieve(RetriverQuery(
